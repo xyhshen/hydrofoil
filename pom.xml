@@ -9,11 +9,13 @@
     <version>1.0-SNAPSHOT</version>
     <modules>
         <module>hydrofoil-common</module>
+        <module>hydrofoil-core</module>
     </modules>
     <packaging>pom</packaging>
     <name>hydrofoil graph engine</name>
     <description>graph computer</description>
     <url>https://github.com/xyhshen/hydrofoil</url>
     <properties>
+        <tinkerpop.version>3.3.3</tinkerpop.version>
     </properties>
 </project>
