@@ -16,6 +16,6 @@
     <description>graph computer</description>
     <url>https://github.com/xyhshen/hydrofoil</url>
     <properties>
-        <tinkerpop.version>3.3.3</tinkerpop.version>
+        <tinkerpop.version>3.2.6</tinkerpop.version>
     </properties>
 </project>

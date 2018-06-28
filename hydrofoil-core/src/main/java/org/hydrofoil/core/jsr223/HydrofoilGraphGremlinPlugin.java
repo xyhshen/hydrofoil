@@ -1,9 +1,5 @@
 package org.hydrofoil.core.jsr223;
 
-import org.apache.tinkerpop.gremlin.jsr223.AbstractGremlinPlugin;
-import org.apache.tinkerpop.gremlin.jsr223.DefaultImportCustomizer;
-import org.apache.tinkerpop.gremlin.jsr223.ImportCustomizer;
-
 /**
  * HydrofoilGraphGremlinPlugin
  * <p>
