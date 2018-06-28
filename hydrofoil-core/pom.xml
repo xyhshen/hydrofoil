@@ -10,6 +10,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>hydrofoil-core</artifactId>
+    <packaging>jar</packaging>
     <dependencies>
         <!-- TinkerPop depend-->
         <dependency>
