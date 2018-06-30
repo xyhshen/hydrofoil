@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="datasources">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="datasource" type="xs:element" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:complexType name="datasource" mixed="true">
+        <xs:attribute name="name" type="xs:string" use="required"/>
+        <xs:attribute name="provider" type="xs:string" use="required"/>
+    </xs:complexType>
+</xs:schema>

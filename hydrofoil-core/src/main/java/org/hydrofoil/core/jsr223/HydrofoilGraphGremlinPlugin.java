@@ -16,7 +16,7 @@ public final class HydrofoilGraphGremlinPlugin extends AbstractGremlinPlugin {
 
     private final static String NAME = "org.hydrofoil";
 
-    private static final ImportCustomizer imports = DefaultImportCustomizer.build().create();
+    private static ImportCustomizer imports = DefaultImportCustomizer.build().create();
 
     public HydrofoilGraphGremlinPlugin() {
         super(NAME, imports);

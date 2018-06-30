@@ -12,6 +12,11 @@
     <artifactId>hydrofoil-core</artifactId>
     <packaging>jar</packaging>
     <dependencies>
+        <dependency>
+            <groupId>org.hydrofoil</groupId>
+            <artifactId>hydrofoil-common</artifactId>
+            <version>${hydrofoil.version}</version>
+        </dependency>
         <!-- TinkerPop depend-->
         <dependency>
             <groupId>org.apache.tinkerpop</groupId>

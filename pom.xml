@@ -16,6 +16,10 @@
     <description>graph computer</description>
     <url>https://github.com/xyhshen/hydrofoil</url>
     <properties>
-        <tinkerpop.version>3.2.6</tinkerpop.version>
+        <hydrofoil.version>1.0-SNAPSHOT</hydrofoil.version>
+        <dom4j.version>1.6.1</dom4j.version>
+        <lang.common.version>3.7</lang.common.version>
+        <collection.common.version>4.1</collection.common.version>
+        <tinkerpop.version>3.3.3</tinkerpop.version>
     </properties>
 </project>
