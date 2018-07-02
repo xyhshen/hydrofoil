@@ -10,6 +10,7 @@
     <modules>
         <module>hydrofoil-common</module>
         <module>hydrofoil-core</module>
+        <module>hydrofoil-mysql</module>
     </modules>
     <packaging>pom</packaging>
     <name>hydrofoil graph engine</name>
