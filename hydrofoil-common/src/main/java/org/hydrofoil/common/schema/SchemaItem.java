@@ -73,7 +73,7 @@ public class SchemaItem {
      * @param object schema list
      * @return this
      */
-    public SchemaItem putSchemaItem(final String name,final Collection<SchemaItem> object){
+    public <C extends SchemaItem> SchemaItem putSchemaItem(final String name,final Collection<C> object){
         schemaMap.put(name,object);
         return this;
     }
@@ -117,7 +117,7 @@ public class SchemaItem {
      * @param item item
      * @return this
      */
-    public SchemaItem putSchemaItem(final String name,final Map<String,SchemaItem> item){
+    public <C extends SchemaItem> SchemaItem putSchemaItem(final String name,final Map<String,C> item){
         schemaMap.put(name,item);
         return this;
     }
@@ -137,9 +137,9 @@ public class SchemaItem {
      * @param name schema item name
      * @return schema list
      */
-    public Collection<SchemaItem> getSchemaList(final String name){
+    public <C extends SchemaItem> Collection<C> getSchemaList(final String name){
         Object o = schemaMap.get(name);
-        return o != null?(Collection<SchemaItem>)o:null;
+        return o != null?(Collection<C>)o:null;
     }
 
     /**
@@ -176,8 +176,8 @@ public class SchemaItem {
      * @param name schema name
      * @return schema map
      */
-    public Map<String,SchemaItem> getSchemaMap(final String name){
+    public <C extends SchemaItem> Map<String,C> getSchemaMap(final String name){
         Object o = schemaMap.get(name);
-        return o != null?(Map<String,SchemaItem>)o:null;
+        return o != null?(Map<String,C>)o:null;
     }
 }

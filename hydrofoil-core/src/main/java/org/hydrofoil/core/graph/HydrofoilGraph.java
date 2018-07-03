@@ -55,7 +55,6 @@ public final class HydrofoilGraph implements Graph {
 
     @Override
     public void close() throws Exception {
-
     }
 
     @Override

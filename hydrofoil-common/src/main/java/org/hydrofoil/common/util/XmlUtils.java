@@ -1,5 +1,6 @@
 package org.hydrofoil.common.util;
 
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Attribute;
 import org.dom4j.Document;
@@ -103,5 +104,14 @@ public final class XmlUtils {
             map.put(children.getName(),children.getText());
         });
         return map;
+    }
+
+    /**
+     * is has children node
+     * @param element node
+     * @return result
+     */
+    public static boolean hasChildren(final Element element){
+        return !ListUtils.emptyIfNull(listElement(element)).isEmpty();
     }
 }

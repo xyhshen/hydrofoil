@@ -7,6 +7,7 @@ import org.hydrofoil.core.standard.StandardVertex;
 import org.hydrofoil.core.standard.query.GraphCondition;
 
 import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * GraphElementSet
@@ -24,11 +25,11 @@ public abstract class AbstractGraphQueryRunner {
 
     protected abstract SchemaManager getSchemaManager();
 
-    public Collection<StandardVertex> listVertex(GraphCondition condition){
+    public Iterator<StandardVertex> listVertex(GraphCondition condition){
         return null;
     }
 
-    public Collection<StandardEdge> listEdge(GraphCondition condition){
+    public Iterator<StandardEdge> listEdge(GraphCondition condition){
         return null;
     }
 
