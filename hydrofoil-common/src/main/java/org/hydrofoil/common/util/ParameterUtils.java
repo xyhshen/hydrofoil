@@ -20,8 +20,17 @@ public final class ParameterUtils {
      * @param s string
      */
     public static void notBlank(final String s){
+        notBlank(s,"parameter");
+    }
+
+    /**
+     * string not blank verify
+     * @param s string
+     * @param name name
+     */
+    public static void notBlank(final String s,final String name){
         if(StringUtils.isBlank(s)){
-            throw new IllegalArgumentException("parameter is blank!");
+            throw new IllegalArgumentException(name + " is blank!");
         }
     }
 
@@ -30,8 +39,17 @@ public final class ParameterUtils {
      * @param c collection
      */
     public static void notEmpty(final Collection c){
+        notEmpty(c,"parameter");
+    }
+
+    /**
+     * collection not empty
+     * @param c collection
+     * @param name name
+     */
+    public static void notEmpty(final Collection c,final String name){
         if(CollectionUtils.isEmpty(c)){
-            throw new IllegalArgumentException("parameter is blank!");
+            throw new IllegalArgumentException(name + " is empty!");
         }
     }
 
@@ -40,8 +58,17 @@ public final class ParameterUtils {
      * @param o object
      */
     public static void notNull(final Object o){
+        notNull(o,"parameter");
+    }
+
+    /**
+     * object not is null
+     * @param o object
+     * @param name name
+     */
+    public static void notNull(final Object o,final String name){
         if(o == null){
-            throw new IllegalArgumentException("parameter is null!");
+            throw new IllegalArgumentException(name + " is null!");
         }
     }
 

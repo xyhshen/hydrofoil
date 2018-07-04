@@ -1,11 +1,12 @@
 package org.hydrofoil.common.provider;
 
-import org.hydrofoil.common.provider.datasource.RowCount;
-import org.hydrofoil.common.provider.datasource.RowQuery;
+import org.hydrofoil.common.provider.datasource.RowQueryRequest;
+import org.hydrofoil.common.provider.datasource.RowQueryResponse;
 import org.hydrofoil.common.provider.datasource.RowStore;
 
 import java.io.Closeable;
 import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * IDataSource
@@ -22,13 +23,13 @@ public interface IDataSource extends Closeable,AutoCloseable{
      * @param query query cond
      * @return result
      */
-    Collection<RowStore> scan(RowQuery query);
+    RowQueryResponse sendQuery(RowQueryRequest query);
 
     /**
      * statistics by cond
      * @param query query cond
      * @return total
      */
-    Long count(RowQuery query);
+    Long count(RowQueryRequest query);
 
 }

@@ -11,15 +11,46 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>hydrofoil-mysql</artifactId>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
     <properties>
         <mysql.jdbc.version>6.0.6</mysql.jdbc.version>
+        <common.dbutil.version>1.7</common.dbutil.version>
+        <commons.dbcp2.version>2.1.1</commons.dbcp2.version>
     </properties>
     <dependencies>
+        <dependency>
+            <groupId>org.hydrofoil</groupId>
+            <artifactId>hydrofoil-common</artifactId>
+            <version>${hydrofoil.version}</version>
+        </dependency>
         <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <version>${mysql.jdbc.version}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/commons-dbutils/commons-dbutils -->
+        <dependency>
+            <groupId>commons-dbutils</groupId>
+            <artifactId>commons-dbutils</artifactId>
+            <version>${common.dbutil.version}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-dbcp2 -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-dbcp2</artifactId>
+            <version>${commons.dbcp2.version}</version>
         </dependency>
     </dependencies>
 </project>
