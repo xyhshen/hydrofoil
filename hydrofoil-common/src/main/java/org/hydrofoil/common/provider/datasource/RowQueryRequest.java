@@ -24,8 +24,14 @@ public final class RowQueryRequest {
          */
         private Set<QMatch.Q> match;
 
+        /**
+         * fields
+         */
+        private Set<String> fields;
+
         public AssociateRowQuery(){
             this.match = new HashSet<>();
+            this.fields = new HashSet<>();
         }
 
         /**
@@ -51,6 +57,14 @@ public final class RowQueryRequest {
          **/
         public Set<QMatch.Q> getMatch() {
             return match;
+        }
+
+        /**
+         * @return String>
+         * @see AssociateRowQuery#fields
+         **/
+        public Set<String> getFields() {
+            return fields;
         }
     }
 

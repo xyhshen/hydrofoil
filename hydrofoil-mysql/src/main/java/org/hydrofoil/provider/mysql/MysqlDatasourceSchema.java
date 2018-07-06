@@ -33,7 +33,12 @@ public final class MysqlDatasourceSchema {
         Password("password","",true),
         TestWhileIdle("testWhileIdle","false",false),
         ValidationQuery("validationQuery","",false),
-        ValidationQueryTimeout("validationQueryTimeout","10",false);
+        ValidationQueryTimeout("validationQueryTimeout","10",false),
+        ConnectPoolMinIdle("connectPoolMinIdle","2",false),
+        ConnectPoolMaxIdle("connectPoolMaxIdle","4",false),
+        ConnectPoolMaxTotal("connectPoolMaxTotal","8",false),
+        CacheTime("cacheTime","1000",false),
+        CachePoolMaxSize("cachePoolMaxSize","1000",false);
 
         private final String name;
         private final String defaultValue;

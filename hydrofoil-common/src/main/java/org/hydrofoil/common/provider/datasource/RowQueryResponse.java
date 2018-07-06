@@ -41,9 +41,7 @@ public class RowQueryResponse implements Iterator<RowStore>,AutoCloseable{
     }
 
     @Override
-    public void close() throws Exception {
-        defaultRowStore.clear();
-    }
+    public void close() throws Exception {}
 
     /**
      * @return $field.TypeName

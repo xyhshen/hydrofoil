@@ -36,9 +36,9 @@ public final class DataProvider implements IDataProvider {
         dataSource.setTestWhileIdle(TestWhileIdle.toBoolean(dataSourceSchema.getConfigItems()));
         dataSource.setValidationQuery(ValidationQuery.toString(dataSourceSchema.getConfigItems()));
         dataSource.setValidationQueryTimeout(ValidationQueryTimeout.toInteger(dataSourceSchema.getConfigItems()));
-        dataSource.setMinIdle(2);
-        dataSource.setMaxIdle(5);
-        dataSource.setMaxTotal(8);
+        dataSource.setMinIdle(ConnectPoolMinIdle.toInteger(dataSourceSchema.getConfigItems()));
+        dataSource.setMaxIdle(ConnectPoolMaxIdle.toInteger(dataSourceSchema.getConfigItems()));
+        dataSource.setMaxTotal(ConnectPoolMaxTotal.toInteger(dataSourceSchema.getConfigItems()));
         return dataSource;
     }
 }
