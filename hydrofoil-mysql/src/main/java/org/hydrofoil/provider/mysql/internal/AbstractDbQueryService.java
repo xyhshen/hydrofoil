@@ -8,6 +8,7 @@ import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.MapListHandler;
+import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.hydrofoil.common.provider.datasource.RowQueryRequest;
@@ -78,11 +79,28 @@ public abstract class AbstractDbQueryService {
     }
 
     /**
+     * get column alias
+     * @param tableName table name
+     * @param columnName column name
+     * @return full name
+     */
+    protected String getColumnAlias(String tableName,String columnName){
+        return tableAlias.get(tableName) + "." + columnName;
+    }
+
+    /**
      * create sql
      * @param params params list
      * @return sql
      */
-    protected abstract String crateSql(List<String> params);
+    protected abstract String crateQuerySql(List<String> params);
+
+    /**
+     * create count sql
+     * @param params params list
+     * @return sql
+     */
+    protected abstract String crateCountSql(List<String> params);
 
     /**
      * execute sql query
@@ -91,10 +109,22 @@ public abstract class AbstractDbQueryService {
      */
     public Collection<RowStore> executeQuery() throws SQLException {
         List<String> params = new ArrayList<>();
-        String sql = crateSql(params);
+        String sql = crateQuerySql(params);
         List<Map<String, Object>> results = new QueryRunner(dataSource).
-                query(sql, new MapListHandler(), params);
+                query(sql, new MapListHandler(), params.toArray());
         return processResult(results);
+    }
+
+    /**
+     * execute count sql
+     * @return total
+     * @throws SQLException
+     */
+    public Long executeCount() throws SQLException{
+        List<String> params = new ArrayList<>();
+        String sql = crateCountSql(params);
+        return new QueryRunner(dataSource).
+                query(sql, new ScalarHandler<Long>(), params);
     }
 
     /**

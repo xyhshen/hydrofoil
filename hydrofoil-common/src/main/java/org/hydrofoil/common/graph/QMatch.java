@@ -25,6 +25,9 @@ public class QMatch {
 
     public final static class Q{
 
+        /**
+         * query type
+         */
         private final QType type;
 
         /**
@@ -32,6 +35,9 @@ public class QMatch {
          */
         private boolean not;
 
+        /**
+         * field value
+         */
         private FieldPair pair;
 
         Q(QType type){

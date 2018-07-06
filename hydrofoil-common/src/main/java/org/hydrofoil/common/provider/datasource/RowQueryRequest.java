@@ -14,6 +14,61 @@ import java.util.*;
  */
 public final class RowQueryRequest {
 
+    /**
+     * Associate match
+     */
+    public static final class AssociateMatch{
+
+        /**
+         * query match
+         */
+        private QMatch.Q match;
+
+        /**
+         * data set name
+         */
+        private String name;
+
+        /**
+         * field name
+         */
+        private String fieldname;
+
+        public AssociateMatch(
+                QMatch.Q match,
+                String name,
+                String fieldname
+        ){
+            this.match = match;
+            this.name = name;
+            this.fieldname = fieldname;
+        }
+
+        /**
+         * @return Q
+         * @see AssociateMatch#match
+         **/
+        public QMatch.Q getMatch() {
+            return match;
+        }
+
+        /**
+         * @return String
+         * @see AssociateMatch#name
+         **/
+        public String getName() {
+            return name;
+        }
+
+        /**
+         * @return String
+         * @see AssociateMatch#fieldname
+         **/
+        public String getFieldname() {
+            return fieldname;
+        }
+    }
+
     public static final class AssociateRowQuery{
         /**
          * Associate data set name
@@ -22,7 +77,7 @@ public final class RowQueryRequest {
         /**
          * Associate match
          */
-        private Set<QMatch.Q> match;
+        private Set<AssociateMatch> match;
 
         /**
          * fields
@@ -55,7 +110,7 @@ public final class RowQueryRequest {
          * @return Q>
          * @see AssociateRowQuery#match
          **/
-        public Set<QMatch.Q> getMatch() {
+        public Set<AssociateMatch> getMatch() {
             return match;
         }
 

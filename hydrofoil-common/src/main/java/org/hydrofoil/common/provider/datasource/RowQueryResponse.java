@@ -30,6 +30,11 @@ public class RowQueryResponse implements Iterator<RowStore>,AutoCloseable{
         this.defaultRowStore = new ArrayList<>(5);
     }
 
+    public RowQueryResponse(boolean succeed,Collection<RowStore> defaultRowStore){
+        this.succeed = succeed;
+        this.defaultRowStore = defaultRowStore;
+    }
+
     @Override
     public boolean hasNext() {
         return defaultRowStore.iterator().hasNext();

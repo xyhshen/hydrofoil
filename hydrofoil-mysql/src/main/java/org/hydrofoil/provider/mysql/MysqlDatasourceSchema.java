@@ -46,8 +46,16 @@ public final class MysqlDatasourceSchema {
 
         DatasourceItem(final String name,final String defaultValue,final boolean required){
             this.name = name;
-            this.defaultValue = name;
+            this.defaultValue = defaultValue;
             this.required = required;
+        }
+
+        /**
+         * get name
+         * @return name
+         */
+        public String getName(){
+            return name;
         }
 
         /**

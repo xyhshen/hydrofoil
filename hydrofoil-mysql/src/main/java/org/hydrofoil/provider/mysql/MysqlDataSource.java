@@ -7,6 +7,8 @@ import org.hydrofoil.common.provider.IDataSource;
 import org.hydrofoil.common.provider.datasource.RowQueryRequest;
 import org.hydrofoil.common.provider.datasource.RowQueryResponse;
 import org.hydrofoil.common.provider.datasource.RowStore;
+import org.hydrofoil.provider.mysql.internal.AbstractDbQueryService;
+import org.hydrofoil.provider.mysql.internal.MysqlDbQueryService;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -28,16 +30,24 @@ public final class MysqlDataSource implements IDataSource {
         this.dataSource = dataSource;
     }
 
-    /*private Collection<RowStore> select(RowQueryRequest query){
-        StringBuffer sql = new StringBuffer();
-        if(query.getAssociateQuery().isEmpty()){
-            String.format("select %s from %s ",,query.getName());
-        }
-    }*/
+    private AbstractDbQueryService getQueryServeice(RowQueryRequest query){
+        AbstractDbQueryService dbQueryService = new MysqlDbQueryService(dataSource,query);
+        dbQueryService.init();
+        return dbQueryService;
+    }
 
     @Override
     public RowQueryResponse sendQuery(RowQueryRequest query) {
-        return null;
+        AbstractDbQueryService queryServeice = getQueryServeice(query);
+        RowQueryResponse response;
+        try {
+            Collection<RowStore> rowStores = queryServeice.executeQuery();
+            response = new RowQueryResponse(true,rowStores);
+        } catch (SQLException e) {
+            response = new RowQueryResponse(false);
+            e.printStackTrace();
+        }
+        return response;
     }
 
     @Override
