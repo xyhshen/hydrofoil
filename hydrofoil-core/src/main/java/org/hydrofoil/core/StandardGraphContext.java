@@ -1,6 +1,6 @@
 package org.hydrofoil.core;
 
-import org.hydrofoil.core.management.DataManager;
+import org.hydrofoil.core.management.DataSourceManager;
 import org.hydrofoil.core.management.SchemaManager;
 import org.hydrofoil.core.standard.internal.AbstractGraphQueryRunner;
 
@@ -17,27 +17,27 @@ public final class StandardGraphContext extends AbstractGraphQueryRunner {
     /**
      * data manager
      */
-    private DataManager dataManager;
+    private DataSourceManager dataSourceManager;
 
     /**
      * schema manager
      */
     private SchemaManager schemaManager;
 
-    StandardGraphContext(DataManager dataManager,
+    StandardGraphContext(DataSourceManager dataSourceManager,
                          SchemaManager schemaManager) {
         super();
-        this.dataManager = dataManager;
+        this.dataSourceManager = dataSourceManager;
         this.schemaManager = schemaManager;
     }
 
     /**
      * @return DataManager
-     * @see StandardGraphContext#dataManager
+     * @see StandardGraphContext#dataSourceManager
      **/
     @Override
-    protected DataManager getDataManager() {
-        return dataManager;
+    protected DataSourceManager getDataManager() {
+        return dataSourceManager;
     }
 
     /**

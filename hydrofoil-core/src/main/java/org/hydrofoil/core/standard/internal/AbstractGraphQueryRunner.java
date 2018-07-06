@@ -1,12 +1,11 @@
 package org.hydrofoil.core.standard.internal;
 
-import org.hydrofoil.core.management.DataManager;
+import org.hydrofoil.core.management.DataSourceManager;
 import org.hydrofoil.core.management.SchemaManager;
 import org.hydrofoil.core.standard.StandardEdge;
 import org.hydrofoil.core.standard.StandardVertex;
 import org.hydrofoil.core.standard.query.GraphCondition;
 
-import java.util.Collection;
 import java.util.Iterator;
 
 /**
@@ -21,7 +20,7 @@ public abstract class AbstractGraphQueryRunner {
 
     protected AbstractGraphQueryRunner(){}
 
-    protected abstract DataManager getDataManager();
+    protected abstract DataSourceManager getDataManager();
 
     protected abstract SchemaManager getSchemaManager();
 

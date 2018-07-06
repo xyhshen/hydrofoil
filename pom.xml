@@ -11,6 +11,7 @@
         <module>hydrofoil-common</module>
         <module>hydrofoil-core</module>
         <module>hydrofoil-mysql</module>
+        <module>hydrofoil-example</module>
     </modules>
     <packaging>pom</packaging>
     <name>hydrofoil graph engine</name>
