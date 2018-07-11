@@ -29,22 +29,22 @@ public final class SchemaManager {
     /**
      * data source schema map
      */
-    private Map<String,DataSourceSchema> dataSourceSchemaMap = new HashMap<>();
+    private final Map<String,DataSourceSchema> dataSourceSchemaMap = new HashMap<>();
 
     /**
      * table schema map
      */
-    private Map<String,TableSchema> tableSchemaMap = new HashMap<>();
+    private final Map<String,TableSchema> tableSchemaMap = new HashMap<>();
 
     /**
      * vertex schema
      */
-    private Map<String,VertexSchema> vertexSchemaMap = new HashMap<>();
+    private final Map<String,VertexSchema> vertexSchemaMap = new HashMap<>();
 
     /**
      * edge schema
      */
-    private Map<String,EdgeSchema> edgeSchemaMap = new HashMap<>();
+    private final Map<String,EdgeSchema> edgeSchemaMap = new HashMap<>();
 
     SchemaManager(){}
 
@@ -52,11 +52,11 @@ public final class SchemaManager {
      * load schema
      * @param configuration config data
      */
-    public void load(HydrofoilConfiguration configuration){
+    public void load(final HydrofoilConfiguration configuration){
 
     }
 
-    private void loadDataSource(InputStream is) throws Exception {
+    private void loadDataSource(final InputStream is) throws Exception {
         Element root = XmlUtils.getRoot(is);
         List<Element> elements = XmlUtils.listElement(root, ELEMENT_DATASOURCE);
         for(Element element:elements){
@@ -66,7 +66,7 @@ public final class SchemaManager {
         }
     }
 
-    private void loadDataSet(InputStream is) throws Exception {
+    private void loadDataSet(final InputStream is) throws Exception {
         Element root = XmlUtils.getRoot(is);
         List<Element> elements = XmlUtils.listElement(root, ELEMENT_TABLE);
         for(Element element:elements){
@@ -78,6 +78,10 @@ public final class SchemaManager {
 
     private void loadMapper(){
 
+    }
+
+    public DataSourceSchema getDatasourceSchema(final String datasSourceName){
+        return dataSourceSchemaMap.get(datasSourceName);
     }
 
 }

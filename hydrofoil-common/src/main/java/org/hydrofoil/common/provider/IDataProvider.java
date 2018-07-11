@@ -13,6 +13,11 @@ import org.hydrofoil.common.schema.DataSourceSchema;
 public interface IDataProvider {
 
     /**
+     * data provider class path
+     */
+    public static final String DATA_PROVIDER_CLASS_PATH = "org.hydrofoil.provider";
+
+    /**
      * 链接数据源
      * @param dataSourceSchema 数据源schema
      * @return 数据源实例

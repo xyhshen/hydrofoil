@@ -1,6 +1,10 @@
 package org.hydrofoil.core.management;
 
+import org.hydrofoil.common.provider.IDataProvider;
 import org.hydrofoil.common.provider.IDataSource;
+import org.hydrofoil.common.schema.DataSourceSchema;
+import org.hydrofoil.common.util.LangUtils;
+import org.hydrofoil.common.util.ParameterUtils;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -17,14 +21,51 @@ import java.util.Map;
  */
 public final class DataSourceManager implements Closeable {
 
-    private Map<String,IDataSource> dataSourceMap;
+    /**
+     * graph managerment
+     */
+    private final Management management;
 
-    public DataSourceManager(){
+    /**
+     * data source map
+     */
+    private final Map<String,IDataSource> dataSourceMap;
+
+    public DataSourceManager(final Management management){
+        this.management = management;
         this.dataSourceMap = new HashMap<>();
     }
 
-    public IDataSource getDatasource(){
-        return null;
+    /**
+     * geet data source
+     * @param dataSourceName source name
+     * @return data source
+     */
+    public IDataSource getDatasource(final String dataSourceName){
+        synchronized (dataSourceMap){
+            return dataSourceMap.computeIfAbsent(dataSourceName,(name)->{
+                DataSourceSchema datasourceSchema = management.getSchemaManager().
+                        getDatasourceSchema(name);
+                ParameterUtils.notNull(datasourceSchema,"data source schema" + name);
+                IDataProvider provider = loadProvider(datasourceSchema.getProvider());
+                IDataSource connect = provider.connect(datasourceSchema);
+                ParameterUtils.nullMessage(connect,"data source " + name
+                        + " connect failed");
+                return connect;
+            });
+        }
+    }
+
+    /**
+     * load provider
+     * @param provider provider
+     * @return provider
+     */
+    private IDataProvider loadProvider(String provider){
+        IDataProvider p = LangUtils.newInstance(Thread.currentThread().
+                getContextClassLoader(), IDataProvider.DATA_PROVIDER_CLASS_PATH + "." + provider);
+        ParameterUtils.notNull(p,"provider instance " + provider);
+        return p;
     }
 
     @Override

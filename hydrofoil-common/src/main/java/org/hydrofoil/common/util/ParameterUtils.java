@@ -73,12 +73,32 @@ public final class ParameterUtils {
     }
 
     /**
+     *
+     * @param o
+     * @param message
+     */
+    public static void nullMessage(final Object o,final String message){
+        if(o == null){
+            throw new IllegalArgumentException(message);
+        }
+    }
+
+    /**
      * must is true
      * @param b value
      */
-    public static void mustTrue(boolean b){
+    public static void mustTrue(final boolean b){
+        mustTrue(b,"parameter");
+    }
+
+    /**
+     * must is true
+     * @param b value
+     * @param name name
+     */
+    public static void mustTrue(final boolean b,final String name){
         if(!b){
-            throw new IllegalArgumentException("parameter is null!");
+            throw new IllegalArgumentException(name + " is null!");
         }
     }
 

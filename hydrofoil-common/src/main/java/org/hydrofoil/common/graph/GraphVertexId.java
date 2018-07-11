@@ -9,4 +9,7 @@ package org.hydrofoil.common.graph;
  * @date 2018/7/2 15:49
  */
 public final class GraphVertexId extends GraphElementId{
+    public GraphVertexId(String label) {
+        super(label);
+    }
 }

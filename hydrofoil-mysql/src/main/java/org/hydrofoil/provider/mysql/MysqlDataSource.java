@@ -1,8 +1,6 @@
 package org.hydrofoil.provider.mysql;
 
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.apache.commons.dbutils.DbUtils;
-import org.apache.commons.dbutils.QueryRunner;
 import org.hydrofoil.common.provider.IDataSource;
 import org.hydrofoil.common.provider.datasource.RowQueryRequest;
 import org.hydrofoil.common.provider.datasource.RowQueryResponse;
@@ -13,6 +11,7 @@ import org.hydrofoil.provider.mysql.internal.MysqlDbQueryService;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * MysqlDataSource
@@ -37,21 +36,35 @@ public final class MysqlDataSource implements IDataSource {
     }
 
     @Override
-    public RowQueryResponse sendQuery(RowQueryRequest query) {
-        AbstractDbQueryService queryServeice = getQueryServeice(query);
-        RowQueryResponse response;
-        try {
-            Collection<RowStore> rowStores = queryServeice.executeQuery();
-            response = new RowQueryResponse(true,rowStores);
-        } catch (SQLException e) {
-            response = new RowQueryResponse(false);
-            e.printStackTrace();
-        }
-        return response;
+    public Iterator<RowQueryResponse> sendQuery(final Collection<RowQueryRequest> querySet) {
+        return new Iterator<RowQueryResponse>() {
+
+            private final Iterator<RowQueryRequest> querySetIterator = querySet.iterator();
+
+            @Override
+            public boolean hasNext() {
+                return querySetIterator.hasNext();
+            }
+
+            @Override
+            public RowQueryResponse next() {
+                RowQueryRequest query = querySetIterator.next();
+                AbstractDbQueryService queryServeice = getQueryServeice(query);
+                RowQueryResponse response;
+                try {
+                    Collection<RowStore> rowStores = queryServeice.executeQuery();
+                    response = new RowQueryResponse(true,rowStores);
+                } catch (SQLException e) {
+                    response = new RowQueryResponse(false);
+                    response.setException(e);
+                }
+                return response;
+            }
+        };
     }
 
     @Override
-    public Long count(RowQueryRequest query) {
+    public Long count(final RowQueryRequest query) {
         return null;
     }
 

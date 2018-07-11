@@ -1,6 +1,6 @@
 package org.hydrofoil.common.provider.datasource;
 
-import java.io.Closeable;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -19,6 +19,11 @@ public class RowQueryResponse implements Iterator<RowStore>,AutoCloseable{
      * state
      */
     private boolean succeed;
+
+    /**
+     * exception
+     */
+    private SQLException exception;
 
     /**
      * default row store
@@ -62,5 +67,21 @@ public class RowQueryResponse implements Iterator<RowStore>,AutoCloseable{
      **/
     public Collection<RowStore> getDefaultRowStore() {
         return defaultRowStore;
+    }
+
+    /**
+     * @return SQLException
+     * @see RowQueryResponse#exception
+     **/
+    public SQLException getException() {
+        return exception;
+    }
+
+    /**
+     * @param exception SQLException
+     * @see RowQueryResponse#exception
+     **/
+    public void setException(SQLException exception) {
+        this.exception = exception;
     }
 }

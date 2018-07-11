@@ -1,7 +1,7 @@
 package org.hydrofoil.core;
 
-import org.hydrofoil.core.management.DataManager;
-import org.hydrofoil.core.management.SchemaManager;
+import org.hydrofoil.core.management.Management;
+import org.hydrofoil.core.standard.internal.StandardGraphContext;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -24,14 +24,9 @@ public final class HydrofoilConnector implements Closeable,AutoCloseable {
     }
 
     /**
-     * schema manager
+     * data management
      */
-    private SchemaManager schemaManager;
-
-    /**
-     * data manager
-     */
-    private DataManager dataManager;
+    private Management management;
 
     HydrofoilConnector(){}
 
@@ -42,8 +37,8 @@ public final class HydrofoilConnector implements Closeable,AutoCloseable {
      * get graph object context
      * @return graph object context
      */
-    public StandardGraphContext graph(){
-        return new StandardGraphContext(dataManager,schemaManager);
+    public IGraphContext graph(){
+        return new StandardGraphContext(management);
     }
 
 
