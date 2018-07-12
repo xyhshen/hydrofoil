@@ -84,4 +84,8 @@ public final class SchemaManager {
         return dataSourceSchemaMap.get(datasSourceName);
     }
 
+    public VertexSchema getVertexSchema(final String label){
+        return vertexSchemaMap.get(label);
+    }
+
 }

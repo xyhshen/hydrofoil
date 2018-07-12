@@ -6,7 +6,6 @@ import org.hydrofoil.common.util.DataUtils;
 import org.hydrofoil.core.standard.StandardEdge;
 import org.hydrofoil.core.standard.StandardVertex;
 import org.hydrofoil.core.standard.query.EdgeGraphCondition;
-import org.hydrofoil.core.standard.query.GraphCondition;
 import org.hydrofoil.core.standard.query.VertexGraphCondition;
 
 import java.io.Closeable;
@@ -45,13 +44,13 @@ public interface IGraphContext extends Closeable,AutoCloseable {
      * @param condition
      * @return
      */
-    Iterator<StandardVertex> listVertices(GraphCondition condition);
+    Iterator<StandardVertex> listVertices(VertexGraphCondition condition);
 
     /**
      * list edge
      * @param condition
      * @return
      */
-    Iterator<StandardEdge> listEdges(GraphCondition condition);
+    Iterator<StandardEdge> listEdges(EdgeGraphCondition condition);
 
 }

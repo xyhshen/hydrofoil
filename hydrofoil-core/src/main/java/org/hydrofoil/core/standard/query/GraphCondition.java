@@ -3,6 +3,7 @@ package org.hydrofoil.core.standard.query;
 import org.hydrofoil.common.graph.GraphElementId;
 import org.hydrofoil.common.graph.QMatch;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -20,7 +21,7 @@ public class GraphCondition<S extends GraphCondition> {
     /**
      * element id
      */
-    private GraphElementId elementId;
+    private Set<GraphElementId> elementIds;
 
     /**
      * start pos
@@ -37,18 +38,22 @@ public class GraphCondition<S extends GraphCondition> {
      */
     private String label;
 
-    private Set<QMatch.Q> propertyQueryMap;
+    /**
+     * property query condition
+     */
+    private Set<QMatch.Q> propertyQuerySet;
 
     public GraphCondition(){
-        this.propertyQueryMap = new HashSet<>();
+        this.elementIds = new HashSet<>();
+        this.propertyQuerySet = new HashSet<>();
     }
 
-    public GraphElementId id(){
-        return elementId;
+    public Collection<GraphElementId> ids(){
+        return elementIds;
     }
 
     public S setId(GraphElementId id){
-        this.elementId = id;
+        this.elementIds.add(id);
         return (S) this;
     }
 
@@ -84,16 +89,16 @@ public class GraphCondition<S extends GraphCondition> {
      * @param q query cond
      * @return this
      */
-    public S propertyMap(QMatch.Q q){
-        propertyQueryMap.add(q);
+    public S putPropertyQuery(QMatch.Q q){
+        propertyQuerySet.add(q);
         return (S) this;
     }
 
     /**
-     * @return Q>
-     * @see GraphCondition#propertyQueryMap
+     * @return Q
+     * @see GraphCondition#propertyQuerySet
      **/
-    public Set<QMatch.Q> getPropertyQueryMap() {
-        return propertyQueryMap;
+    public Set<QMatch.Q> getPropertyQuerySet() {
+        return propertyQuerySet;
     }
 }

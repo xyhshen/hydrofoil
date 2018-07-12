@@ -12,4 +12,12 @@ public final class GraphVertexId extends GraphElementId{
     public GraphVertexId(String label) {
         super(label);
     }
+
+    @Override
+    public boolean equals(Object otherObj){
+        if(otherObj instanceof GraphVertexId){
+            return super.equals(otherObj);
+        }
+        return false;
+    }
 }

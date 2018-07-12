@@ -12,4 +12,12 @@ public final class GraphEdgeId extends GraphElementId {
     public GraphEdgeId(String label) {
         super(label);
     }
+
+    @Override
+    public boolean equals(Object otherObj){
+        if(otherObj instanceof GraphEdgeId){
+           return super.equals(otherObj);
+        }
+        return false;
+    }
 }

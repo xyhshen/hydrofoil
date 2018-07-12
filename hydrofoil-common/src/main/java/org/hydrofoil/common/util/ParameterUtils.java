@@ -98,7 +98,7 @@ public final class ParameterUtils {
      */
     public static void mustTrue(final boolean b,final String name){
         if(!b){
-            throw new IllegalArgumentException(name + " is null!");
+            throw new IllegalArgumentException(name + " is false!");
         }
     }
 

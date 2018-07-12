@@ -1,8 +1,11 @@
 package org.hydrofoil.common.graph;
 
-import org.hydrofoil.common.util.bean.FieldPair;
+import org.apache.commons.collections4.SetUtils;
+import org.apache.commons.lang3.StringUtils;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * GraphElementId
@@ -24,15 +27,16 @@ public class GraphElementId {
      */
     private Map<String,Object> unique;
 
-    protected GraphElementId(String label){
+    GraphElementId(String label){
         this.label = label;
+        this.unique = new HashMap<>();
     }
 
     /**
      * @return String
      * @see GraphElementId#label
      **/
-    public String getLabel() {
+    public String label() {
         return label;
     }
 
@@ -51,7 +55,24 @@ public class GraphElementId {
      * @see GraphElementId#unique
      **/
     public GraphElementId unique(String name,Object value) {
-        this.unique = unique;
+        unique.put(name,value);
         return this;
+    }
+
+    @Override
+    public int hashCode(){
+        return Objects.hash(label,unique.entrySet().toArray());
+    }
+
+    @Override
+    public boolean equals(Object otherObj){
+        if(!(otherObj instanceof GraphElementId)){
+            return false;
+        }
+        GraphElementId otherId = (GraphElementId)otherObj;
+        if(!StringUtils.equalsIgnoreCase(otherId.label,label)){
+            return false;
+        }
+        return SetUtils.isEqualSet(unique.entrySet(),otherId.unique.entrySet());
     }
 }
