@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<mapper>
+    <vertices>
+        <vertex label="person" table="person">
+            <properties>
+                <property primary="true" label="idnumber" field="idnumber" />
+                <property label="name" field="name" />
+                <property label="gender" field="gender" />
+                <property label="telphone" field="telphone" />
+                <property label="spouseName" field="spouseName" />
+                <property label="workunit" field="workunit" />
+                <property label="address" field="address" />
+            </properties>
+        </vertex>
+    </vertices>
+    <edges>
+
+    </edges>
+</mapper>

@@ -1,7 +1,8 @@
 package org.hydrofoil.core.standard;
 
 import org.hydrofoil.common.graph.GraphElementId;
-import org.hydrofoil.common.graph.GraphVertexId;
+
+import java.util.Map;
 
 /**
  * StandardVertex
@@ -13,7 +14,7 @@ import org.hydrofoil.common.graph.GraphVertexId;
  */
 public final class StandardVertex extends StandardElement{
 
-    StandardVertex(GraphElementId elementId) {
-        super(elementId);
+    public StandardVertex(GraphElementId elementId, Map<String, StandardProperty> propertyMap) {
+        super(elementId, propertyMap);
     }
 }

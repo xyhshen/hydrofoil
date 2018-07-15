@@ -1,6 +1,9 @@
 package org.hydrofoil.core.standard;
 
 import org.hydrofoil.common.graph.GraphElementId;
+import org.hydrofoil.common.graph.GraphVertexId;
+
+import java.util.Map;
 
 /**
  * StandardEdge
@@ -11,7 +14,18 @@ import org.hydrofoil.common.graph.GraphElementId;
  * @date 2018/7/2 15:58
  */
 public class StandardEdge extends StandardElement {
-    StandardEdge(GraphElementId elementId) {
-        super(elementId);
+
+    /**
+     * source vertex id
+     */
+    private GraphVertexId sourceId;
+
+    /**
+     * target vertex id
+     */
+    private GraphVertexId targetId;
+
+    StandardEdge(GraphElementId elementId, Map<String, StandardProperty> propertyMap) {
+        super(elementId, propertyMap);
     }
 }

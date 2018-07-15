@@ -4,7 +4,6 @@ import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Attribute;
 import org.dom4j.Document;
-import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
@@ -70,7 +69,7 @@ public final class XmlUtils {
      * @return node list
      */
     public static List<Element> listElement(final Element element){
-        return listElement(element);
+        return listElement(element,null);
     }
 
     /**

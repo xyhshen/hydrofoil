@@ -25,6 +25,7 @@
         <tinkerpop.version>3.3.3</tinkerpop.version>
         <junit.version>4.12</junit.version>
         <slf4j.api.version>1.7.25</slf4j.api.version>
+        <io.common.version>2.4</io.common.version>
     </properties>
     <dependencies>
         <!-- https://mvnrepository.com/artifact/junit/junit -->

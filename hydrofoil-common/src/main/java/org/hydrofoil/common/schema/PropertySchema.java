@@ -85,12 +85,16 @@ public final class PropertySchema extends SchemaItem{
         return getItem(ATTR_PROPERTY_TABLE);
     }
 
-    public String getReffield(){
-        return getItem(ATTR_PROPERTY_FIELD);
+    public Map<String,String> getReffield(){
+        return getItemMap(ATTR_PROPERTY_FIELD);
     }
 
     public boolean isMultiple(){
         return BooleanUtils.toBoolean(getItem(ATTR_PROPERTY_MULTIPLE));
+    }
+
+    public Map<String,PairSchema> getChildren(){
+        return getSchemaMap(ATTR_PROPERTY_CHILDREN_ELEMENT);
     }
 
 }

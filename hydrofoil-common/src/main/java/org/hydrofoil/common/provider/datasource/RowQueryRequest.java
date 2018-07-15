@@ -1,5 +1,6 @@
 package org.hydrofoil.common.provider.datasource;
 
+import org.apache.commons.lang3.RandomUtils;
 import org.hydrofoil.common.graph.QMatch;
 
 import java.util.*;
@@ -13,6 +14,7 @@ import java.util.*;
  * @date 2018/7/2 18:34
  */
 public final class RowQueryRequest {
+
 
     /**
      * Associate match
@@ -124,6 +126,11 @@ public final class RowQueryRequest {
     }
 
     /**
+     * request id
+     */
+    private Long id;
+
+    /**
      * data set name
      */
     private String name;
@@ -163,6 +170,7 @@ public final class RowQueryRequest {
         this.uniqueField = new TreeSet<>();
         this.associateQuery = new ArrayList<>(2);
         this.fields = new TreeSet<>();
+        this.id = RandomUtils.nextLong();
     }
 
     /**
@@ -246,5 +254,13 @@ public final class RowQueryRequest {
      **/
     public Set<String> getFields() {
         return fields;
+    }
+
+    /**
+     * @return String
+     * @see RowQueryRequest#id
+     **/
+    public Long getId() {
+        return id;
     }
 }

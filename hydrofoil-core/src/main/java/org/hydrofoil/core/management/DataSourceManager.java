@@ -1,5 +1,6 @@
 package org.hydrofoil.core.management;
 
+import org.apache.commons.io.IOUtils;
 import org.hydrofoil.common.provider.IDataProvider;
 import org.hydrofoil.common.provider.IDataSource;
 import org.hydrofoil.common.schema.DataSourceSchema;
@@ -63,13 +64,20 @@ public final class DataSourceManager implements Closeable {
      */
     private IDataProvider loadProvider(String provider){
         IDataProvider p = LangUtils.newInstance(Thread.currentThread().
-                getContextClassLoader(), IDataProvider.DATA_PROVIDER_CLASS_PATH + "." + provider);
+                getContextClassLoader(), IDataProvider.DATA_PROVIDER_CLASS_PATH + "." +
+                provider + "." + IDataProvider.DATA_PROVIDER_CLASS_NAME);
         ParameterUtils.notNull(p,"provider instance " + provider);
         return p;
     }
 
     @Override
     public void close() throws IOException {
-
+        //close all datasource
+        synchronized (dataSourceMap){
+            dataSourceMap.forEach((k,v)->{
+                IOUtils.closeQuietly(v);
+            });
+            dataSourceMap.clear();
+        }
     }
 }

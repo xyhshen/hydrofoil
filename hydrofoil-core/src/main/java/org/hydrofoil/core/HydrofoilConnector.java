@@ -1,7 +1,11 @@
 package org.hydrofoil.core;
 
+import org.hydrofoil.common.configuration.HydrofoilConfiguration;
+import org.hydrofoil.common.graph.GraphEdgeId;
+import org.hydrofoil.common.graph.GraphVertexId;
 import org.hydrofoil.core.management.Management;
-import org.hydrofoil.core.standard.internal.StandardGraphContext;
+import org.hydrofoil.core.standard.query.EdgeGraphQueryRunner;
+import org.hydrofoil.core.standard.query.VertexGraphQueryRunner;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -16,34 +20,40 @@ import java.io.IOException;
  */
 public final class HydrofoilConnector implements Closeable,AutoCloseable {
 
-    static class HydrofoilConnectorBuilder{
-
-        HydrofoilConnector build(){
-            return new HydrofoilConnector();
-        }
-    }
-
     /**
      * data management
      */
     private Management management;
 
-    HydrofoilConnector(){}
+    HydrofoilConnector(){
+        this.management = new Management();
+    }
 
-    void init(){
+    void init(HydrofoilConfiguration configuration) throws Exception {
+        management.load(configuration);
     }
 
     /**
-     * get graph object context
-     * @return graph object context
+     * vertex query
+     * @param vertexIds ids
+     * @return query runner
      */
-    public IGraphContext graph(){
-        return new StandardGraphContext(management);
+    public VertexGraphQueryRunner vertices(GraphVertexId ...vertexIds){
+        return new VertexGraphQueryRunner(management).elements(vertexIds);
+    }
+
+    /**
+     * edge query
+     * @param edgeIds ids
+     * @return query runner
+     */
+    public EdgeGraphQueryRunner edges(GraphEdgeId ...edgeIds){
+        return new EdgeGraphQueryRunner(management).elements(edgeIds);
     }
 
 
     @Override
     public void close() throws IOException {
-
+        management.close();
     }
 }

@@ -8,7 +8,7 @@ package org.hydrofoil.common.graph;
  * @author xie_yh
  * @date 2018/7/2 16:58
  */
-public final class GraphEdgeId extends GraphElementId {
+public final class GraphEdgeId extends GraphElementId<GraphEdgeId> {
     public GraphEdgeId(String label) {
         super(label);
     }

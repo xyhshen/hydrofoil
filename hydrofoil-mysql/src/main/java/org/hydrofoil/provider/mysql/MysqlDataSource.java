@@ -58,6 +58,7 @@ public final class MysqlDataSource implements IDataSource {
                     response = new RowQueryResponse(false);
                     response.setException(e);
                 }
+                response.setId(query.getId());
                 return response;
             }
         };

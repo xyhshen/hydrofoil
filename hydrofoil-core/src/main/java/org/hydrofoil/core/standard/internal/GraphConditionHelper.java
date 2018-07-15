@@ -1,15 +1,10 @@
 package org.hydrofoil.core.standard.internal;
 
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.collections4.SetUtils;
-import org.hydrofoil.common.graph.GraphElementId;
-import org.hydrofoil.common.graph.GraphVertexId;
+import org.apache.commons.lang3.StringUtils;
 import org.hydrofoil.common.schema.PropertySchema;
+import org.hydrofoil.common.schema.TableSchema;
+import org.hydrofoil.common.util.ParameterUtils;
 import org.hydrofoil.core.management.SchemaManager;
-
-import java.util.Collection;
-import java.util.Map;
 
 /**
  * GraphConditionUtils
@@ -19,37 +14,28 @@ import java.util.Map;
  * @author xie_yh
  * @date 2018/7/12 14:32
  */
-final class GraphConditionHelper {
+final class MapperHelper {
 
     /**
-     *
+     * get real table name
+     * @param schemaManager schema manager
+     * @param tableName tablename
+     * @return real table name
      */
-    private final SchemaManager schemaManager;
-
-    GraphConditionHelper(final SchemaManager schemaManager){
-        this.schemaManager = schemaManager;
+    static String getRealTableName(SchemaManager schemaManager,String tableName){
+        TableSchema tableSchema = schemaManager.getTableSchema(tableName);
+        ParameterUtils.notNull(tableSchema,"table schema");
+        return tableSchema.getRealName();
     }
 
-    /**
-     * check vertex id
-     * @param elementIds id array
-     * @return check result
-     */
-    boolean checkVertexIds(final Collection<GraphElementId> elementIds){
-        if(CollectionUtils.isEmpty(elementIds)){
-            return false;
-        }
-        for(final GraphElementId elementId:elementIds){
-            if(!(elementId instanceof GraphVertexId) || MapUtils.isEmpty(elementId.unique())){
-                return false;
-            }
-            Map<String, PropertySchema> properties = schemaManager.
-                    getVertexSchema(elementId.label()).getProperties();
-            if(!SetUtils.isEqualSet(elementId.unique().keySet(),properties.keySet())){
-                return false;
-            }
-        }
-        return true;
+    static String getDatasourceName(SchemaManager schemaManager,String tableName){
+        TableSchema tableSchema = schemaManager.getTableSchema(tableName);
+        ParameterUtils.notNull(tableSchema,"table schema");
+        return tableSchema.getDatasourceName();
+    }
+
+    static boolean isPropertyInMainTable(PropertySchema propertySchema){
+        return StringUtils.isBlank(propertySchema.getTable());
     }
 
 }

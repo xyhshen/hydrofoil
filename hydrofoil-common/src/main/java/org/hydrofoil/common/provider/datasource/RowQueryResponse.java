@@ -13,7 +13,12 @@ import java.util.Iterator;
  * @author xie_yh
  * @date 2018/7/4 10:36
  */
-public class RowQueryResponse implements Iterator<RowStore>,AutoCloseable{
+public class RowQueryResponse implements Iterable<RowStore>,AutoCloseable{
+
+    /**
+     * request id
+     */
+    private Long id;
 
     /**
      * state
@@ -38,16 +43,6 @@ public class RowQueryResponse implements Iterator<RowStore>,AutoCloseable{
     public RowQueryResponse(boolean succeed,Collection<RowStore> defaultRowStore){
         this.succeed = succeed;
         this.defaultRowStore = defaultRowStore;
-    }
-
-    @Override
-    public boolean hasNext() {
-        return defaultRowStore.iterator().hasNext();
-    }
-
-    @Override
-    public RowStore next() {
-        return defaultRowStore.iterator().next();
     }
 
     @Override
@@ -83,5 +78,26 @@ public class RowQueryResponse implements Iterator<RowStore>,AutoCloseable{
      **/
     public void setException(SQLException exception) {
         this.exception = exception;
+    }
+
+    /**
+     * @return Long
+     * @see RowQueryResponse#id
+     **/
+    public Long getId() {
+        return id;
+    }
+
+    /**
+     * @param id Long
+     * @see RowQueryResponse#id
+     **/
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    @Override
+    public Iterator<RowStore> iterator() {
+        return defaultRowStore.iterator();
     }
 }

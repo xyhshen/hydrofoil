@@ -1,5 +1,6 @@
 package org.hydrofoil.common.schema;
 
+import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Element;
 import org.hydrofoil.common.util.ParameterUtils;
 import org.hydrofoil.common.util.XmlUtils;
@@ -60,7 +61,8 @@ public class TableSchema extends SchemaItem{
      * @return table real name
      */
     public String getRealName(){
-       return getItem(ATTR_TABLE_REALNAME);
+        String realName = getItem(ATTR_TABLE_REALNAME);
+       return StringUtils.isNotBlank(realName)?realName:getName();
     }
 
 }

@@ -18,6 +18,11 @@ public interface IDataProvider {
     public static final String DATA_PROVIDER_CLASS_PATH = "org.hydrofoil.provider";
 
     /**
+     * data provider class name
+     */
+    public static final String DATA_PROVIDER_CLASS_NAME = "DataProvider";
+
+    /**
      * 链接数据源
      * @param dataSourceSchema 数据源schema
      * @return 数据源实例

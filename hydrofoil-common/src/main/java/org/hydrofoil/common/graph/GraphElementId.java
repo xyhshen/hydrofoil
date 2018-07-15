@@ -15,7 +15,7 @@ import java.util.Objects;
  * @author xie_yh
  * @date 2018/7/2 15:48
  */
-public class GraphElementId {
+public class GraphElementId <E extends GraphElementId>{
 
     /**
      * element label
@@ -54,9 +54,9 @@ public class GraphElementId {
      * @param value value
      * @see GraphElementId#unique
      **/
-    public GraphElementId unique(String name,Object value) {
+    public E unique(String name,Object value) {
         unique.put(name,value);
-        return this;
+        return (E) this;
     }
 
     @Override

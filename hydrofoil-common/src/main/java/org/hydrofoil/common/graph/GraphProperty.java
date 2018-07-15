@@ -70,28 +70,28 @@ public final class GraphProperty {
     }
 
     /**
-     * property label
+     * property name
      */
-    private final String label;
+    private final String name;
 
     /**
      * property content
      */
     private final Object content;
 
-    public GraphProperty(final String label,final Object content){
-        this.label = label;
+    public GraphProperty(final String name,final Object content){
+        this.name = name;
         this.content = content;
 
-        ParameterUtils.mustTrue(PropertyType.checkValue(content),label + " checkValue");
+        ParameterUtils.mustTrue(PropertyType.checkValue(content),name + " checkValue");
     }
 
     /**
      * @return String
-     * @see GraphProperty#label
+     * @see GraphProperty#name
      **/
-    public String getLabel() {
-        return label;
+    public String name() {
+        return name;
     }
 
     @Override

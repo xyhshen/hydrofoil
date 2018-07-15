@@ -18,7 +18,7 @@ import java.util.Map;
  */
 public abstract class AbstractElementSchema extends SchemaItem {
 
-    private static final String ATTR_ELEMENT_LABEL =            "name";
+    private static final String ATTR_ELEMENT_LABEL =            "label";
     private static final String ATTR_ELEMENT_TABLE =            "table";
     private static final String ATTR_ELEMENT_PROPERTIES =      "properties";
     private static final String ATTR_ELEMENT_PROPERTY =         "property";

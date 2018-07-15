@@ -1,5 +1,10 @@
 package org.hydrofoil.core.management;
 
+import org.hydrofoil.common.configuration.HydrofoilConfiguration;
+
+import java.io.Closeable;
+import java.io.IOException;
+
 /**
  * Management
  * <p>
@@ -8,7 +13,7 @@ package org.hydrofoil.core.management;
  * @author xie_yh
  * @date 2018/7/10 13:12
  */
-public final class Management {
+public final class Management implements Closeable {
 
     /**
      * data source manager
@@ -20,7 +25,14 @@ public final class Management {
      */
     private SchemaManager schemaManager;
 
-    public Management(){}
+    public Management(){
+        this.dataSourceManager = new DataSourceManager(this);
+        this.schemaManager = new SchemaManager();
+    }
+
+    public void load(HydrofoilConfiguration configuration) throws Exception{
+        schemaManager.load(configuration);
+    }
 
     /**
      * get data source manger
@@ -38,5 +50,10 @@ public final class Management {
      **/
     public SchemaManager getSchemaManager() {
         return schemaManager;
+    }
+
+    @Override
+    public void close() throws IOException {
+        dataSourceManager.close();
     }
 }

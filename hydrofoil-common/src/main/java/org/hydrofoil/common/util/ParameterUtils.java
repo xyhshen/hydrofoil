@@ -102,4 +102,22 @@ public final class ParameterUtils {
         }
     }
 
+    public static void mustTrueMessage(final boolean b,final String message){
+        if(!b){
+            throw new IllegalArgumentException(message);
+        }
+    }
+
+    /**
+     *
+     * @param b
+     * @param message
+     * @param t
+     */
+    public static void mustTrueException(final boolean b,final String message,Throwable t){
+        if(!b){
+            throw new RuntimeException(message,t);
+        }
+    }
+
 }

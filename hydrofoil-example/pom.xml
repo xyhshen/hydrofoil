@@ -11,6 +11,29 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>hydrofoil-example</artifactId>
-
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    <dependencies>
+        <dependency>
+            <groupId>org.hydrofoil</groupId>
+            <artifactId>hydrofoil-core</artifactId>
+            <version>${hydrofoil.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hydrofoil</groupId>
+            <artifactId>hydrofoil-mysql</artifactId>
+            <version>${hydrofoil.version}</version>
+        </dependency>
+    </dependencies>
 
 </project>
