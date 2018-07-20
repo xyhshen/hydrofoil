@@ -51,18 +51,34 @@ public final class EdgeSchema extends AbstractElementSchema{
         putItem("target-" + ATTR_EDGE_VERTEX_FIELD,targetField);
     }
 
+    /**
+     * get source vertex label
+     * @return label
+     */
     public String getSourceLabel(){
         return getItem("source-" + ATTR_EDGE_VERTEX_LABEL);
     }
 
+    /**
+     * get source vertex field
+     * @return k,v->(vertex property label,table field name)
+     */
     public Map<String,String> getSourceField(){
         return getItemMap("source-" + ATTR_EDGE_VERTEX_FIELD);
     }
 
+    /**
+     * get target vertex label
+     * @return label
+     */
     public String getTargetLabel(){
         return getItem("target-" + ATTR_EDGE_VERTEX_LABEL);
     }
 
+    /**
+     * get target vertex field
+     * @return k,v->(vertex property label,table field name)
+     */
     public Map<String,String> getTargetField(){
         return getItemMap("target-" + ATTR_EDGE_VERTEX_FIELD);
     }

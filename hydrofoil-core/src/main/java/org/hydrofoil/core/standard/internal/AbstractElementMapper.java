@@ -6,8 +6,10 @@ import org.apache.commons.collections4.SetUtils;
 import org.hydrofoil.common.graph.GraphElementId;
 import org.hydrofoil.common.graph.QMatch;
 import org.hydrofoil.common.provider.datasource.RowQueryRequest;
+import org.hydrofoil.common.provider.datasource.RowStore;
 import org.hydrofoil.common.schema.AbstractElementSchema;
 import org.hydrofoil.common.schema.PropertySchema;
+import org.hydrofoil.common.util.LangUtils;
 import org.hydrofoil.core.management.SchemaManager;
 import org.hydrofoil.core.standard.StandardElement;
 
@@ -24,6 +26,7 @@ import java.util.*;
 public abstract class AbstractElementMapper<E extends StandardElement> {
 
     protected final SchemaManager schemaManager;
+
 
     public AbstractElementMapper(final SchemaManager schemaManager){
         this.schemaManager = schemaManager;
@@ -65,18 +68,19 @@ public abstract class AbstractElementMapper<E extends StandardElement> {
         }
         return true;
     }
-    public ElementMapping toMapping(GraphElementId elementId, AbstractElementSchema elementSchema){
+
+    @SuppressWarnings("unchecked")
+    public ElementMapping toMapping(Set<QMatch.Q> mainCondition, AbstractElementSchema elementSchema,Long start,Long limit){
         ElementMapping elementMapping = new ElementMapping();
         elementMapping.setSchemaItem(elementSchema);
         RowQueryRequest rowQueryRequest = new RowQueryRequest();
         rowQueryRequest.setName(MapperHelper.getRealTableName(schemaManager,elementSchema.getTable()));
         Map<String,RowQueryRequest.AssociateRowQuery> associateRowQueryMap = new TreeMap<>();
 
+        //add main query condition
+        rowQueryRequest.getMatch().addAll(mainCondition);
+        //set property
         elementSchema.getProperties().forEach((propertyLabel,propertySchema)->{
-            if(propertySchema.isPrimary()){
-                Object value = MapUtils.getObject(elementId.unique(),propertySchema.getLabel());
-                rowQueryRequest.getMatch().add(QMatch.eq(propertySchema.getField(),value));
-            }
             if(MapperHelper.isPropertyInMainTable(propertySchema)) {
                 rowQueryRequest.getFields().add(propertySchema.getField());
             }else{
@@ -104,12 +108,24 @@ public abstract class AbstractElementMapper<E extends StandardElement> {
                 });
             }
         });
-        rowQueryRequest.setStart(0L);
-        rowQueryRequest.setLimit(1L);
+        rowQueryRequest.setStart(start);
+        rowQueryRequest.setLimit(limit);
         elementMapping.setQueryRequest(rowQueryRequest);
         elementMapping.setDatasource(MapperHelper.
                 getDatasourceName(schemaManager,elementSchema.getTable()));
         return elementMapping;
+    }
+
+    protected <EID extends GraphElementId> EID rowElementToId(AbstractElementSchema elementSchema,RowStore rowStore,Class<EID> clz){
+        EID eid = LangUtils.newInstance(clz,elementSchema.getLabel());
+        String tableName = MapperHelper.getRealTableName(schemaManager,elementSchema.getTable());
+
+        elementSchema.getProperties().values().forEach((propertySchema) -> {
+            if(propertySchema.isPrimary()){
+                eid.unique(propertySchema.getLabel(),rowStore.value(tableName,propertySchema.getField()));
+            }
+        });
+        return eid;
     }
 
 

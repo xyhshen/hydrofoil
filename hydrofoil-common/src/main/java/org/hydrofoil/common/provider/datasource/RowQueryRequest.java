@@ -1,6 +1,7 @@
 package org.hydrofoil.common.provider.datasource;
 
 import org.apache.commons.lang3.RandomUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hydrofoil.common.graph.QMatch;
 
 import java.util.*;
@@ -68,6 +69,20 @@ public final class RowQueryRequest {
          **/
         public String getFieldname() {
             return fieldname;
+        }
+
+        @Override
+        public boolean equals(Object other){
+            if(other instanceof AssociateMatch){
+                return StringUtils.equalsIgnoreCase(((AssociateMatch) other).name,name) &&
+                        StringUtils.equalsIgnoreCase(((AssociateMatch) other).fieldname,fieldname);
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode(){
+            return Objects.hash(match,name,fieldname);
         }
     }
 

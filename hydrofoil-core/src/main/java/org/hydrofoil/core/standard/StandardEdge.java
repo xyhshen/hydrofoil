@@ -25,7 +25,21 @@ public class StandardEdge extends StandardElement {
      */
     private GraphVertexId targetId;
 
-    StandardEdge(GraphElementId elementId, Map<String, StandardProperty> propertyMap) {
+    public StandardEdge(GraphElementId elementId,
+                        GraphVertexId sourceId,
+                        GraphVertexId targetId,
+                        Map<String, StandardProperty> propertyMap) {
         super(elementId, propertyMap);
+        this.sourceId = sourceId;
+        this.targetId = targetId;
     }
+
+    public GraphVertexId sourceId(){
+        return sourceId;
+    }
+
+    public GraphVertexId targetId(){
+        return targetId;
+    }
+
 }

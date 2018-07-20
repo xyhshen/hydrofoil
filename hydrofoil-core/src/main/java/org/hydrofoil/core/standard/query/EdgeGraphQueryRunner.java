@@ -1,13 +1,10 @@
 package org.hydrofoil.core.standard.query;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.hydrofoil.common.graph.EdgeDirection;
 import org.hydrofoil.common.graph.GraphEdgeId;
-import org.hydrofoil.common.graph.GraphElementId;
 import org.hydrofoil.common.provider.datasource.RowStore;
 import org.hydrofoil.common.schema.EdgeSchema;
-import org.hydrofoil.common.schema.SchemaItem;
 import org.hydrofoil.common.util.ParameterUtils;
 import org.hydrofoil.core.management.Management;
 import org.hydrofoil.core.standard.StandardEdge;
@@ -49,6 +46,7 @@ public class EdgeGraphQueryRunner extends AbstractGraphQueryRunner<StandardEdge,
         super(management);
         this.edgeMapper = new EdgeMapper(management.getSchemaManager());
         this.vertexMapper = new VertexMapper(management.getSchemaManager());
+        this.direction = EdgeDirection.InAndOut;
     }
 
     @Override
@@ -60,15 +58,28 @@ public class EdgeGraphQueryRunner extends AbstractGraphQueryRunner<StandardEdge,
             query edge by id style
              */
             ParameterUtils.mustTrue(edgeMapper.checkElementIds(elementIds),"check edge id");
-            elementIds.forEach((elementId -> {
-                elementRequests.add(edgeMapper.toMapping((GraphEdgeId) elementId));
-            }));
+            elementIds.forEach((elementId->elementRequests.add(edgeMapper.toMapping((GraphEdgeId) elementId))));
         }else if(vertex != null){
             ParameterUtils.mustTrue(vertexMapper.checkElementIds(Collections.singleton(vertex.elementId())),"check vertex id");
-            EdgeSchema[] edgeSchemaOfVertex = management.getSchemaManager().
-                    getEdgeSchemaOfVertex(vertex.label(), direction != null ? direction : EdgeDirection.InAndOut);
-            if(!ArrayUtils.isEmpty(edgeSchemaOfVertex)){
-
+            EdgeSchema[] inEdgeSchema = null;
+            EdgeSchema[] outEdgeSchema = null;
+            if(direction == EdgeDirection.In || direction == EdgeDirection.InAndOut){
+                inEdgeSchema = management.getSchemaManager().
+                        getEdgeSchemaOfVertex(vertex.label(), EdgeDirection.In,label);
+            }
+            if(direction == EdgeDirection.Out || direction == EdgeDirection.InAndOut){
+                outEdgeSchema = management.getSchemaManager().
+                        getEdgeSchemaOfVertex(vertex.label(), EdgeDirection.Out,label);
+            }
+            if(inEdgeSchema != null){
+                for(EdgeSchema schema:inEdgeSchema){
+                    elementRequests.add(edgeMapper.toMapping(vertex,schema,EdgeDirection.In));
+                }
+            }
+            if(outEdgeSchema != null){
+                for(EdgeSchema schema:outEdgeSchema){
+                    elementRequests.add(edgeMapper.toMapping(vertex,schema,EdgeDirection.Out));
+                }
             }
         }else{
             /*
@@ -80,13 +91,13 @@ public class EdgeGraphQueryRunner extends AbstractGraphQueryRunner<StandardEdge,
     }
 
     @Override
-    protected StandardEdge handleRowToElement(SchemaItem schemaItem, RowStore rowStore) {
-        return null;
+    protected StandardEdge handleRowToElement(ElementMapping mapping, RowStore rowStore) {
+        return edgeMapper.rowStoreToEdge((EdgeSchema) mapping.getSchemaItem(),rowStore);
     }
 
     /**
      * @return GraphElementId
-     * @see EdgeGraphQueryRunner#centreVertexId
+     * @see EdgeGraphQueryRunner#vertex
      **/
     public StandardVertex vertex() {
         return vertex;

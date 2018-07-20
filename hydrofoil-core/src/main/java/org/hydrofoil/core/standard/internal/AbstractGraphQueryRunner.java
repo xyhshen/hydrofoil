@@ -9,7 +9,6 @@ import org.hydrofoil.common.provider.IDataSource;
 import org.hydrofoil.common.provider.datasource.RowQueryRequest;
 import org.hydrofoil.common.provider.datasource.RowQueryResponse;
 import org.hydrofoil.common.provider.datasource.RowStore;
-import org.hydrofoil.common.schema.SchemaItem;
 import org.hydrofoil.common.util.ParameterUtils;
 import org.hydrofoil.core.management.Management;
 import org.hydrofoil.core.standard.IGraphQueryRunner;
@@ -104,7 +103,7 @@ public abstract class AbstractGraphQueryRunner <E extends StandardElement,T exte
      * @param rowStore row store
      * @return element
      */
-    protected abstract E handleRowToElement(SchemaItem schemaItem, RowStore rowStore);
+    protected abstract E handleRowToElement(ElementMapping mapping, RowStore rowStore);
 
     MultiValuedMap<String,ElementMapping> getQueryRequest(){
         MultiValuedMap<String,ElementMapping> maps = new ArrayListValuedHashMap<>();
@@ -115,14 +114,14 @@ public abstract class AbstractGraphQueryRunner <E extends StandardElement,T exte
         return  maps;
     }
 
-    Collection<E> handleRowRequest(SchemaItem schemaItem,RowQueryResponse response){
+    Collection<E> handleRowRequest(ElementMapping mapping,RowQueryResponse response){
         ParameterUtils.mustTrueException(response.isSucceed(),
                 "request datasource failed",
                 response.getException());
         List<RowStore> rowStores = IterableUtils.toList(response);
         List<E> elements = new ArrayList<>(rowStores.size());
         rowStores.forEach((row)->{
-            elements.add(handleRowToElement(schemaItem,row));
+            elements.add(handleRowToElement(mapping,row));
         });
         return elements;
     }
@@ -131,20 +130,21 @@ public abstract class AbstractGraphQueryRunner <E extends StandardElement,T exte
     public Iterator<E> take() {
         List<E> elements = new ArrayList<>(100);
         MultiValuedMap<String,ElementMapping> maps = getQueryRequest();
-        Map<Long,SchemaItem> schemaItemMap = new HashMap<>();
+        Map<Long,ElementMapping> elementMappingMap = new HashMap<>();
         maps.asMap().forEach((dataSourceName,requests)->{
             IDataSource datasource = management.getDataSourceManager().
                     getDatasource(dataSourceName);
             List<RowQueryRequest> rowQueryRequests = new ArrayList<>(requests.size());
             requests.forEach((request)->{
-                schemaItemMap.put(request.getQueryRequest().getId(),request.getSchemaItem());
+                elementMappingMap.put(request.getQueryRequest().getId(),request);
                 rowQueryRequests.add(request.getQueryRequest());
             });
             Iterator<RowQueryResponse> rowQueryResponseIterator =
                     datasource.sendQuery(rowQueryRequests);
             while(rowQueryResponseIterator.hasNext()){
                 RowQueryResponse next = rowQueryResponseIterator.next();
-                elements.addAll(handleRowRequest(schemaItemMap.get(next.getId()),next));
+                elements.addAll(handleRowRequest(elementMappingMap.get(next.getId()),
+                        next));
             }
         });
         return elements.iterator();

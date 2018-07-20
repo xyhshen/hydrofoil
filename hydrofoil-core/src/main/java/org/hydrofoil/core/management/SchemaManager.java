@@ -1,6 +1,7 @@
 package org.hydrofoil.core.management;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.dom4j.Element;
 import org.hydrofoil.common.configuration.HydrofoilConfiguration;
@@ -134,7 +135,8 @@ public final class SchemaManager {
      * @return schema
      */
     public EdgeSchema[] getEdgeSchemaOfVertex(final String vertexLabel,
-                                                    final EdgeDirection direction){
+                                                    final EdgeDirection direction,
+                                                    final String label){
         Pair<String[], String[]> vertexEdgePair = vertexEdgeSchemaMap.get(vertexLabel);
         if(vertexEdgePair == null){
             return null;
@@ -142,19 +144,16 @@ public final class SchemaManager {
         Set<String> schemas = new HashSet<>();
         if(direction == EdgeDirection.In){
             schemas.addAll(Arrays.asList(vertexEdgePair.getLeft()));
-        }else if(direction == EdgeDirection.Out){
-            schemas.addAll(Arrays.asList(vertexEdgePair.getRight()));
         }else{
-            schemas.addAll(Arrays.asList(vertexEdgePair.getLeft()));
             schemas.addAll(Arrays.asList(vertexEdgePair.getRight()));
         }
         if(schemas.isEmpty()){
             return null;
         }
+        final boolean filterLabel = StringUtils.isNotBlank(label);
         List<EdgeSchema> l = new ArrayList<>(schemas.size());
-        schemas.forEach((label)->{
-            l.add(edgeSchemaMap.get(label));
-        });
+        schemas.stream().filter(p-> !filterLabel || StringUtils.equalsIgnoreCase(label, p)).
+                forEach((v)->l.add(edgeSchemaMap.get(v)));
         return l.toArray(new EdgeSchema[schemas.size()]);
     }
 

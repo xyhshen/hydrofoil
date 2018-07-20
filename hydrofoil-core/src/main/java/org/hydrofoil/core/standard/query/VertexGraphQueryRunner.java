@@ -3,7 +3,6 @@ package org.hydrofoil.core.standard.query;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hydrofoil.common.graph.GraphVertexId;
 import org.hydrofoil.common.provider.datasource.RowStore;
-import org.hydrofoil.common.schema.SchemaItem;
 import org.hydrofoil.common.schema.VertexSchema;
 import org.hydrofoil.common.util.ParameterUtils;
 import org.hydrofoil.core.management.Management;
@@ -54,7 +53,7 @@ public final class VertexGraphQueryRunner extends AbstractGraphQueryRunner<Stand
     }
 
     @Override
-    protected StandardVertex handleRowToElement(SchemaItem schemaItem, RowStore rowStore) {
-        return vertexMapper.rowStoreToVertex((VertexSchema) schemaItem,rowStore);
+    protected StandardVertex handleRowToElement(ElementMapping mapping, RowStore rowStore) {
+        return vertexMapper.rowStoreToVertex((VertexSchema) mapping.getSchemaItem(),rowStore);
     }
 }

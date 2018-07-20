@@ -19,6 +19,8 @@ public final class ElementMapping{
 
     private RowQueryRequest queryRequest;
 
+    private Object context;
+
     /**
      * @return String
      * @see ElementMapping#datasource
@@ -65,5 +67,21 @@ public final class ElementMapping{
      **/
     public void setQueryRequest(RowQueryRequest queryRequest) {
         this.queryRequest = queryRequest;
+    }
+
+    /**
+     * @return Object
+     * @see ElementMapping#context
+     **/
+    public Object getContext() {
+        return context;
+    }
+
+    /**
+     * @param context Object
+     * @see ElementMapping#context
+     **/
+    public void setContext(Object context) {
+        this.context = context;
     }
 }

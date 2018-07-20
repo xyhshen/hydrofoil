@@ -42,7 +42,7 @@ public class GraphElementId <E extends GraphElementId>{
 
 
     /**
-     * @return Object>
+     * @return k,v->(label,value)
      * @see GraphElementId#unique
      **/
     public Map<String, Object> unique() {

@@ -1,8 +1,10 @@
 package org.hydrofoil.core.standard.internal;
 
+import org.apache.commons.collections4.MapUtils;
 import org.hydrofoil.common.graph.GraphElementId;
 import org.hydrofoil.common.graph.GraphProperty;
 import org.hydrofoil.common.graph.GraphVertexId;
+import org.hydrofoil.common.graph.QMatch;
 import org.hydrofoil.common.provider.datasource.RowStore;
 import org.hydrofoil.common.schema.AbstractElementSchema;
 import org.hydrofoil.common.schema.VertexSchema;
@@ -11,7 +13,9 @@ import org.hydrofoil.core.standard.StandardProperty;
 import org.hydrofoil.core.standard.StandardVertex;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * VertexMapper
@@ -38,12 +42,21 @@ public final class VertexMapper extends AbstractElementMapper{
     }
 
     public ElementMapping toMapping(GraphVertexId vertexId){
-        return super.toMapping(vertexId,schemaManager.getVertexSchema(vertexId.label()));
+        VertexSchema vertexSchema = schemaManager.getVertexSchema(vertexId.label());
+        Set<QMatch.Q> mainCondition = new HashSet<>();
+        vertexSchema.getProperties().forEach((k,v)->{
+            if(v.isPrimary()){
+                Object value = MapUtils.getObject(vertexId.unique(),v.getLabel());
+                mainCondition.add(QMatch.eq(v.getField(),value));
+            }
+        });
+
+        return super.toMapping(mainCondition,vertexSchema,0L,1L);
     }
 
     public StandardVertex rowStoreToVertex(VertexSchema vertexSchema, RowStore rowStore){
         Map<String,StandardProperty> propertyMap = new HashMap<>();
-        StandardVertex vertex = new StandardVertex(getVertexId(vertexSchema,rowStore),propertyMap);
+        StandardVertex vertex = new StandardVertex(rowElementToId(vertexSchema,rowStore,GraphVertexId.class),propertyMap);
         String tableName = MapperHelper.getRealTableName(schemaManager,vertexSchema.getTable());
         vertexSchema.getProperties().values().forEach((propertySchema) ->{
             if(MapperHelper.isPropertyInMainTable(propertySchema)){
@@ -55,18 +68,6 @@ public final class VertexMapper extends AbstractElementMapper{
             }
         });
         return vertex;
-    }
-
-    private  GraphVertexId getVertexId(VertexSchema vertexSchema,RowStore rowStore){
-        GraphVertexId vertexId = new GraphVertexId(vertexSchema.getLabel());
-        String tableName = MapperHelper.getRealTableName(schemaManager,vertexSchema.getTable());
-
-        vertexSchema.getProperties().values().forEach((propertySchema) -> {
-            if(propertySchema.isPrimary()){
-                vertexId.unique(propertySchema.getLabel(),rowStore.value(tableName,propertySchema.getField()));
-            }
-        });
-        return vertexId;
     }
 
 }
