@@ -1,5 +1,8 @@
 package org.hydrofoil.core.management;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MultiValuedMap;
+import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -30,33 +33,41 @@ public final class SchemaManager {
     private static final String ELEMENT_TABLE = "table";
     private static final String ELEMENT_VERTICES = "vertices";
     private static final String ELEMENT_VERTEX = "vertex";
+    private static final String ELEMENT_EDGES = "edges";
+    private static final String ELEMENT_EDGE = "edge";
 
     /**
      * data source schema map
      */
-    private final Map<String,DataSourceSchema> dataSourceSchemaMap = new HashMap<>();
+    private final Map<String,DataSourceSchema> dataSourceSchemaMap;
 
     /**
      * table schema map
      */
-    private final Map<String,TableSchema> tableSchemaMap = new HashMap<>();
+    private final Map<String,TableSchema> tableSchemaMap;
 
     /**
      * vertex schema
      */
-    private final Map<String,VertexSchema> vertexSchemaMap = new HashMap<>();
+    private final Map<String,VertexSchema> vertexSchemaMap;
 
     /**
      * edge schema
      */
-    private final Map<String,EdgeSchema> edgeSchemaMap = new HashMap<>();
+    private final Map<String,EdgeSchema> edgeSchemaMap;
 
     /**
      * vertex edge schema map,2nd param as left:in,right:out
      */
-    private final Map<String,Pair<String[],String[]>> vertexEdgeSchemaMap = new HashMap<>();
+    private final Map<String,Pair<Collection<String>,Collection<String>>> vertexEdgeSchemaMap;
 
-    SchemaManager(){}
+    SchemaManager(){
+        dataSourceSchemaMap = new HashMap<>();
+        tableSchemaMap = new HashMap<>();
+        vertexSchemaMap = new HashMap<>();
+        edgeSchemaMap = new HashMap<>();
+        vertexEdgeSchemaMap = new HashMap<>();
+    }
 
     /**
      * load schema
@@ -90,14 +101,43 @@ public final class SchemaManager {
         IOUtils.closeQuietly(is);
     }
 
-    private void loadMapper(final InputStream is) throws Exception{
-        Element root = XmlUtils.getRoot(is);
+    private void loadVertexMapper(Element root){
         List<Element> elements = XmlUtils.listElement(root.element(ELEMENT_VERTICES),ELEMENT_VERTEX );
         for(Element element:elements){
             VertexSchema vertexSchema = new VertexSchema();
             vertexSchema.read(element);
             vertexSchemaMap.put(vertexSchema.getLabel(),vertexSchema);
         }
+    }
+
+    private void loadEdgeMapper(Element root){
+        List<Element> elements = XmlUtils.listElement(root.element(ELEMENT_EDGES),ELEMENT_EDGE );
+        for(Element element:elements){
+            EdgeSchema edgeSchema = new EdgeSchema();
+            edgeSchema.read(element);
+            edgeSchemaMap.put(edgeSchema.getLabel(),edgeSchema);
+        }
+        MultiValuedMap<String,EdgeSchema> inMap = new ArrayListValuedHashMap<>();
+        MultiValuedMap<String,EdgeSchema> outMap = new ArrayListValuedHashMap<>();
+        edgeSchemaMap.forEach((edgeLabel,edgeSchema)->{
+            outMap.put(edgeSchema.getSourceLabel(),edgeSchema);
+            inMap.put(edgeSchema.getTargetLabel(),edgeSchema);
+        });
+        vertexSchemaMap.keySet().forEach((vertexLabel)->{
+            Collection<EdgeSchema> inSchema = inMap.get(vertexLabel);
+            Collection<EdgeSchema> outSchema = outMap.get(vertexLabel);
+            Set<String> inLabelSet = new HashSet<>();
+            Set<String> outLabelSet = new HashSet<>();
+            CollectionUtils.emptyIfNull(inSchema).forEach((v)->inLabelSet.add(v.getLabel()));
+            CollectionUtils.emptyIfNull(outSchema).forEach((v)->outLabelSet.add(v.getLabel()));
+            vertexEdgeSchemaMap.put(vertexLabel,Pair.of(inLabelSet,outLabelSet));
+        });
+    }
+
+    private void loadMapper(final InputStream is) throws Exception{
+        Element root = XmlUtils.getRoot(is);
+        loadVertexMapper(root);
+        loadEdgeMapper(root);
         IOUtils.closeQuietly(is);
     }
 
@@ -137,15 +177,15 @@ public final class SchemaManager {
     public EdgeSchema[] getEdgeSchemaOfVertex(final String vertexLabel,
                                                     final EdgeDirection direction,
                                                     final String label){
-        Pair<String[], String[]> vertexEdgePair = vertexEdgeSchemaMap.get(vertexLabel);
+        Pair<Collection<String>, Collection<String>> vertexEdgePair = vertexEdgeSchemaMap.get(vertexLabel);
         if(vertexEdgePair == null){
             return null;
         }
         Set<String> schemas = new HashSet<>();
         if(direction == EdgeDirection.In){
-            schemas.addAll(Arrays.asList(vertexEdgePair.getLeft()));
+            schemas.addAll(vertexEdgePair.getLeft());
         }else{
-            schemas.addAll(Arrays.asList(vertexEdgePair.getRight()));
+            schemas.addAll(vertexEdgePair.getRight());
         }
         if(schemas.isEmpty()){
             return null;
@@ -154,6 +194,9 @@ public final class SchemaManager {
         List<EdgeSchema> l = new ArrayList<>(schemas.size());
         schemas.stream().filter(p-> !filterLabel || StringUtils.equalsIgnoreCase(label, p)).
                 forEach((v)->l.add(edgeSchemaMap.get(v)));
+        if(CollectionUtils.isEmpty(l)){
+            return null;
+        }
         return l.toArray(new EdgeSchema[schemas.size()]);
     }
 

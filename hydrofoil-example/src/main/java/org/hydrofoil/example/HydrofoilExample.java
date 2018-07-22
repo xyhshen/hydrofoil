@@ -2,9 +2,11 @@ package org.hydrofoil.example;
 
 import org.hydrofoil.common.configuration.HydrofoilConfiguration;
 import org.hydrofoil.common.configuration.HydrofoilConfigurationProperties;
+import org.hydrofoil.common.graph.EdgeDirection;
 import org.hydrofoil.common.graph.GraphVertexId;
 import org.hydrofoil.core.HydrofoilConnector;
 import org.hydrofoil.core.HydrofoilFactory;
+import org.hydrofoil.core.standard.StandardEdge;
 import org.hydrofoil.core.standard.StandardVertex;
 
 import java.util.Iterator;
@@ -25,8 +27,9 @@ public final class HydrofoilExample {
         configuration.putSchemaFile(HydrofoilConfigurationProperties.SCHEMA_DATASET,"dataset.xml");
         configuration.putSchemaFile(HydrofoilConfigurationProperties.SCHEMA_MAPPER,"mapper.xml");
         try(HydrofoilConnector connector = HydrofoilFactory.connect(configuration)){
-            Iterator<StandardVertex> take = connector.vertices(new GraphVertexId("person").unique("idnumber","370601198205043112")).take();
-            System.out.println(take);
+            Iterator<StandardVertex> vertexIterator = connector.vertices(new GraphVertexId("person").unique("idnumber","370601198205043112")).take();
+            Iterator<StandardEdge> edgeIterator = connector.edges().label("employ").vertex(vertexIterator.next()).direction(EdgeDirection.In).take();
+            System.out.println(edgeIterator);
         }
 
     }

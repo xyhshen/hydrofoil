@@ -12,8 +12,23 @@
                 <property label="address" field="address" />
             </properties>
         </vertex>
+        <vertex label="company" table="companys">
+            <properties>
+                <property primary="true" label="name" field="name" />
+                <property label="address" field="address" />
+                <property label="scope" field="scope" />
+            </properties>
+        </vertex>
     </vertices>
     <edges>
-
+        <edge label="employ" table="person">
+            <source label="company" field="name=workunit" />
+            <target label="person"  field="idnumber=idnumber" />
+            <properties>
+                <property primary="true" label="idnumber" field="idnumber" />
+                <property primary="true" label="workunit" field="workunit" />
+                <property label="name" field="name" />
+            </properties>
+        </edge>
     </edges>
 </mapper>
