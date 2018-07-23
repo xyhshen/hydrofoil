@@ -1,4 +1,4 @@
-package org.hydrofoil.core.graph;
+package org.hydrofoil.core.tinkerpop;
 
 import org.apache.commons.configuration.Configuration;
 import org.apache.tinkerpop.gremlin.process.computer.GraphComputer;

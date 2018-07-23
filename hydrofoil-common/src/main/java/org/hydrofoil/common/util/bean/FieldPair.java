@@ -12,7 +12,7 @@ import java.util.Objects;
  * @author xie_yh
  * @date 2018/7/3 9:15
  */
-public class FieldPair {
+public class FieldPair implements Cloneable {
 
     /**
      * field name
@@ -43,6 +43,14 @@ public class FieldPair {
     }
 
     /**
+     * set name
+     * @param name name
+     */
+    public void name(String name){
+        this.name = name;
+    }
+
+    /**
      *
      * @return first value
      */
@@ -61,6 +69,12 @@ public class FieldPair {
             return false;
         }
         return StringUtils.equals(name,((FieldPair)object).name);
+    }
+
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
+    @Override
+    public FieldPair clone(){
+        return new FieldPair(name,first);
     }
 
 }

@@ -40,14 +40,13 @@ public final class VertexGraphQueryRunner extends AbstractGraphQueryRunner<Stand
             query vertex by id style
              */
             ParameterUtils.mustTrue(vertexMapper.checkElementIds(elementIds),"check vertex id");
-            elementIds.forEach((elementId -> {
-                elementRequests.add(vertexMapper.toMapping((GraphVertexId) elementId));
-            }));
+            elementIds.forEach((elementId -> elementRequests.add(vertexMapper.toMapping((GraphVertexId) elementId))));
         }else{
             /*
             query vertex by label or other complex style
              */
             ParameterUtils.notBlank(label,"vertex label");
+            elementRequests.add(vertexMapper.toMapping(label,propertyQuerySet,start,limit));
         }
         return elementRequests;
     }

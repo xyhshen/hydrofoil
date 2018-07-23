@@ -28,7 +28,9 @@ public final class HydrofoilExample {
         configuration.putSchemaFile(HydrofoilConfigurationProperties.SCHEMA_MAPPER,"mapper.xml");
         try(HydrofoilConnector connector = HydrofoilFactory.connect(configuration)){
             Iterator<StandardVertex> vertexIterator = connector.vertices(new GraphVertexId("person").unique("idnumber","370601198205043112")).take();
+            vertexIterator = connector.vertices().label("person").field("name","秦宁谦").limit(3L).take();
             Iterator<StandardEdge> edgeIterator = connector.edges().label("employ").vertex(vertexIterator.next()).direction(EdgeDirection.In).take();
+            edgeIterator = connector.edges().label("employ").field("workunit","济南金贵隆润滑油有限公司").limit(10L).take();
             System.out.println(edgeIterator);
         }
 

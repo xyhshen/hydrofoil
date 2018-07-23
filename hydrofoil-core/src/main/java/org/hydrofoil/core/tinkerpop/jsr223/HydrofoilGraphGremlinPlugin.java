@@ -1,4 +1,4 @@
-package org.hydrofoil.core.jsr223;
+package org.hydrofoil.core.tinkerpop.jsr223;
 
 import org.apache.tinkerpop.gremlin.jsr223.AbstractGremlinPlugin;
 import org.apache.tinkerpop.gremlin.jsr223.DefaultImportCustomizer;

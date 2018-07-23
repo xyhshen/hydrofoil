@@ -1,12 +1,14 @@
 package org.hydrofoil.core.standard.internal;
 
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.collections4.SetUtils;
 import org.hydrofoil.common.graph.GraphElementId;
 import org.hydrofoil.common.graph.GraphProperty;
 import org.hydrofoil.common.graph.GraphVertexId;
 import org.hydrofoil.common.graph.QMatch;
 import org.hydrofoil.common.provider.datasource.RowStore;
 import org.hydrofoil.common.schema.AbstractElementSchema;
+import org.hydrofoil.common.schema.PropertySchema;
 import org.hydrofoil.common.schema.VertexSchema;
 import org.hydrofoil.core.management.SchemaManager;
 import org.hydrofoil.core.standard.StandardProperty;
@@ -16,6 +18,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * VertexMapper
@@ -52,6 +55,17 @@ public final class VertexMapper extends AbstractElementMapper{
         });
 
         return super.toMapping(mainCondition,vertexSchema,0L,1L);
+    }
+
+    public ElementMapping toMapping(String label, Set<QMatch.Q> propertyQuerySet,Long start,Long limit){
+        VertexSchema vertexSchema = schemaManager.getVertexSchema(label);
+        Set<QMatch.Q> mainCondition = SetUtils.emptyIfNull(propertyQuerySet).stream().map((propertyQuery)->{
+            PropertySchema propertySchema = vertexSchema.getProperties().get(propertyQuery.pair().name());
+            QMatch.Q clone = propertyQuery.clone();
+            clone.pair().name(propertySchema.getField());
+            return clone;
+        }).collect(Collectors.toSet());
+        return toMapping(mainCondition,vertexSchema,start,limit);
     }
 
     public StandardVertex rowStoreToVertex(VertexSchema vertexSchema, RowStore rowStore){

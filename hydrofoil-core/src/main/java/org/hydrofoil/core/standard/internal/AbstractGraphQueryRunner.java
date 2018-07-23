@@ -3,6 +3,7 @@ package org.hydrofoil.core.standard.internal;
 import org.apache.commons.collections4.IterableUtils;
 import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
+import org.apache.commons.lang3.ArrayUtils;
 import org.hydrofoil.common.graph.GraphElementId;
 import org.hydrofoil.common.graph.QMatch;
 import org.hydrofoil.common.provider.IDataSource;
@@ -52,12 +53,12 @@ public abstract class AbstractGraphQueryRunner <E extends StandardElement,T exte
     /**
      * query set
      */
-    protected Set<QMatch.Q> fieldQuerySet;
+    protected Set<QMatch.Q> propertyQuerySet;
 
     protected AbstractGraphQueryRunner(Management management){
         this.start = null;
         this.limit = null;
-        this.fieldQuerySet = new HashSet<>();
+        this.propertyQuerySet = new HashSet<>();
         this.elementIds = new HashSet<>();
         this.management = management;
     }
@@ -82,7 +83,8 @@ public abstract class AbstractGraphQueryRunner <E extends StandardElement,T exte
 
     @Override
     public T fields(final QMatch.Q ...query){
-        this.fieldQuerySet.addAll(Arrays.asList(query));
+        ParameterUtils.mustTrue(ArrayUtils.isNotEmpty(query),"property query");
+        this.propertyQuerySet.addAll(Arrays.asList(query));
         return (T) this;
     }
 

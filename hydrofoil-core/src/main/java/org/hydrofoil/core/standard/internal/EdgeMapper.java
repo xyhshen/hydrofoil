@@ -1,10 +1,12 @@
 package org.hydrofoil.core.standard.internal;
 
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.collections4.SetUtils;
 import org.hydrofoil.common.graph.*;
 import org.hydrofoil.common.provider.datasource.RowStore;
 import org.hydrofoil.common.schema.AbstractElementSchema;
 import org.hydrofoil.common.schema.EdgeSchema;
+import org.hydrofoil.common.schema.PropertySchema;
 import org.hydrofoil.core.management.SchemaManager;
 import org.hydrofoil.core.standard.StandardEdge;
 import org.hydrofoil.core.standard.StandardProperty;
@@ -14,6 +16,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * EdgeMapper
@@ -51,22 +54,31 @@ public class EdgeMapper extends AbstractElementMapper {
     }
 
     @SuppressWarnings("unchecked")
-    public ElementMapping toMapping(StandardVertex vertex, EdgeSchema edgeSchema, EdgeDirection direction) {
+    public ElementMapping toMapping(Set<QMatch.Q> propertyQuerySet,StandardVertex vertex,EdgeSchema edgeSchema, EdgeDirection direction,Long start,Long limit) {
         Set<QMatch.Q> mainCondition = new HashSet<>();
-        Map<String,String> fields;
-        if(direction == EdgeDirection.In){
-            fields = edgeSchema.getTargetField();
-        }else{
-            fields = edgeSchema.getSourceField();
-        }
-        fields.forEach((vertexPropertyLabel,tableFieldname)->{
-            Object value = MapUtils.getObject(vertex.elementId().unique(),vertexPropertyLabel);
-            if(null == value){
-                return;
+        if(vertex != null){
+            Map<String,String> fields;
+            if(direction == EdgeDirection.In){
+                fields = edgeSchema.getTargetField();
+            }else{
+                fields = edgeSchema.getSourceField();
             }
-            mainCondition.add(QMatch.eq(tableFieldname,value));
-        });
-        return super.toMapping(mainCondition,edgeSchema,null,null);
+            fields.forEach((vertexPropertyLabel,tableFieldname)->{
+                Object value = MapUtils.getObject(vertex.elementId().unique(),vertexPropertyLabel);
+                if(null == value){
+                    return;
+                }
+                mainCondition.add(QMatch.eq(tableFieldname,value));
+            });
+        }
+        mainCondition.addAll(SetUtils.emptyIfNull(propertyQuerySet).stream().map((propertyQuery)->{
+            PropertySchema propertySchema = edgeSchema.getProperties().get(propertyQuery.pair().name());
+            QMatch.Q clone = propertyQuery.clone();
+            clone.pair().name(propertySchema.getField());
+            return clone;
+        }).collect(Collectors.toSet()));
+
+        return super.toMapping(mainCondition,edgeSchema,start,limit);
     }
 
     GraphVertexId[] getEdgeVertexId(EdgeSchema edgeSchema,RowStore rowStore){

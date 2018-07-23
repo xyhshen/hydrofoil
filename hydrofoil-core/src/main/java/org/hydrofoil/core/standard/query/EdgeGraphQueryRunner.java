@@ -59,33 +59,42 @@ public class EdgeGraphQueryRunner extends AbstractGraphQueryRunner<StandardEdge,
              */
             ParameterUtils.mustTrue(edgeMapper.checkElementIds(elementIds),"check edge id");
             elementIds.forEach((elementId->elementRequests.add(edgeMapper.toMapping((GraphEdgeId) elementId))));
-        }else if(vertex != null){
-            ParameterUtils.mustTrue(vertexMapper.checkElementIds(Collections.singleton(vertex.elementId())),"check vertex id");
+        }else{
             EdgeSchema[] inEdgeSchema = null;
             EdgeSchema[] outEdgeSchema = null;
-            if(direction == EdgeDirection.In || direction == EdgeDirection.InAndOut){
-                inEdgeSchema = management.getSchemaManager().
-                        getEdgeSchemaOfVertex(vertex.label(), EdgeDirection.In,label);
+            Long start = this.start;
+            Long limit = this.limit;
+            if(vertex != null){
+                ParameterUtils.mustTrue(vertexMapper.checkElementIds(Collections.singleton(vertex.elementId())),"check vertex id");
+                if(direction == EdgeDirection.In || direction == EdgeDirection.InAndOut){
+                    inEdgeSchema = management.getSchemaManager().
+                            getEdgeSchemaOfVertex(vertex.label(), EdgeDirection.In,label);
+                }
+                if(direction == EdgeDirection.Out || direction == EdgeDirection.InAndOut){
+                    outEdgeSchema = management.getSchemaManager().
+                            getEdgeSchemaOfVertex(vertex.label(), EdgeDirection.Out,label);
+                }
+                start = limit = null;
+            }else{
+                /*
+                    query vertex by label or other complex style
+                */
+                ParameterUtils.notBlank(label,"edge label");
+                inEdgeSchema = new EdgeSchema[]{
+                        management.getSchemaManager().getEdgeSchema(label)
+                };
             }
-            if(direction == EdgeDirection.Out || direction == EdgeDirection.InAndOut){
-                outEdgeSchema = management.getSchemaManager().
-                        getEdgeSchemaOfVertex(vertex.label(), EdgeDirection.Out,label);
-            }
+
             if(inEdgeSchema != null){
                 for(EdgeSchema schema:inEdgeSchema){
-                    elementRequests.add(edgeMapper.toMapping(vertex,schema,EdgeDirection.In));
+                    elementRequests.add(edgeMapper.toMapping(propertyQuerySet,vertex,schema,EdgeDirection.In,start,limit));
                 }
             }
             if(outEdgeSchema != null){
                 for(EdgeSchema schema:outEdgeSchema){
-                    elementRequests.add(edgeMapper.toMapping(vertex,schema,EdgeDirection.Out));
+                    elementRequests.add(edgeMapper.toMapping(propertyQuerySet,vertex,schema,EdgeDirection.Out,null,null));
                 }
             }
-        }else{
-            /*
-            query vertex by label or other complex style
-             */
-            ParameterUtils.notBlank(label,"edge label");
         }
         return elementRequests;
     }

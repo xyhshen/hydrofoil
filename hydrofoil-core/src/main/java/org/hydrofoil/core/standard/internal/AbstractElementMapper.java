@@ -110,6 +110,9 @@ public abstract class AbstractElementMapper<E extends StandardElement> {
         });
         rowQueryRequest.setStart(start);
         rowQueryRequest.setLimit(limit);
+        if(start == null && limit != null){
+            rowQueryRequest.setStart(0L);
+        }
         elementMapping.setQueryRequest(rowQueryRequest);
         elementMapping.setDatasource(MapperHelper.
                 getDatasourceName(schemaManager,elementSchema.getTable()));

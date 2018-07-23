@@ -23,7 +23,7 @@ public class QMatch {
         in
     }
 
-    public final static class Q{
+    public final static class Q implements Cloneable{
 
         /**
          * query type
@@ -79,6 +79,15 @@ public class QMatch {
                 return false;
             }
             return Objects.equals(this,obj);
+        }
+
+        @SuppressWarnings("MethodDoesntCallSuperMethod")
+        @Override
+        public Q clone(){
+            Q query = new Q(this.type);
+            query.pair = pair.clone();
+            query.not = not;
+            return query;
         }
     }
 

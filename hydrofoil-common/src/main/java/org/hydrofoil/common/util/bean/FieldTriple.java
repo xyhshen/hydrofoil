@@ -1,7 +1,5 @@
 package org.hydrofoil.common.util.bean;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.Objects;
 
 /**
@@ -40,5 +38,11 @@ public class FieldTriple extends FieldPair {
             return false;
         }
         return super.equals(object);
+    }
+
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
+    @Override
+    public FieldTriple clone(){
+        return new FieldTriple(name(),first(),last);
     }
 }
