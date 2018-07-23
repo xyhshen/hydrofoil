@@ -23,9 +23,9 @@ public interface IDataProvider {
     public static final String DATA_PROVIDER_CLASS_NAME = "DataProvider";
 
     /**
-     * 链接数据源
-     * @param dataSourceSchema 数据源schema
-     * @return 数据源实例
+     * connect datasource
+     * @param dataSourceSchema datasource schema
+     * @return data source's instance
      */
     IDataSource connect(DataSourceSchema dataSourceSchema);
 
