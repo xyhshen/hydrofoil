@@ -11,7 +11,7 @@ import org.hydrofoil.common.provider.datasource.RowQueryRequest;
 import org.hydrofoil.common.provider.datasource.RowQueryResponse;
 import org.hydrofoil.common.provider.datasource.RowStore;
 import org.hydrofoil.common.util.ParameterUtils;
-import org.hydrofoil.core.management.Management;
+import org.hydrofoil.core.standard.management.Management;
 import org.hydrofoil.core.standard.IGraphQueryRunner;
 import org.hydrofoil.core.standard.StandardElement;
 

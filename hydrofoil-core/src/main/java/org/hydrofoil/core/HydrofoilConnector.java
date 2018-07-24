@@ -3,7 +3,7 @@ package org.hydrofoil.core;
 import org.hydrofoil.common.configuration.HydrofoilConfiguration;
 import org.hydrofoil.common.graph.GraphEdgeId;
 import org.hydrofoil.common.graph.GraphVertexId;
-import org.hydrofoil.core.management.Management;
+import org.hydrofoil.core.standard.management.Management;
 import org.hydrofoil.core.standard.query.EdgeGraphQueryRunner;
 import org.hydrofoil.core.standard.query.VertexGraphQueryRunner;
 

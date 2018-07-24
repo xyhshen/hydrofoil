@@ -6,7 +6,7 @@ import org.hydrofoil.common.graph.GraphEdgeId;
 import org.hydrofoil.common.provider.datasource.RowStore;
 import org.hydrofoil.common.schema.EdgeSchema;
 import org.hydrofoil.common.util.ParameterUtils;
-import org.hydrofoil.core.management.Management;
+import org.hydrofoil.core.standard.management.Management;
 import org.hydrofoil.core.standard.StandardEdge;
 import org.hydrofoil.core.standard.StandardVertex;
 import org.hydrofoil.core.standard.internal.AbstractGraphQueryRunner;

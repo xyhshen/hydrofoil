@@ -10,7 +10,7 @@ import org.hydrofoil.common.provider.datasource.RowStore;
 import org.hydrofoil.common.schema.AbstractElementSchema;
 import org.hydrofoil.common.schema.PropertySchema;
 import org.hydrofoil.common.util.LangUtils;
-import org.hydrofoil.core.management.SchemaManager;
+import org.hydrofoil.core.standard.management.SchemaManager;
 import org.hydrofoil.core.standard.StandardElement;
 
 import java.util.*;

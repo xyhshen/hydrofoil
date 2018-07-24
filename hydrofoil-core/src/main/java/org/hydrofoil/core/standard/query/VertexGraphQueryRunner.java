@@ -5,7 +5,7 @@ import org.hydrofoil.common.graph.GraphVertexId;
 import org.hydrofoil.common.provider.datasource.RowStore;
 import org.hydrofoil.common.schema.VertexSchema;
 import org.hydrofoil.common.util.ParameterUtils;
-import org.hydrofoil.core.management.Management;
+import org.hydrofoil.core.standard.management.Management;
 import org.hydrofoil.core.standard.StandardVertex;
 import org.hydrofoil.core.standard.internal.AbstractGraphQueryRunner;
 import org.hydrofoil.core.standard.internal.ElementMapping;

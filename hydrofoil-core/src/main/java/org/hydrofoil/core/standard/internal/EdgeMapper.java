@@ -7,7 +7,7 @@ import org.hydrofoil.common.provider.datasource.RowStore;
 import org.hydrofoil.common.schema.AbstractElementSchema;
 import org.hydrofoil.common.schema.EdgeSchema;
 import org.hydrofoil.common.schema.PropertySchema;
-import org.hydrofoil.core.management.SchemaManager;
+import org.hydrofoil.core.standard.management.SchemaManager;
 import org.hydrofoil.core.standard.StandardEdge;
 import org.hydrofoil.core.standard.StandardProperty;
 import org.hydrofoil.core.standard.StandardVertex;

@@ -1,4 +1,4 @@
-package org.hydrofoil.core.management;
+package org.hydrofoil.core.standard.management;
 
 import org.apache.commons.io.IOUtils;
 import org.hydrofoil.common.provider.IDataProvider;

@@ -4,7 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hydrofoil.common.schema.PropertySchema;
 import org.hydrofoil.common.schema.TableSchema;
 import org.hydrofoil.common.util.ParameterUtils;
-import org.hydrofoil.core.management.SchemaManager;
+import org.hydrofoil.core.standard.management.SchemaManager;
 
 /**
  * GraphConditionUtils
