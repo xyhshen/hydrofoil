@@ -1,6 +1,7 @@
 package org.hydrofoil.core;
 
 import org.hydrofoil.common.configuration.HydrofoilConfiguration;
+import org.hydrofoil.core.tinkerpop.HydrofoilGraph;
 
 /**
  * HydrofoilFactory
@@ -22,6 +23,17 @@ public final class HydrofoilFactory {
         HydrofoilConnector connector = new HydrofoilConnector();
         connector.init(configuration);
         return connector;
+    }
+
+    /**
+     * connect graph,to tinkerpop style
+     * @param configuration graph config
+     * @return tinkerpop graph object
+     * @throws Exception
+     */
+    public static HydrofoilGraph openTinkerpop(HydrofoilConfiguration configuration)  throws Exception {
+        HydrofoilConnector connector = connect(configuration);
+        return new HydrofoilGraph(connector);
     }
 
 }

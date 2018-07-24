@@ -1,11 +1,15 @@
 package org.hydrofoil.core.tinkerpop;
 
 import org.apache.commons.configuration.Configuration;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.tinkerpop.gremlin.process.computer.GraphComputer;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Transaction;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.hydrofoil.common.util.ParameterUtils;
+import org.hydrofoil.core.HydrofoilConnector;
 
 import java.util.Iterator;
 
@@ -21,6 +25,20 @@ import java.util.Iterator;
 @Graph.OptIn(Graph.OptIn.SUITE_STRUCTURE_INTEGRATE)
 @Graph.OptIn(Graph.OptIn.SUITE_PROCESS_STANDARD)
 public final class HydrofoilGraph implements Graph {
+
+    private HydrofoilConnector connector;
+
+    public HydrofoilGraph(HydrofoilConnector connector){
+        this.connector = connector;
+    }
+
+    /**
+     * get Hydrofoil connector
+     * @return connector
+     */
+    public HydrofoilConnector connector(){
+        return connector;
+    }
 
     @Override
     public Vertex addVertex(Object... keyValues) {
@@ -40,11 +58,13 @@ public final class HydrofoilGraph implements Graph {
 
     @Override
     public Iterator<Vertex> vertices(Object... vertexIds) {
+        ParameterUtils.mustTrueMessage(ArrayUtils.isNotEmpty(vertexIds),"ids not empty");
         return null;
     }
 
     @Override
     public Iterator<Edge> edges(Object... edgeIds) {
+        ParameterUtils.mustTrueMessage(ArrayUtils.isNotEmpty(edgeIds),"ids not empty");
         return null;
     }
 
@@ -55,6 +75,7 @@ public final class HydrofoilGraph implements Graph {
 
     @Override
     public void close() throws Exception {
+        IOUtils.closeQuietly(connector);
     }
 
     @Override
