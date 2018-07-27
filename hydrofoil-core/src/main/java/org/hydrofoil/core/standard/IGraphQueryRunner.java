@@ -44,25 +44,34 @@ public interface IGraphQueryRunner <E extends StandardElement,T extends IGraphQu
     T elements(final GraphElementId ...elementIds);
 
     /**
-     * set start
-     * @param start start pos
+     * set offset
+     * @param offset start pos
      * @return this
      */
-    T start(final Long start);
+    T offset(final Long offset);
 
     /**
-     * set limit
-     * @param limit limit pos
+     * set result length
+     * @param length length
      * @return this
      */
-    T limit(final Long limit);
+    T length(final Long length);
 
     /**
      * set label
      * @param label graph label
      * @return this
      */
-    T label(final String label);
+    default T label(final String label){
+        return labels(label);
+    }
+
+    /**
+     * set multi label
+     * @param labels label array
+     * @return this
+     */
+    T labels(final String ...labels);
 
     /**
      * query field

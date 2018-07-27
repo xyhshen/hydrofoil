@@ -70,7 +70,7 @@ public abstract class AbstractElementMapper<E extends StandardElement> {
     }
 
     @SuppressWarnings("unchecked")
-    public ElementMapping toMapping(Set<QMatch.Q> mainCondition, AbstractElementSchema elementSchema,Long start,Long limit){
+    protected ElementMapping toMapping(Set<QMatch.Q> mainCondition, AbstractElementSchema elementSchema,Long start,Long limit){
         ElementMapping elementMapping = new ElementMapping();
         elementMapping.setSchemaItem(elementSchema);
         RowQueryRequest rowQueryRequest = new RowQueryRequest();
@@ -108,10 +108,10 @@ public abstract class AbstractElementMapper<E extends StandardElement> {
                 });
             }
         });
-        rowQueryRequest.setStart(start);
+        rowQueryRequest.setOffset(start);
         rowQueryRequest.setLimit(limit);
         if(start == null && limit != null){
-            rowQueryRequest.setStart(0L);
+            rowQueryRequest.setOffset(0L);
         }
         elementMapping.setQueryRequest(rowQueryRequest);
         elementMapping.setDatasource(MapperHelper.

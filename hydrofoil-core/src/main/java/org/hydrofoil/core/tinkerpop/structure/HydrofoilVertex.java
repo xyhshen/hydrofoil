@@ -1,9 +1,6 @@
-package org.hydrofoil.core.tinkerpop;
+package org.hydrofoil.core.tinkerpop.structure;
 
-import org.apache.tinkerpop.gremlin.structure.Direction;
-import org.apache.tinkerpop.gremlin.structure.Edge;
-import org.apache.tinkerpop.gremlin.structure.Vertex;
-import org.apache.tinkerpop.gremlin.structure.VertexProperty;
+import org.apache.tinkerpop.gremlin.structure.*;
 import org.hydrofoil.core.standard.StandardVertex;
 
 import java.util.Iterator;
@@ -16,16 +13,17 @@ import java.util.Iterator;
  * @author xie_yh
  * @date 2018/7/24 11:34
  */
+@SuppressWarnings("unchecked")
 public class HydrofoilVertex extends HydrofoilElement implements Vertex {
 
-    protected HydrofoilVertex(HydrofoilGraph graph,
-                              StandardVertex standardVertex) {
+    public HydrofoilVertex(HydrofoilGraph graph,
+                           StandardVertex standardVertex) {
         super(graph, standardVertex);
     }
 
     @Override
     public Edge addEdge(String label, Vertex inVertex, Object... keyValues) {
-        return null;
+        return (Edge) Vertex.Exceptions.edgeAdditionsNotSupported();
     }
 
     @Override
@@ -40,7 +38,12 @@ public class HydrofoilVertex extends HydrofoilElement implements Vertex {
 
     @Override
     public <V> VertexProperty<V> property(VertexProperty.Cardinality cardinality, String key, V value, Object... keyValues) {
-        return null;
+        return (VertexProperty<V>) Element.Exceptions.propertyAdditionNotSupported();
+    }
+
+    @Override
+    public void remove() {
+        throw Vertex.Exceptions.vertexRemovalNotSupported();
     }
 
     @Override

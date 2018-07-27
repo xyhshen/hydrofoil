@@ -153,7 +153,7 @@ public final class RowQueryRequest {
     /**
      * start pos
      */
-    private Long start;
+    private Long offset;
 
     /**
      * length
@@ -190,18 +190,18 @@ public final class RowQueryRequest {
 
     /**
      * @return Long
-     * @see RowQueryRequest#start
+     * @see RowQueryRequest#offset
      **/
-    public Long getStart() {
-        return start;
+    public Long getOffset() {
+        return offset;
     }
 
     /**
-     * @param start Long
-     * @see RowQueryRequest#start
+     * @param offset Long
+     * @see RowQueryRequest#offset
      **/
-    public RowQueryRequest setStart(Long start) {
-        this.start = start;
+    public RowQueryRequest setOffset(Long offset) {
+        this.offset = offset;
         return this;
     }
 

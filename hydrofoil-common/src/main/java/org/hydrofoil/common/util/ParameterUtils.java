@@ -120,4 +120,10 @@ public final class ParameterUtils {
         }
     }
 
+    public static void checkStateMessage(final boolean b,String message){
+        if(!b){
+            throw new IllegalStateException(message);
+        }
+    }
+
 }

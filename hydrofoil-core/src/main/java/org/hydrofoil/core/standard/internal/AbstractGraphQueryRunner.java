@@ -36,19 +36,19 @@ public abstract class AbstractGraphQueryRunner <E extends StandardElement,T exte
     protected Set<GraphElementId> elementIds;
 
     /**
-     * start
+     * offset
      */
-    protected Long start;
+    protected Long offset;
 
     /**
-     * limit
+     * length
      */
-    protected Long limit;
+    protected Long length;
 
     /**
-     * label
+     * labels
      */
-    protected String label;
+    protected Set<String> labels;
 
     /**
      * query set
@@ -56,28 +56,29 @@ public abstract class AbstractGraphQueryRunner <E extends StandardElement,T exte
     protected Set<QMatch.Q> propertyQuerySet;
 
     protected AbstractGraphQueryRunner(Management management){
-        this.start = null;
-        this.limit = null;
+        this.offset = null;
+        this.length = null;
         this.propertyQuerySet = new HashSet<>();
         this.elementIds = new HashSet<>();
         this.management = management;
+        this.labels = new HashSet<>();
     }
 
     @Override
-    public T start(final Long start){
-        this.start = start;
+    public T offset(final Long offset){
+        this.offset = offset;
         return (T) this;
     }
 
     @Override
-    public T limit(final Long limit){
-        this.limit = limit;
+    public T length(final Long length){
+        this.length = length;
         return (T) this;
     }
 
     @Override
-    public T label(final String label){
-        this.label = label;
+    public T labels(final String ...labels){
+        this.labels.addAll(Arrays.asList(ArrayUtils.nullToEmpty(labels)));
         return (T) this;
     }
 

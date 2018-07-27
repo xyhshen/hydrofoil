@@ -62,27 +62,26 @@ public class EdgeGraphQueryRunner extends AbstractGraphQueryRunner<StandardEdge,
         }else{
             EdgeSchema[] inEdgeSchema = null;
             EdgeSchema[] outEdgeSchema = null;
-            Long start = this.start;
-            Long limit = this.limit;
+            Long start = this.offset;
+            Long limit = this.length;
             if(vertex != null){
                 ParameterUtils.mustTrue(vertexMapper.checkElementIds(Collections.singleton(vertex.elementId())),"check vertex id");
                 if(direction == EdgeDirection.In || direction == EdgeDirection.InAndOut){
                     inEdgeSchema = management.getSchemaManager().
-                            getEdgeSchemaOfVertex(vertex.label(), EdgeDirection.In,label);
+                            getEdgeSchemaOfVertex(vertex.label(), EdgeDirection.In,labels);
                 }
                 if(direction == EdgeDirection.Out || direction == EdgeDirection.InAndOut){
                     outEdgeSchema = management.getSchemaManager().
-                            getEdgeSchemaOfVertex(vertex.label(), EdgeDirection.Out,label);
+                            getEdgeSchemaOfVertex(vertex.label(), EdgeDirection.Out,labels);
                 }
                 start = limit = null;
             }else{
                 /*
                     query vertex by label or other complex style
                 */
-                ParameterUtils.notBlank(label,"edge label");
-                inEdgeSchema = new EdgeSchema[]{
-                        management.getSchemaManager().getEdgeSchema(label)
-                };
+                ParameterUtils.mustTrue(!labels.isEmpty(),"edge label");
+                inEdgeSchema = (EdgeSchema[]) labels.stream().map(management.
+                        getSchemaManager()::getEdgeSchema).toArray();
             }
 
             if(inEdgeSchema != null){

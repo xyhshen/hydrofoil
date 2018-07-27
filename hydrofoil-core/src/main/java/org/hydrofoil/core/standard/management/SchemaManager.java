@@ -10,14 +10,12 @@ import org.dom4j.Element;
 import org.hydrofoil.common.configuration.HydrofoilConfiguration;
 import org.hydrofoil.common.configuration.HydrofoilConfigurationProperties;
 import org.hydrofoil.common.graph.EdgeDirection;
-import org.hydrofoil.common.schema.DataSourceSchema;
-import org.hydrofoil.common.schema.EdgeSchema;
-import org.hydrofoil.common.schema.TableSchema;
-import org.hydrofoil.common.schema.VertexSchema;
+import org.hydrofoil.common.schema.*;
 import org.hydrofoil.common.util.XmlUtils;
 
 import java.io.InputStream;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * SchemaManager
@@ -61,12 +59,49 @@ public final class SchemaManager {
      */
     private final Map<String,Pair<Collection<String>,Collection<String>>> vertexEdgeSchemaMap;
 
+    /**
+     * element schema order sequence
+     */
+    public static final class ElementSchemaOrder{
+
+        /**
+         * sequence
+         */
+        private Integer order;
+
+        /**
+         * unique sequence
+         */
+        private List<String> uniqueOrder;
+
+        public Integer order(){
+            return order;
+        }
+
+        /**
+         * @return String>
+         * @see ElementSchemaOrder#uniqueOrder
+         **/
+        public List<String> uniqueOrder() {
+            return uniqueOrder;
+        }
+    }
+
+    /**
+     * order
+     */
+    private Map<String,ElementSchemaOrder> vertexOrderMap;
+    //
+    private Map<String,ElementSchemaOrder> edgeOrderMap;
+
     SchemaManager(){
         dataSourceSchemaMap = new HashMap<>();
         tableSchemaMap = new HashMap<>();
         vertexSchemaMap = new HashMap<>();
         edgeSchemaMap = new HashMap<>();
         vertexEdgeSchemaMap = new HashMap<>();
+        vertexOrderMap = new HashMap<>();
+        edgeOrderMap = new HashMap<>();
     }
 
     /**
@@ -101,12 +136,26 @@ public final class SchemaManager {
         IOUtils.closeQuietly(is);
     }
 
+    private static List<String> getUniquePropertiesOrder(final Map<String,PropertySchema> propertySchemaMap){
+        return propertySchemaMap.values().stream().filter(PropertySchema::isPrimary).
+                sorted((o1, o2) -> StringUtils.compareIgnoreCase(o1.getLabel(),o2.getLabel())).
+                map(PropertySchema::getLabel).collect(Collectors.toList());
+    }
+
     private void loadVertexMapper(Element root){
         List<Element> elements = XmlUtils.listElement(root.element(ELEMENT_VERTICES),ELEMENT_VERTEX );
         for(Element element:elements){
             VertexSchema vertexSchema = new VertexSchema();
             vertexSchema.read(element);
             vertexSchemaMap.put(vertexSchema.getLabel(),vertexSchema);
+        }
+        List<String> orders = vertexSchemaMap.keySet().stream().
+                sorted().collect(Collectors.toList());
+        for(int i = 0;i < orders.size();i++){
+            ElementSchemaOrder order = new ElementSchemaOrder();
+            order.order = i;
+            order.uniqueOrder = getUniquePropertiesOrder(vertexSchemaMap.get(orders.get(i)).getProperties());
+            vertexOrderMap.put(orders.get(i),order);
         }
     }
 
@@ -132,6 +181,14 @@ public final class SchemaManager {
             CollectionUtils.emptyIfNull(outSchema).forEach((v)->outLabelSet.add(v.getLabel()));
             vertexEdgeSchemaMap.put(vertexLabel,Pair.of(inLabelSet,outLabelSet));
         });
+        List<String> orders = edgeSchemaMap.keySet().stream().
+                sorted().collect(Collectors.toList());
+        for(int i = 0;i < orders.size();i++){
+            ElementSchemaOrder order = new ElementSchemaOrder();
+            order.order = i;
+            order.uniqueOrder = getUniquePropertiesOrder(edgeSchemaMap.get(orders.get(i)).getProperties());
+            edgeOrderMap.put(orders.get(i),order);
+        }
     }
 
     private void loadMapper(final InputStream is) throws Exception{
@@ -172,11 +229,12 @@ public final class SchemaManager {
      * get edge schema of vertex
      * @param vertexLabel vertex label
      * @param direction direct
+     * @param labelSet label set
      * @return schema
      */
     public EdgeSchema[] getEdgeSchemaOfVertex(final String vertexLabel,
                                                     final EdgeDirection direction,
-                                                    final String label){
+                                                    final Set<String> labelSet){
         Pair<Collection<String>, Collection<String>> vertexEdgePair = vertexEdgeSchemaMap.get(vertexLabel);
         if(vertexEdgePair == null){
             return null;
@@ -190,14 +248,30 @@ public final class SchemaManager {
         if(schemas.isEmpty()){
             return null;
         }
-        final boolean filterLabel = StringUtils.isNotBlank(label);
+        final boolean filterLabel = CollectionUtils.isNotEmpty(labelSet);
         List<EdgeSchema> l = new ArrayList<>(schemas.size());
-        schemas.stream().filter(p-> !filterLabel || StringUtils.equalsIgnoreCase(label, p)).
+        schemas.stream().filter(p-> !filterLabel || labelSet.contains(p)).
                 forEach((v)->l.add(edgeSchemaMap.get(v)));
         if(CollectionUtils.isEmpty(l)){
             return null;
         }
         return l.toArray(new EdgeSchema[schemas.size()]);
+    }
+
+    /**
+     * get order of vertex map
+     * @return order
+     */
+    public Map<String, ElementSchemaOrder> getVertexOrder(){
+        return vertexOrderMap;
+    }
+
+    /**
+     * get order of edge map
+     * @return order
+     */
+    public Map<String, ElementSchemaOrder> getEdgeOrder(){
+        return edgeOrderMap;
     }
 
     /**

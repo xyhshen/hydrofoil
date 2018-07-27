@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
+import java.util.Optional;
 
 /**
  * DataUtils
@@ -49,5 +50,12 @@ public final class DataUtils {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public static Object getOptional(Optional<?> optional){
+        if(optional == null){
+            return null;
+        }
+        return optional.orElse(null);
     }
 }

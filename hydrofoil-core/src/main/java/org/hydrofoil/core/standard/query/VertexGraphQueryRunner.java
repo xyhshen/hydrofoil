@@ -13,6 +13,7 @@ import org.hydrofoil.core.standard.internal.VertexMapper;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.stream.Collectors;
 
 /**
  * VertexGraphQueryRunner
@@ -45,8 +46,10 @@ public final class VertexGraphQueryRunner extends AbstractGraphQueryRunner<Stand
             /*
             query vertex by label or other complex style
              */
-            ParameterUtils.notBlank(label,"vertex label");
-            elementRequests.add(vertexMapper.toMapping(label,propertyQuerySet,start,limit));
+            ParameterUtils.mustTrue(!labels.isEmpty(),"vertex label");
+            elementRequests.addAll(labels.stream().map((label)-> vertexMapper.
+                    toMapping(label,propertyQuerySet,offset,length)).
+                    collect(Collectors.toList()));
         }
         return elementRequests;
     }

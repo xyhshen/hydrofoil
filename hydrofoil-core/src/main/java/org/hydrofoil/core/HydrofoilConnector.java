@@ -51,6 +51,13 @@ public final class HydrofoilConnector implements Closeable,AutoCloseable {
         return new EdgeGraphQueryRunner(management).elements(edgeIds);
     }
 
+    /**
+     * @return Management
+     * @see HydrofoilConnector#management
+     **/
+    public Management getManagement() {
+        return management;
+    }
 
     @Override
     public void close() throws IOException {

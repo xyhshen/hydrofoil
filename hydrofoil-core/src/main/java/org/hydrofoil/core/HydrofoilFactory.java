@@ -1,7 +1,7 @@
 package org.hydrofoil.core;
 
 import org.hydrofoil.common.configuration.HydrofoilConfiguration;
-import org.hydrofoil.core.tinkerpop.HydrofoilGraph;
+import org.hydrofoil.core.tinkerpop.structure.HydrofoilGraph;
 
 /**
  * HydrofoilFactory

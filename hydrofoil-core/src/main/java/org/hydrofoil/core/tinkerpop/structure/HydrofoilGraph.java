@@ -1,15 +1,21 @@
-package org.hydrofoil.core.tinkerpop;
+package org.hydrofoil.core.tinkerpop.structure;
 
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.tinkerpop.gremlin.process.computer.GraphComputer;
+import org.apache.tinkerpop.gremlin.process.traversal.TraversalStrategies;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Transaction;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.hydrofoil.common.util.ParameterUtils;
 import org.hydrofoil.core.HydrofoilConnector;
+import org.hydrofoil.core.tinkerpop.glue.IdManage;
+import org.hydrofoil.core.tinkerpop.glue.TinkerpopGraphUtils;
+import org.hydrofoil.core.tinkerpop.process.traversal.strategy.optimization.HydrofoilGraphStepStrategy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Iterator;
 
@@ -26,10 +32,28 @@ import java.util.Iterator;
 @Graph.OptIn(Graph.OptIn.SUITE_PROCESS_STANDARD)
 public final class HydrofoilGraph implements Graph {
 
-    private HydrofoilConnector connector;
+    private static Logger logger = LoggerFactory.getLogger(HydrofoilGraph.class);
+
+    /**
+     * hydrofoil graph connector
+     */
+    private final HydrofoilConnector connector;
+
+    /**
+     * id manager
+     */
+    private final IdManage idManage;
+
+    static{
+        TraversalStrategies.GlobalCache.registerStrategies(HydrofoilGraph.class,
+                TraversalStrategies.GlobalCache.getStrategies(Graph.class).clone().addStrategies(
+                        HydrofoilGraphStepStrategy.instance()
+                ));
+    }
 
     public HydrofoilGraph(HydrofoilConnector connector){
         this.connector = connector;
+        this.idManage = new IdManage(connector.getManagement().getSchemaManager());
     }
 
     /**
@@ -37,6 +61,22 @@ public final class HydrofoilGraph implements Graph {
      * @return connector
      */
     public HydrofoilConnector connector(){
+        return connector;
+    }
+
+    /**
+     * @return IdManage
+     * @see HydrofoilGraph#idManage
+     **/
+    public IdManage getIdManage() {
+        return idManage;
+    }
+
+    /**
+     * @return HydrofoilConnector
+     * @see HydrofoilGraph#connector
+     **/
+    public HydrofoilConnector getConnector() {
         return connector;
     }
 
@@ -59,7 +99,7 @@ public final class HydrofoilGraph implements Graph {
     @Override
     public Iterator<Vertex> vertices(Object... vertexIds) {
         ParameterUtils.mustTrueMessage(ArrayUtils.isNotEmpty(vertexIds),"ids not empty");
-        return null;
+        return TinkerpopGraphUtils.listVertexByIds(this,vertexIds);
     }
 
     @Override

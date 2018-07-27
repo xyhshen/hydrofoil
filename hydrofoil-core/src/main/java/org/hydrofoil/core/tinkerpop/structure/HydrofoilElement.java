@@ -1,4 +1,4 @@
-package org.hydrofoil.core.tinkerpop;
+package org.hydrofoil.core.tinkerpop.structure;
 
 import org.apache.tinkerpop.gremlin.structure.Element;
 import org.apache.tinkerpop.gremlin.structure.Graph;
@@ -14,19 +14,22 @@ import org.hydrofoil.core.standard.StandardElement;
  */
 public abstract class HydrofoilElement implements Element {
 
-    protected StandardElement standardElement;
+    protected final StandardElement standardElement;
 
-    protected HydrofoilGraph graph;
+    protected final HydrofoilGraph graph;
+
+    protected final Object id;
 
     HydrofoilElement(HydrofoilGraph graph,
                                StandardElement standardElement){
         this.graph = graph;
         this.standardElement = standardElement;
+        this.id = graph.getIdManage().tinkerpopId(standardElement.elementId());
     }
 
     @Override
     public Object id() {
-        return null;
+        return id;
     }
 
     @Override
@@ -35,11 +38,6 @@ public abstract class HydrofoilElement implements Element {
             return null;
         }
         return standardElement.elementId().label();
-    }
-
-    @Override
-    public void remove() {
-
     }
 
     @Override

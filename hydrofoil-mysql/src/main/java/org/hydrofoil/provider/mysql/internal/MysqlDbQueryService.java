@@ -2,7 +2,6 @@ package org.hydrofoil.provider.mysql.internal;
 
 import org.apache.commons.collections4.MultiMapUtils;
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.mutable.MutableBoolean;
@@ -153,9 +152,9 @@ public final class MysqlDbQueryService extends AbstractDbQueryService{
                 first.setFalse();
             });
         }
-        if(ObjectUtils.allNotNull(request.getStart(),request.getLimit())){
+        if(ObjectUtils.allNotNull(request.getOffset(),request.getLimit())){
             sql.append(" limit ").
-                    append(request.getStart()).
+                    append(request.getOffset()).
                     append(",").
                     append(request.getLimit());
         }
