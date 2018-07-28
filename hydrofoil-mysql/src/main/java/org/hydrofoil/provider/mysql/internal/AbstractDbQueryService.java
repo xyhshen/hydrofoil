@@ -1,6 +1,5 @@
 package org.hydrofoil.provider.mysql.internal;
 
-import com.mysql.cj.api.result.Row;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.collections4.MultiMapUtils;
 import org.apache.commons.collections4.MultiValuedMap;

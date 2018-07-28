@@ -19,8 +19,8 @@ import java.util.Iterator;
 @SuppressWarnings("unchecked")
 public class HydrofoilEdge extends HydrofoilElement implements Edge {
 
-    protected HydrofoilEdge(HydrofoilGraph graph,
-                            StandardEdge standardEdge) {
+    public HydrofoilEdge(HydrofoilGraph graph,
+                         StandardEdge standardEdge) {
         super(graph, standardEdge);
     }
 

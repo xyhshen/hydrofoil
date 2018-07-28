@@ -29,7 +29,7 @@ public final class GraphProperty {
         Double("double",Double.class,null),
         Date("date", Date.class,null),
         Url("url", URL.class,null),
-        Blob("blob",byte[].class,null);
+        Bytes("bytes",byte[].class,null);
 
         /**
          * type java class
@@ -94,6 +94,14 @@ public final class GraphProperty {
         return name;
     }
 
+    /**
+     * get property value content
+     * @return raw value
+     */
+    public Object content(){
+        return content;
+    }
+
     @Override
     public String toString(){
         return PropertyType.String.isMatch(content)?
@@ -143,10 +151,10 @@ public final class GraphProperty {
                 (Double) PropertyType.Double.nullValue;
     }
 
-    public byte[] toBlob(){
-        return PropertyType.Blob.isMatch(content)?
+    public byte[] toBytes(){
+        return PropertyType.Bytes.isMatch(content)?
                 (byte[]) content:
-                (byte[]) PropertyType.Blob.nullValue;
+                (byte[]) PropertyType.Bytes.nullValue;
     }
 
     public URL toURL(){

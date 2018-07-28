@@ -15,6 +15,12 @@ import java.util.NoSuchElementException;
  */
 public final class HydrofoilProperty<V> implements Property<V> {
 
+    private final HydrofoilVertexProperty vertexProperty;
+
+    public HydrofoilProperty(final HydrofoilVertexProperty vertexProperty){
+        this.vertexProperty = vertexProperty;
+    }
+
     @Override
     public String key() {
         return null;
@@ -27,12 +33,12 @@ public final class HydrofoilProperty<V> implements Property<V> {
 
     @Override
     public boolean isPresent() {
-        return false;
+        return true;
     }
 
     @Override
     public Element element() {
-        return null;
+        return vertexProperty;
     }
 
     @Override

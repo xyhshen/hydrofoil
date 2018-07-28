@@ -98,14 +98,14 @@ public final class HydrofoilGraph implements Graph {
 
     @Override
     public Iterator<Vertex> vertices(Object... vertexIds) {
-        ParameterUtils.mustTrueMessage(ArrayUtils.isNotEmpty(vertexIds),"ids not empty");
+        ParameterUtils.mustTrueMessage(ArrayUtils.isNotEmpty(vertexIds),"vertex id's not empty");
         return TinkerpopGraphUtils.listVertexByIds(this,vertexIds);
     }
 
     @Override
     public Iterator<Edge> edges(Object... edgeIds) {
-        ParameterUtils.mustTrueMessage(ArrayUtils.isNotEmpty(edgeIds),"ids not empty");
-        return null;
+        ParameterUtils.mustTrueMessage(ArrayUtils.isNotEmpty(edgeIds),"edge id's not empty");
+        return TinkerpopGraphUtils.listEdgeByIds(this,edgeIds);
     }
 
     @Override

@@ -7,12 +7,16 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.hydrofoil.common.graph.GraphEdgeId;
 import org.hydrofoil.common.graph.GraphElementId;
 import org.hydrofoil.common.graph.GraphVertexId;
+import org.hydrofoil.common.schema.PropertySchema;
 import org.hydrofoil.common.util.EncodeUtils;
 import org.hydrofoil.core.standard.management.SchemaManager;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 /**
  * IdManage
@@ -30,6 +34,8 @@ public final class IdManage {
 
     private static final char ID_RAW_SPLIT = '-';
 
+    private final AtomicLong lastSchemaChanged;
+
     /**
      * schema manager
      */
@@ -39,20 +45,91 @@ public final class IdManage {
 
     private final Map<Integer,String> edgeOrderReverseMap;
 
+    private final Object lockObject;
+
+    /**
+     * element schema order sequence
+     */
+    static final class ElementSchemaOrder{
+
+        /**
+         * sequence
+         */
+        private Integer order;
+
+        /**
+         * unique sequence
+         */
+        private List<String> uniqueOrder;
+
+        Integer order(){
+            return order;
+        }
+
+        /**
+         * @return String>
+         * @see ElementSchemaOrder#uniqueOrder
+         **/
+        List<String> uniqueOrder() {
+            return uniqueOrder;
+        }
+    }
+
+    /**
+     * order
+     */
+    private Map<String,ElementSchemaOrder> vertexOrderMap;
+    //
+    private Map<String,ElementSchemaOrder> edgeOrderMap;
+
     public IdManage(SchemaManager schemaManager){
         this.schemaManager = schemaManager;
         vertexOrderReverseMap = new HashMap<>();
         edgeOrderReverseMap = new HashMap<>();
+        vertexOrderMap = new HashMap<>();
+        edgeOrderMap = new HashMap<>();
+        lastSchemaChanged = new AtomicLong(0L);
+        lockObject = new Object();
     }
 
-    private synchronized void loadOrderMap(){
-        if(schemaManager.getVertexOrder().size() !=
-                vertexOrderReverseMap.size()){
+    private static List<String> getUniquePropertiesOrder(final Map<String,PropertySchema> propertySchemaMap){
+        return propertySchemaMap.values().stream().filter(PropertySchema::isPrimary).
+                sorted((o1, o2) -> StringUtils.compareIgnoreCase(o1.getLabel(),o2.getLabel())).
+                map(PropertySchema::getLabel).collect(Collectors.toList());
+    }
 
+    private void loadOrderMap(){
+        //check schema is changed
+        Long lastChanged = schemaManager.getLastChanged();
+        if(!lastSchemaChanged.compareAndSet(lastChanged,lastChanged)){
+            return;
         }
-        if(schemaManager.getEdgeOrder().size() !=
-                edgeOrderReverseMap.size()){
 
+        synchronized(lockObject){
+            //calc vertex schema order
+            {
+                List<String> orders = schemaManager.getVertexSchemaMap().keySet().stream().
+                        sorted().collect(Collectors.toList());
+                for(int i = 0;i < orders.size();i++){
+                    ElementSchemaOrder order = new ElementSchemaOrder();
+                    order.order = i;
+                    order.uniqueOrder = getUniquePropertiesOrder(schemaManager.getVertexSchemaMap().get(orders.get(i)).getProperties());
+                    vertexOrderMap.put(orders.get(i),order);
+                    vertexOrderReverseMap.put(i,orders.get(i));
+                }
+            }
+            //calc edge schema order
+            {
+                List<String> orders = schemaManager.getEdgeSchemaMap().keySet().stream().
+                        sorted().collect(Collectors.toList());
+                for(int i = 0;i < orders.size();i++){
+                    ElementSchemaOrder order = new ElementSchemaOrder();
+                    order.order = i;
+                    order.uniqueOrder = getUniquePropertiesOrder(schemaManager.getEdgeSchemaMap().get(orders.get(i)).getProperties());
+                    edgeOrderMap.put(orders.get(i),order);
+                    edgeOrderReverseMap.put(i,orders.get(i));
+                }
+            }
         }
     }
 
@@ -62,14 +139,14 @@ public final class IdManage {
             return null;
         }
         char type = '0';
-        SchemaManager.ElementSchemaOrder schemaOrder = null;
+        ElementSchemaOrder schemaOrder = null;
         if(elementId instanceof GraphVertexId){
             type = ID_PREFIX_VERTEX;
-            schemaOrder = schemaManager.getVertexOrder().get(elementId.label());
+            schemaOrder = vertexOrderMap.get(elementId.label());
         }
         if(elementId instanceof GraphEdgeId){
             type = ID_PREFIX_EDGE;
-            schemaOrder = schemaManager.getEdgeOrder().get(elementId.label());
+            schemaOrder = edgeOrderMap.get(elementId.label());
         }
         if(schemaOrder == null){
             return null;
@@ -115,14 +192,14 @@ public final class IdManage {
         String prefix = idchunks[0];
         //get label order seq
         Integer seq = NumberUtils.toInt(idchunks[1]);
-        SchemaManager.ElementSchemaOrder schemaOrder;
+        ElementSchemaOrder schemaOrder;
         //check element type
         if(prefix.charAt(0) == ID_PREFIX_VERTEX){
             elementId = (E) new GraphVertexId(vertexOrderReverseMap.get(seq));
-            schemaOrder = schemaManager.getVertexOrder().get(elementId.label());
+            schemaOrder = vertexOrderMap.get(elementId.label());
         }else{
             elementId = (E) new GraphEdgeId(edgeOrderReverseMap.get(seq));
-            schemaOrder = schemaManager.getEdgeOrder().get(elementId.label());
+            schemaOrder = edgeOrderMap.get(elementId.label());
         }
         //set unique property
         for(int i = 2;i < idchunks.length;i++){
@@ -130,7 +207,6 @@ public final class IdManage {
             String value = EncodeUtils.base64Decode(idchunks[i]);
             elementId.unique(label,value);
         }
-
         return elementId;
     }
 

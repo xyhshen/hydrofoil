@@ -4,18 +4,19 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.dom4j.Element;
 import org.hydrofoil.common.configuration.HydrofoilConfiguration;
 import org.hydrofoil.common.configuration.HydrofoilConfigurationProperties;
 import org.hydrofoil.common.graph.EdgeDirection;
-import org.hydrofoil.common.schema.*;
+import org.hydrofoil.common.schema.DataSourceSchema;
+import org.hydrofoil.common.schema.EdgeSchema;
+import org.hydrofoil.common.schema.TableSchema;
+import org.hydrofoil.common.schema.VertexSchema;
 import org.hydrofoil.common.util.XmlUtils;
 
 import java.io.InputStream;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * SchemaManager
@@ -60,39 +61,9 @@ public final class SchemaManager {
     private final Map<String,Pair<Collection<String>,Collection<String>>> vertexEdgeSchemaMap;
 
     /**
-     * element schema order sequence
+     * last schema changee time
      */
-    public static final class ElementSchemaOrder{
-
-        /**
-         * sequence
-         */
-        private Integer order;
-
-        /**
-         * unique sequence
-         */
-        private List<String> uniqueOrder;
-
-        public Integer order(){
-            return order;
-        }
-
-        /**
-         * @return String>
-         * @see ElementSchemaOrder#uniqueOrder
-         **/
-        public List<String> uniqueOrder() {
-            return uniqueOrder;
-        }
-    }
-
-    /**
-     * order
-     */
-    private Map<String,ElementSchemaOrder> vertexOrderMap;
-    //
-    private Map<String,ElementSchemaOrder> edgeOrderMap;
+    private volatile Long lastChanged;
 
     SchemaManager(){
         dataSourceSchemaMap = new HashMap<>();
@@ -100,8 +71,7 @@ public final class SchemaManager {
         vertexSchemaMap = new HashMap<>();
         edgeSchemaMap = new HashMap<>();
         vertexEdgeSchemaMap = new HashMap<>();
-        vertexOrderMap = new HashMap<>();
-        edgeOrderMap = new HashMap<>();
+        lastChanged = 0L;
     }
 
     /**
@@ -112,6 +82,7 @@ public final class SchemaManager {
         loadDataSource(configuration.getSchemaFile(HydrofoilConfigurationProperties.SCHEMA_DATASOURCE));
         loadDataSet(configuration.getSchemaFile(HydrofoilConfigurationProperties.SCHEMA_DATASET));
         loadMapper(configuration.getSchemaFile(HydrofoilConfigurationProperties.SCHEMA_MAPPER));
+        lastChanged = System.currentTimeMillis();
     }
 
     private void loadDataSource(final InputStream is) throws Exception {
@@ -136,26 +107,12 @@ public final class SchemaManager {
         IOUtils.closeQuietly(is);
     }
 
-    private static List<String> getUniquePropertiesOrder(final Map<String,PropertySchema> propertySchemaMap){
-        return propertySchemaMap.values().stream().filter(PropertySchema::isPrimary).
-                sorted((o1, o2) -> StringUtils.compareIgnoreCase(o1.getLabel(),o2.getLabel())).
-                map(PropertySchema::getLabel).collect(Collectors.toList());
-    }
-
     private void loadVertexMapper(Element root){
         List<Element> elements = XmlUtils.listElement(root.element(ELEMENT_VERTICES),ELEMENT_VERTEX );
         for(Element element:elements){
             VertexSchema vertexSchema = new VertexSchema();
             vertexSchema.read(element);
             vertexSchemaMap.put(vertexSchema.getLabel(),vertexSchema);
-        }
-        List<String> orders = vertexSchemaMap.keySet().stream().
-                sorted().collect(Collectors.toList());
-        for(int i = 0;i < orders.size();i++){
-            ElementSchemaOrder order = new ElementSchemaOrder();
-            order.order = i;
-            order.uniqueOrder = getUniquePropertiesOrder(vertexSchemaMap.get(orders.get(i)).getProperties());
-            vertexOrderMap.put(orders.get(i),order);
         }
     }
 
@@ -181,14 +138,6 @@ public final class SchemaManager {
             CollectionUtils.emptyIfNull(outSchema).forEach((v)->outLabelSet.add(v.getLabel()));
             vertexEdgeSchemaMap.put(vertexLabel,Pair.of(inLabelSet,outLabelSet));
         });
-        List<String> orders = edgeSchemaMap.keySet().stream().
-                sorted().collect(Collectors.toList());
-        for(int i = 0;i < orders.size();i++){
-            ElementSchemaOrder order = new ElementSchemaOrder();
-            order.order = i;
-            order.uniqueOrder = getUniquePropertiesOrder(edgeSchemaMap.get(orders.get(i)).getProperties());
-            edgeOrderMap.put(orders.get(i),order);
-        }
     }
 
     private void loadMapper(final InputStream is) throws Exception{
@@ -259,19 +208,27 @@ public final class SchemaManager {
     }
 
     /**
-     * get order of vertex map
-     * @return order
-     */
-    public Map<String, ElementSchemaOrder> getVertexOrder(){
-        return vertexOrderMap;
+     * @return VertexSchema>
+     * @see SchemaManager#vertexSchemaMap
+     **/
+    public Map<String, VertexSchema> getVertexSchemaMap() {
+        return vertexSchemaMap;
     }
 
     /**
-     * get order of edge map
-     * @return order
-     */
-    public Map<String, ElementSchemaOrder> getEdgeOrder(){
-        return edgeOrderMap;
+     * @return EdgeSchema>
+     * @see SchemaManager#edgeSchemaMap
+     **/
+    public Map<String, EdgeSchema> getEdgeSchemaMap() {
+        return edgeSchemaMap;
+    }
+
+    /**
+     * @return Long
+     * @see SchemaManager#lastChanged
+     **/
+    public Long getLastChanged() {
+        return lastChanged;
     }
 
     /**

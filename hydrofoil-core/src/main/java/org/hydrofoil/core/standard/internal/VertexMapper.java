@@ -78,7 +78,7 @@ public final class VertexMapper extends AbstractElementMapper{
                         new GraphProperty(propertySchema.getLabel(),
                                 rowStore.value(tableName,propertySchema.getField()));
                 propertyMap.put(propertySchema.getLabel(),
-                        new StandardProperty(propertySchema.getLabel(),graphProperty,false,false));
+                        new StandardProperty(propertySchema.getLabel(),graphProperty,false));
             }
         });
         return vertex;
