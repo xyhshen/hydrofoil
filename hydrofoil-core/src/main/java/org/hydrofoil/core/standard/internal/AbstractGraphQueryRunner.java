@@ -11,9 +11,8 @@ import org.hydrofoil.common.provider.datasource.RowQueryRequest;
 import org.hydrofoil.common.provider.datasource.RowQueryResponse;
 import org.hydrofoil.common.provider.datasource.RowStore;
 import org.hydrofoil.common.util.ParameterUtils;
-import org.hydrofoil.core.standard.management.Management;
 import org.hydrofoil.core.standard.IGraphQueryRunner;
-import org.hydrofoil.core.standard.StandardElement;
+import org.hydrofoil.core.standard.management.Management;
 
 import java.util.*;
 
@@ -26,7 +25,7 @@ import java.util.*;
  * @date 2018/7/14 10:05
  */
 @SuppressWarnings("unchecked")
-public abstract class AbstractGraphQueryRunner <E extends StandardElement,T extends IGraphQueryRunner> implements IGraphQueryRunner<E,T> {
+public abstract class AbstractGraphQueryRunner <E,T extends IGraphQueryRunner> implements IGraphQueryRunner<E,T> {
 
     protected Management management;
 
@@ -108,7 +107,7 @@ public abstract class AbstractGraphQueryRunner <E extends StandardElement,T exte
      */
     protected abstract E handleRowToElement(ElementMapping mapping, RowStore rowStore);
 
-    MultiValuedMap<String,ElementMapping> getQueryRequest(){
+    private MultiValuedMap<String,ElementMapping> getQueryRequest(){
         MultiValuedMap<String,ElementMapping> maps = new ArrayListValuedHashMap<>();
         Collection<ElementMapping> elementRequests = makeQueryRequest();
         elementRequests.forEach((v)->{
@@ -117,7 +116,7 @@ public abstract class AbstractGraphQueryRunner <E extends StandardElement,T exte
         return  maps;
     }
 
-    Collection<E> handleRowRequest(ElementMapping mapping,RowQueryResponse response){
+    private Collection<E> handleRowRequest(ElementMapping mapping, RowQueryResponse response){
         ParameterUtils.mustTrueException(response.isSucceed(),
                 "request datasource failed",
                 response.getException());

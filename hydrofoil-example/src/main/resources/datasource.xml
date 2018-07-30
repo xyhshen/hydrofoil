@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <datasources>
-    <datasource name="gongan" provider="mysql" >
+    <datasource name="gongan" provider="mysql">
         <url>jdbc:mysql://10.110.18.53:3306/gongan?useUnicode=true&amp;characterEncoding=utf-8&amp;useOldAliasMetadataBehavior=true&amp;allowMultiQueries=true</url>
         <username>root</username>
         <password>123456a?</password>

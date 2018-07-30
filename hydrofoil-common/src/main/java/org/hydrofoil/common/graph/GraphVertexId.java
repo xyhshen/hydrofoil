@@ -20,4 +20,11 @@ public final class GraphVertexId extends GraphElementId<GraphVertexId>{
         }
         return false;
     }
+
+    @Override
+    public GraphVertexId clone(){
+        GraphVertexId graphVertexId = new GraphVertexId(label());
+        graphVertexId.unique.putAll(super.unique);
+        return graphVertexId;
+    }
 }

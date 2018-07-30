@@ -15,17 +15,17 @@ import java.util.Objects;
  * @author xie_yh
  * @date 2018/7/2 15:48
  */
-public class GraphElementId <E extends GraphElementId>{
+public class GraphElementId <E extends GraphElementId> implements Cloneable{
 
     /**
      * element label
      */
-    private String label;
+    protected String label;
 
     /**
      * unique field
      */
-    private Map<String,Object> unique;
+    protected Map<String,Object> unique;
 
     GraphElementId(String label){
         this.label = label;

@@ -71,7 +71,7 @@ public final class HydrofoilVertexProperty<V> implements VertexProperty<V>{
     public <U> Iterator<Property<U>> properties(String... propertyKeys) {
         List<Property<U>> properties = new LinkedList<>();
         if(!standardProperty.isComplex()){
-            properties.add(new HydrofoilProperty<>());
+            //properties.add(new HydrofoilProperty<>());
         }
         return null;
     }

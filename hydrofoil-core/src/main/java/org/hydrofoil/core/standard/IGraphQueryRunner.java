@@ -14,7 +14,7 @@ import java.util.Iterator;
  * @author xie_yh
  * @date 2018/7/14 9:35
  */
-public interface IGraphQueryRunner <E extends StandardElement,T extends IGraphQueryRunner> {
+public interface IGraphQueryRunner <E,T extends IGraphQueryRunner> {
 
     /**
      * get element

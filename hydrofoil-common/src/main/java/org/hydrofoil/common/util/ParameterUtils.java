@@ -120,9 +120,15 @@ public final class ParameterUtils {
         }
     }
 
-    public static void checkStateMessage(final boolean b,String message){
+    public static void checkStateMessage(final boolean b,final String message){
         if(!b){
             throw new IllegalStateException(message);
+        }
+    }
+
+    public static void checkSupport(final boolean b,final String message){
+        if(!b){
+            throw new UnsupportedOperationException(message);
         }
     }
 

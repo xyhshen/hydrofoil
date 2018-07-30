@@ -1,5 +1,6 @@
 package org.hydrofoil.core.tinkerpop.glue;
 
+import org.apache.commons.collections4.map.LinkedMap;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.hydrofoil.common.util.ParameterUtils;
@@ -10,6 +11,7 @@ import org.hydrofoil.core.tinkerpop.structure.HydrofoilGraph;
 import org.hydrofoil.core.tinkerpop.structure.HydrofoilVertex;
 
 import java.util.Iterator;
+
 /**
  * TinkerpopGraphUtils
  * <p>
@@ -68,6 +70,11 @@ public final class TinkerpopGraphUtils {
                 return new HydrofoilEdge(graph,next);
             }
         };
+    }
+
+    public static void main(String[] args){
+        LinkedMap<String,Object> map = new LinkedMap<>();
+        map.get("");
     }
 
 }

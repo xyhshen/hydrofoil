@@ -20,4 +20,11 @@ public final class GraphEdgeId extends GraphElementId<GraphEdgeId> {
         }
         return false;
     }
+
+    @Override
+    public GraphEdgeId clone(){
+        GraphEdgeId graphEdgeId = new GraphEdgeId(label());
+        graphEdgeId.unique.putAll(super.unique);
+        return graphEdgeId;
+    }
 }

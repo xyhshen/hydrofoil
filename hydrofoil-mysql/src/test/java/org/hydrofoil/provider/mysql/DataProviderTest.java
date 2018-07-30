@@ -1,7 +1,6 @@
 package org.hydrofoil.provider.mysql;
 
 import org.hydrofoil.common.graph.QMatch;
-import org.hydrofoil.common.provider.IDataProvider;
 import org.hydrofoil.common.provider.IDataSource;
 import org.hydrofoil.common.provider.datasource.RowQueryRequest;
 import org.hydrofoil.common.provider.datasource.RowQueryResponse;
@@ -14,10 +13,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.hydrofoil.provider.mysql.MysqlDatasourceSchema.DatasourceItem.ConnectUrl;
-import static org.hydrofoil.provider.mysql.MysqlDatasourceSchema.DatasourceItem.Password;
-import static org.hydrofoil.provider.mysql.MysqlDatasourceSchema.DatasourceItem.Username;
-import static org.junit.Assert.assertTrue;
+import static org.hydrofoil.provider.mysql.MysqlDatasourceSchema.DatasourceItem.*;
 
 /**
  * DataProviderTest
@@ -81,7 +77,7 @@ public final class DataProviderTest {
             ));
             query.getAssociateQuery().add(associateRowQuery);
         }
-        query.setStart(0L).setLimit(100L);
+        query.setOffset(0L).setLimit(100L);
         RowQueryResponse response = dataSource.sendQuery(query);
         System.out.println(response);
     }

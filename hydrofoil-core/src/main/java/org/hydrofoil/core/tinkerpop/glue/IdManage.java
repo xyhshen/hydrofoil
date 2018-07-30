@@ -2,6 +2,7 @@ package org.hydrofoil.core.tinkerpop.glue;
 
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.hydrofoil.common.graph.GraphEdgeId;
@@ -101,7 +102,7 @@ public final class IdManage {
     private void loadOrderMap(){
         //check schema is changed
         Long lastChanged = schemaManager.getLastChanged();
-        if(!lastSchemaChanged.compareAndSet(lastChanged,lastChanged)){
+        if(lastSchemaChanged.compareAndSet(lastChanged,lastChanged)){
             return;
         }
 
@@ -135,9 +136,13 @@ public final class IdManage {
 
     @SuppressWarnings("unchecked")
     public Object tinkerpopId(final GraphElementId elementId){
-        if(elementId == null){
+        if(elementId == null) {
             return null;
         }
+
+        //load order map
+        loadOrderMap();
+
         char type = '0';
         ElementSchemaOrder schemaOrder = null;
         if(elementId instanceof GraphVertexId){
@@ -175,6 +180,9 @@ public final class IdManage {
 
     @SuppressWarnings("unchecked")
     public <E extends GraphElementId> E elementId(Object id){
+        if(id instanceof GraphElementId){
+            return (E)ObjectUtils.clone((GraphElementId) id);
+        }
         String idstring = Objects.toString(id,null);
         if(StringUtils.isBlank(idstring)){
             return null;
@@ -216,7 +224,7 @@ public final class IdManage {
         }
         GraphVertexId[] elementIds = new GraphVertexId[ids.length];
         for(int i = 0;i < elementIds.length;i++){
-            ids[i] = elementId(ids[i]);
+            elementIds[i] = elementId(ids[i]);
         }
         return elementIds;
     }
