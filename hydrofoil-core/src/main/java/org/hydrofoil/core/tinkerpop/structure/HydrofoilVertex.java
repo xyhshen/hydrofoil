@@ -5,6 +5,7 @@ import org.apache.tinkerpop.gremlin.structure.*;
 import org.hydrofoil.common.util.ParameterUtils;
 import org.hydrofoil.core.standard.StandardProperty;
 import org.hydrofoil.core.standard.StandardVertex;
+import org.hydrofoil.core.tinkerpop.glue.TinkerpopGraphTransit;
 
 import java.util.Iterator;
 
@@ -31,12 +32,12 @@ public class HydrofoilVertex extends HydrofoilElement implements Vertex {
 
     @Override
     public Iterator<Edge> edges(Direction direction, String... edgeLabels) {
-        return null;
+        return TinkerpopGraphTransit.listEdgesByVertex(graph,this,direction,edgeLabels);
     }
 
     @Override
     public Iterator<Vertex> vertices(Direction direction, String... edgeLabels) {
-        return null;
+        return TinkerpopGraphTransit.listEdgeVerticesByVertex(graph,this,direction,edgeLabels);
     }
 
     @Override

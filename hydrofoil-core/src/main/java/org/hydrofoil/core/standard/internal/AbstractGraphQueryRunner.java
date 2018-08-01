@@ -65,13 +65,21 @@ public abstract class AbstractGraphQueryRunner <E,T extends IGraphQueryRunner> i
 
     @Override
     public T offset(final Long offset){
-        this.offset = offset;
+        if(offset != null && offset.equals(0L)){
+            this.offset = null;
+        }else{
+            this.offset = offset;
+        }
         return (T) this;
     }
 
     @Override
     public T length(final Long length){
-        this.length = length;
+        if(length != null && length.equals(0L)){
+            this.length = null;
+        }else{
+            this.length = length;
+        }
         return (T) this;
     }
 

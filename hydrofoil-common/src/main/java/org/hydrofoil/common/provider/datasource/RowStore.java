@@ -25,7 +25,7 @@ public final class RowStore {
 
     /**
      * put field
-     * @param name data set name
+     * @param name collect set name
      * @param pair field pair
      * @return this
      */
@@ -37,7 +37,7 @@ public final class RowStore {
 
     /**
      * put a field value
-     * @param name data set name
+     * @param name collect set name
      * @param fieldname field name
      * @param value field value
      * @return this
@@ -62,7 +62,7 @@ public final class RowStore {
 
     /**
      *
-     * @param name data set name
+     * @param name collect set name
      * @param fieldname field name
      * @return value
      */

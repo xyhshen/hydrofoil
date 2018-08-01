@@ -28,7 +28,7 @@ public final class RowQueryRequest {
         private QMatch.Q match;
 
         /**
-         * data set name
+         * collect set name
          */
         private String name;
 
@@ -88,7 +88,7 @@ public final class RowQueryRequest {
 
     public static final class AssociateRowQuery{
         /**
-         * Associate data set name
+         * Associate collect set name
          */
         private String name;
         /**
@@ -146,7 +146,7 @@ public final class RowQueryRequest {
     private Long id;
 
     /**
-     * data set name
+     * collect set name
      */
     private String name;
 

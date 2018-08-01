@@ -16,7 +16,7 @@ import java.io.IOException;
 public final class Management implements Closeable {
 
     /**
-     * data source manager
+     * collect source manager
      */
     private DataSourceManager dataSourceManager;
 
@@ -25,17 +25,24 @@ public final class Management implements Closeable {
      */
     private SchemaManager schemaManager;
 
+    /**
+     * cache manager
+     */
+    private CacheManager cacheManager;
+
     public Management(){
         this.dataSourceManager = new DataSourceManager(this);
         this.schemaManager = new SchemaManager();
+        this.cacheManager = new CacheManager();
     }
 
-    public void load(HydrofoilConfiguration configuration) throws Exception{
+    public void load(final HydrofoilConfiguration configuration) throws Exception{
         schemaManager.load(configuration);
+        cacheManager.load(configuration);
     }
 
     /**
-     * get data source manger
+     * get collect source manger
      * @return DataSourceManager
      * @see Management#dataSourceManager
      **/
@@ -52,8 +59,17 @@ public final class Management implements Closeable {
         return schemaManager;
     }
 
+    /**
+     * @return CacheManager
+     * @see Management#cacheManager
+     **/
+    public CacheManager getCacheManager() {
+        return cacheManager;
+    }
+
     @Override
     public void close() throws IOException {
         dataSourceManager.close();
+        cacheManager.close();
     }
 }

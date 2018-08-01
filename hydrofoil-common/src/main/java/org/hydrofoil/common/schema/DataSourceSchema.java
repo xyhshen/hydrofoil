@@ -8,7 +8,7 @@ import java.util.Map;
 
 /**
  * DataSourceSchema
- * data source config shcema
+ * collect source config shcema
  * <p>
  * package org.hydrofoil.common.schema
  *

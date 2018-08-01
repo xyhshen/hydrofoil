@@ -44,4 +44,12 @@ public abstract class HydrofoilElement implements Element {
     public Graph graph() {
         return graph;
     }
+
+    /**
+     * get standard element
+     * @return element
+     */
+    public StandardElement standard(){
+        return standardElement;
+    }
 }

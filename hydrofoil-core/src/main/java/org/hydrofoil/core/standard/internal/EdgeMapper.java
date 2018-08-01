@@ -84,14 +84,16 @@ public class EdgeMapper extends AbstractElementMapper {
     GraphVertexId[] getEdgeVertexId(EdgeSchema edgeSchema,RowStore rowStore){
         GraphVertexId[] vertexIds = new GraphVertexId[2];
         String tableName = MapperHelper.getRealTableName(schemaManager,edgeSchema.getTable());
-        vertexIds[0] = new GraphVertexId(edgeSchema.getSourceLabel());
+        GraphElementId.GraphElementBuilder fromBuilder = GraphElementId.builder(edgeSchema.getSourceLabel());
         edgeSchema.getSourceField().forEach((k,v)->{
-            vertexIds[0].unique(k,rowStore.value(tableName,v));
+            fromBuilder.unique(k,rowStore.value(tableName,v));
         });
-        vertexIds[1] = new GraphVertexId(edgeSchema.getTargetLabel());
+        GraphElementId.GraphElementBuilder toBuilder = GraphElementId.builder(edgeSchema.getTargetLabel());
         edgeSchema.getTargetField().forEach((k,v)->{
-            vertexIds[1].unique(k,rowStore.value(tableName,v));
+            toBuilder.unique(k,rowStore.value(tableName,v));
         });
+        vertexIds[0] = fromBuilder.buildVertexId();
+        vertexIds[1] = toBuilder.buildVertexId();
         return vertexIds;
     }
 

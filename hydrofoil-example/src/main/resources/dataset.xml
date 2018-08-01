@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <dataSets>
     <table name="person" datasource="gongan" realname="person1" />
-    <!--<table name="companys" datasource="gongan" />-->
+    <table name="companys" datasource="gongan" />
 </dataSets>

@@ -1,7 +1,7 @@
 package org.hydrofoil.common.graph;
 
-import org.apache.commons.collections4.SetUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.hydrofoil.common.util.collect.ArrayMap;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,7 +15,7 @@ import java.util.Objects;
  * @author xie_yh
  * @date 2018/7/2 15:48
  */
-public class GraphElementId <E extends GraphElementId> implements Cloneable{
+public class GraphElementId implements Cloneable{
 
     /**
      * element label
@@ -27,9 +27,55 @@ public class GraphElementId <E extends GraphElementId> implements Cloneable{
      */
     protected Map<String,Object> unique;
 
-    GraphElementId(String label){
+    /**
+     * element builder
+     */
+    public static final class GraphElementBuilder{
+
+        private final Map<String,Object> unique;
+
+        private final String label;
+
+        GraphElementBuilder(final String label){
+            this.label = label;
+            unique = new HashMap<>();
+        }
+
+        GraphElementBuilder(final String label,final String name,final Object value){
+            this(label);
+            unique.put(name,value);
+        }
+
+        /**
+         * @param name field name
+         * @param value value
+         * @see GraphElementId#unique
+         **/
+        public GraphElementBuilder unique(final String name,final Object value) {
+            unique.put(name,value);
+            return this;
+        }
+
+        /**
+         * create vertex id
+         * @return vertex id
+         */
+        public GraphVertexId buildVertexId(){
+            return new GraphVertexId(label,unique);
+        }
+
+        /**
+         * create edge id
+         * @return edge id
+         */
+        public GraphEdgeId buildEdgeId(){
+            return new GraphEdgeId(label,unique);
+        }
+    }
+
+    GraphElementId(final String label,final Map<String,Object> unique){
         this.label = label;
-        this.unique = new HashMap<>();
+        this.unique = new ArrayMap<>(unique);
     }
 
     /**
@@ -49,23 +95,13 @@ public class GraphElementId <E extends GraphElementId> implements Cloneable{
         return unique;
     }
 
-    /**
-     * @param name field name
-     * @param value value
-     * @see GraphElementId#unique
-     **/
-    public E unique(String name,Object value) {
-        unique.put(name,value);
-        return (E) this;
-    }
-
     @Override
     public int hashCode(){
-        return Objects.hash(label,unique.entrySet().toArray());
+        return Objects.hashCode(label) ^ Objects.hashCode(unique);
     }
 
     @Override
-    public boolean equals(Object otherObj){
+    public boolean equals(final Object otherObj){
         if(!(otherObj instanceof GraphElementId)){
             return false;
         }
@@ -73,6 +109,37 @@ public class GraphElementId <E extends GraphElementId> implements Cloneable{
         if(!StringUtils.equalsIgnoreCase(otherId.label,label)){
             return false;
         }
-        return SetUtils.isEqualSet(unique.entrySet(),otherId.unique.entrySet());
+        return Objects.equals(unique,otherId.unique);
+    }
+
+    /**
+     * make vertex id
+     * @param label vertex label
+     * @param name property label
+     * @param value value
+     * @return id
+     */
+    public static GraphVertexId VertexId(final String label,final String name,final Object value){
+        return new GraphElementBuilder(label,name,value).buildVertexId();
+    }
+
+    /**
+     * make edge id
+     * @param label edge label
+     * @param name property label
+     * @param value value
+     * @return id
+     */
+    public static GraphEdgeId EdgeId(final String label,final String name,final Object value){
+        return new GraphElementBuilder(label,name,value).buildEdgeId();
+    }
+
+    /**
+     * create builder
+     * @param label element label
+     * @return id builder
+     */
+    public static GraphElementBuilder builder(final String label){
+        return new GraphElementBuilder(label);
     }
 }

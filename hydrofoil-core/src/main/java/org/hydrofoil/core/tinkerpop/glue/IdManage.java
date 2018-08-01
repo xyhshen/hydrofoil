@@ -102,7 +102,7 @@ public final class IdManage {
     private void loadOrderMap(){
         //check schema is changed
         Long lastChanged = schemaManager.getLastChanged();
-        if(lastSchemaChanged.compareAndSet(lastChanged,lastChanged)){
+        if(!lastSchemaChanged.compareAndSet(lastSchemaChanged.get(),lastChanged)){
             return;
         }
 
@@ -195,27 +195,30 @@ public final class IdManage {
         //re load order map
         loadOrderMap();
 
-        E elementId;
+        GraphElementId.GraphElementBuilder builder;
         //get prefix
         String prefix = idchunks[0];
         //get label order seq
         Integer seq = NumberUtils.toInt(idchunks[1]);
         ElementSchemaOrder schemaOrder;
+        boolean vertexOrEdge;
         //check element type
         if(prefix.charAt(0) == ID_PREFIX_VERTEX){
-            elementId = (E) new GraphVertexId(vertexOrderReverseMap.get(seq));
-            schemaOrder = vertexOrderMap.get(elementId.label());
+            builder = GraphElementId.builder(vertexOrderReverseMap.get(seq));
+            schemaOrder = vertexOrderMap.get(vertexOrderReverseMap.get(seq));
+            vertexOrEdge = true;
         }else{
-            elementId = (E) new GraphEdgeId(edgeOrderReverseMap.get(seq));
-            schemaOrder = edgeOrderMap.get(elementId.label());
+            builder = GraphElementId.builder(edgeOrderReverseMap.get(seq));
+            schemaOrder = edgeOrderMap.get(edgeOrderReverseMap.get(seq));
+            vertexOrEdge = false;
         }
         //set unique property
         for(int i = 2;i < idchunks.length;i++){
             String label = schemaOrder.uniqueOrder().get(i);
             String value = EncodeUtils.base64Decode(idchunks[i]);
-            elementId.unique(label,value);
+            builder.unique(label,value);
         }
-        return elementId;
+        return vertexOrEdge? (E) builder.buildVertexId() : (E) builder.buildEdgeId();
     }
 
     public GraphVertexId[] vertexIds(Object ...ids){

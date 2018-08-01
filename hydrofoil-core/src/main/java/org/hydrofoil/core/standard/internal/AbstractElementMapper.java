@@ -4,14 +4,14 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.collections4.SetUtils;
 import org.hydrofoil.common.graph.GraphElementId;
+import org.hydrofoil.common.graph.GraphVertexId;
 import org.hydrofoil.common.graph.QMatch;
 import org.hydrofoil.common.provider.datasource.RowQueryRequest;
 import org.hydrofoil.common.provider.datasource.RowStore;
 import org.hydrofoil.common.schema.AbstractElementSchema;
 import org.hydrofoil.common.schema.PropertySchema;
-import org.hydrofoil.common.util.LangUtils;
-import org.hydrofoil.core.standard.management.SchemaManager;
 import org.hydrofoil.core.standard.StandardElement;
+import org.hydrofoil.core.standard.management.SchemaManager;
 
 import java.util.*;
 
@@ -119,16 +119,17 @@ public abstract class AbstractElementMapper<E extends StandardElement> {
         return elementMapping;
     }
 
-    protected <EID extends GraphElementId> EID rowElementToId(AbstractElementSchema elementSchema,RowStore rowStore,Class<EID> clz){
-        EID eid = LangUtils.newInstance(clz,elementSchema.getLabel());
+    @SuppressWarnings("unchecked")
+    protected <EID extends GraphElementId> EID rowElementToId(AbstractElementSchema elementSchema, RowStore rowStore, Class<EID> clz){
+        GraphElementId.GraphElementBuilder builder = GraphElementId.builder(elementSchema.getLabel());
         String tableName = MapperHelper.getRealTableName(schemaManager,elementSchema.getTable());
 
         elementSchema.getProperties().values().forEach((propertySchema) -> {
             if(propertySchema.isPrimary()){
-                eid.unique(propertySchema.getLabel(),rowStore.value(tableName,propertySchema.getField()));
+                builder.unique(propertySchema.getLabel(),rowStore.value(tableName,propertySchema.getField()));
             }
         });
-        return eid;
+        return clz.isAssignableFrom(GraphVertexId.class)? (EID) builder.buildVertexId() : (EID) builder.buildEdgeId();
     }
 
 

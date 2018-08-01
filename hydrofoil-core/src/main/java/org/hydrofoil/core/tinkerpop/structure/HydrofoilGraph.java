@@ -1,6 +1,7 @@
 package org.hydrofoil.core.tinkerpop.structure;
 
 import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration.MapConfiguration;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.tinkerpop.gremlin.process.computer.GraphComputer;
@@ -12,7 +13,7 @@ import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.hydrofoil.common.util.ParameterUtils;
 import org.hydrofoil.core.HydrofoilConnector;
 import org.hydrofoil.core.tinkerpop.glue.IdManage;
-import org.hydrofoil.core.tinkerpop.glue.TinkerpopGraphUtils;
+import org.hydrofoil.core.tinkerpop.glue.TinkerpopGraphTransit;
 import org.hydrofoil.core.tinkerpop.process.traversal.strategy.optimization.HydrofoilGraphStepStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -99,13 +100,13 @@ public final class HydrofoilGraph implements Graph {
     @Override
     public Iterator<Vertex> vertices(Object... vertexIds) {
         ParameterUtils.mustTrueMessage(ArrayUtils.isNotEmpty(vertexIds),"vertex id's not empty");
-        return TinkerpopGraphUtils.listVertexByIds(this,vertexIds);
+        return TinkerpopGraphTransit.listVerticesByIds(this,vertexIds);
     }
 
     @Override
     public Iterator<Edge> edges(Object... edgeIds) {
         ParameterUtils.mustTrueMessage(ArrayUtils.isNotEmpty(edgeIds),"edge id's not empty");
-        return TinkerpopGraphUtils.listEdgeByIds(this,edgeIds);
+        return TinkerpopGraphTransit.listEdgesByIds(this,edgeIds);
     }
 
     @Override
@@ -125,6 +126,6 @@ public final class HydrofoilGraph implements Graph {
 
     @Override
     public Configuration configuration() {
-        return null;
+        return new MapConfiguration(connector.getConfiguration().toMap());
     }
 }

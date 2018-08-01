@@ -28,7 +28,7 @@ public final class LogUtils {
      * @param logger logger
      * @param s content
      */
-    public static void printDebug(Logger logger,String s){
+    public static void printDebug(final Logger logger,final String s){
         printDebug(logger,s,null);
     }
 
@@ -38,9 +38,23 @@ public final class LogUtils {
      * @param s content
      * @param t throw
      */
-    public static void printDebug(Logger logger,String s,Throwable t){
+    public static void printDebug(final Logger logger,final String s,Throwable t){
         if(logger.isDebugEnabled()){
             logger.debug(s,t);
+        }
+    }
+
+    public static void callError(final Logger logger,final String methodName){
+        callError(logger,methodName,null);
+    }
+
+    public static void callError(final Logger logger,final String methodName,Throwable t){
+        StringBuilder sb = new StringBuilder();
+        sb.append("call method \"").append(methodName).append("\"").append(" failed");
+        if(t != null){
+            logger.error(sb.toString(),t);
+        }else{
+            logger.error(sb.toString());
         }
     }
 

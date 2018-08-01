@@ -1,6 +1,9 @@
 package org.hydrofoil.common.configuration;
 
-import org.hydrofoil.common.util.DataUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
+import org.hydrofoil.common.util.ParameterUtils;
 
 import java.io.InputStream;
 import java.util.HashMap;
@@ -17,30 +20,68 @@ import java.util.Objects;
  */
 public class HydrofoilConfiguration {
 
-    private Map<String,Object> schemaFileMap;
+    /**
+     * prefix name
+     */
+    public static final String CONFIG_PREFIX = "hydrofoil";
+
+    private Map<String,Object> configProperties;
 
     public HydrofoilConfiguration(){
-        this.schemaFileMap = new HashMap<>();
+        this.configProperties = new HashMap<>();
     }
 
-    public HydrofoilConfiguration putSchemaFile(String name,Object raw){
-        schemaFileMap.put(name,raw);
+    public HydrofoilConfiguration put(String name,Object content){
+        configProperties.put(name,content);
         return this;
     }
 
-    public InputStream getSchemaFile(String name){
-        Object raw = schemaFileMap.get(name);
-        if(raw == null){
-            return null;
+    public Object getItem(HydrofoilConfigurationItem item){
+        Object value = configProperties.get(item.getFullname());
+        if(value == null){
+            value = item.getDefaultValue();
         }
-        if(raw instanceof String){
-            return DataUtils.openFile(Objects.toString(raw,null));
+        if(value instanceof String &&
+                StringUtils.isBlank(Objects.toString(value,null))){
+            value = item.getDefaultValue();
         }
+        return value;
+    }
 
-        if(raw instanceof InputStream){
-            return (InputStream) raw;
+    public Long getLong(HydrofoilConfigurationItem item){
+        return NumberUtils.toLong(Objects.toString(getItem(item),null));
+    }
+
+    public Integer getInt(HydrofoilConfigurationItem item){
+        return NumberUtils.toInt(Objects.toString(getItem(item),null));
+    }
+
+    /**
+     * get item
+     * @param item
+     * @return
+     */
+    public InputStream getStream(HydrofoilConfigurationItem item){
+        ParameterUtils.mustTrueMessage(item.getType() ==
+                HydrofoilConfigurationItem.ConfigType.file,"must is file type");
+        InputStream is = null;
+        StreamType[] values = StreamType.values();
+        for(StreamType streamType:values){
+            Object o = MapUtils.getObject(configProperties,item.getFullname()
+                    + "." + streamType.getName());
+            if(o == null){
+                continue;
+            }
+            is = streamType.getStream(o);
+            if(is != null){
+                break;
+            }
         }
-        return null;
+        return is;
+    }
+
+    public Map<String,Object> toMap(){
+        return configProperties;
     }
 
 }

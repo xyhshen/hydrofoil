@@ -28,29 +28,29 @@ public final class DataSourceManager implements Closeable {
     private final Management management;
 
     /**
-     * data source map
+     * collect source map
      */
     private final Map<String,IDataSource> dataSourceMap;
 
-    public DataSourceManager(final Management management){
+    DataSourceManager(final Management management){
         this.management = management;
         this.dataSourceMap = new HashMap<>();
     }
 
     /**
-     * geet data source
+     * geet collect source
      * @param dataSourceName source name
-     * @return data source
+     * @return collect source
      */
     public IDataSource getDatasource(final String dataSourceName){
         synchronized (dataSourceMap){
             return dataSourceMap.computeIfAbsent(dataSourceName,(name)->{
                 DataSourceSchema datasourceSchema = management.getSchemaManager().
                         getDatasourceSchema(name);
-                ParameterUtils.notNull(datasourceSchema,"data source schema" + name);
+                ParameterUtils.notNull(datasourceSchema,"collect source schema" + name);
                 IDataProvider provider = loadProvider(datasourceSchema.getProvider());
                 IDataSource connect = provider.connect(datasourceSchema);
-                ParameterUtils.nullMessage(connect,"data source " + name
+                ParameterUtils.nullMessage(connect,"collect source " + name
                         + " connect failed");
                 return connect;
             });

@@ -20,7 +20,7 @@ import java.util.Iterator;
 public interface IDataSource extends Closeable,AutoCloseable{
 
     /**
-     * scan data set
+     * scan collect set
      * @param query query cond
      * @return result
      */
@@ -29,7 +29,7 @@ public interface IDataSource extends Closeable,AutoCloseable{
     }
 
     /**
-     * scan data set
+     * scan collect set
      * @param querySet qyery set
      * @return result set
      */

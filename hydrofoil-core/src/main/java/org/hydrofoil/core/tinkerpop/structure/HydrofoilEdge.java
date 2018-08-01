@@ -1,10 +1,13 @@
 package org.hydrofoil.core.tinkerpop.structure;
 
+import org.apache.commons.collections4.IteratorUtils;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Property;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.hydrofoil.common.util.DataUtils;
 import org.hydrofoil.core.standard.StandardEdge;
+import org.hydrofoil.core.tinkerpop.glue.TinkerpopGraphTransit;
 
 import java.util.Iterator;
 
@@ -26,22 +29,32 @@ public class HydrofoilEdge extends HydrofoilElement implements Edge {
 
     @Override
     public Iterator<Vertex> vertices(Direction direction) {
-        return null;
+        if(direction == Direction.IN){
+            return IteratorUtils.arrayIterator(inVertex());
+        }
+        if(direction == Direction.OUT){
+            return IteratorUtils.arrayIterator(outVertex());
+        }
+        return bothVertices();
     }
 
     @Override
     public Vertex outVertex() {
-        return null;
+        StandardEdge standardEdge = (StandardEdge) standardElement;
+        return DataUtils.iteratorFirst(TinkerpopGraphTransit.listVerticesByIds(graph,
+                standardEdge.sourceId()));
     }
 
     @Override
     public Vertex inVertex() {
-        return null;
+        StandardEdge standardEdge = (StandardEdge) standardElement;
+        return DataUtils.iteratorFirst(TinkerpopGraphTransit.listVerticesByIds(graph,
+                standardEdge.targetId()));
     }
 
     @Override
     public Iterator<Vertex> bothVertices() {
-        return null;
+        return IteratorUtils.arrayIterator(outVertex(),inVertex());
     }
 
     @Override

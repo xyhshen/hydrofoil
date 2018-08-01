@@ -1,4 +1,4 @@
-package org.hydrofoil.common.util.data;
+package org.hydrofoil.common.util.collect;
 
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -10,15 +10,17 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.hydrofoil.common.util.ParameterUtils.checkSupport;
+
 /**
  * ArrayMap
  * <p>
- * package org.hydrofoil.common.util.data
+ * package org.hydrofoil.common.util.collect
  *
  * @author xie_yh
  * @date 2018/7/30 18:54
  */
-public class ArrayMap<K,V> implements Map<K,V>, Cloneable, Serializable {
+public class ArrayMap<K extends Comparable,V> implements Map<K,V>, Cloneable, Serializable {
 
     private ArrayMapEntry<K,V>[] storager;
 
@@ -49,15 +51,31 @@ public class ArrayMap<K,V> implements Map<K,V>, Cloneable, Serializable {
             return value;
         }
 
-        @SuppressWarnings({"unchecked", "ConstantConditions"})
+        @SuppressWarnings({"unchecked"})
         @Override
         public int compareTo(ArrayMapEntry o) {
+            if(o == null){
+                return -1;
+            }
             if(!(key instanceof Comparable) ||
-                    !(o instanceof Comparable)){
-                return ObjectUtils.compare(hashCode(),o.hashCode(),true);
+                    !(o.key instanceof Comparable)){
+                return ObjectUtils.compare(Objects.hashCode(key),Objects.hashCode(o.key),true);
             }
 
             return ObjectUtils.compare((Comparable)key,(Comparable)o.getKey(),true);
+        }
+
+        @Override
+        public int hashCode(){
+            return Objects.hashCode(key) ^ Objects.hashCode(value);
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public boolean equals(Object otherObj){
+            return (otherObj instanceof ArrayMapEntry) &&
+                    Objects.equals(((ArrayMapEntry)(otherObj)).key,this.key) &&
+                        Objects.equals(((ArrayMapEntry)(otherObj)).value,this.value);
         }
     }
 
@@ -65,6 +83,7 @@ public class ArrayMap<K,V> implements Map<K,V>, Cloneable, Serializable {
         init(original);
     }
 
+    @SuppressWarnings("unchecked")
     private void init(final Map<? extends K,? extends V> original){
         ParameterUtils.mustTrueMessage(MapUtils.isNotEmpty(original),"original is empty");
         storager = original.entrySet().stream().map((entry)->
@@ -109,13 +128,13 @@ public class ArrayMap<K,V> implements Map<K,V>, Cloneable, Serializable {
 
     @Override
     public V put(K key, V value) {
-        ParameterUtils.checkSupport(false,"can't be add!");
+        checkSupport(false,"can't be add!");
         return null;
     }
 
     @Override
     public V remove(Object key) {
-        ParameterUtils.checkSupport(false,"can't be deleted!");
+        checkSupport(false,"can't be deleted!");
         return null;
     }
 
@@ -152,15 +171,30 @@ public class ArrayMap<K,V> implements Map<K,V>, Cloneable, Serializable {
         return Stream.of(storager).collect(Collectors.toSet());
     }
 
-    public static void main(String[] args){
-        Map<String,String> map = new HashMap<>();
-        map.put("aaa","1");
-        map.put("ccc","2");
-        map.put("eee","3");
-        map.put("sss","4");
-        map.put("bbb","5");
-        Map<String,String> newMap = new ArrayMap<>(map);
+    @Override
+    public Object clone(){
+        try {
+            ArrayMap map = (ArrayMap) super.clone();
+            if(!isEmpty()){
+                map.storager = Arrays.copyOf(storager,size());
+            }
+            return map;
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
-        System.out.println(newMap.get("sss"));
+    @Override
+    public int hashCode(){
+        return Objects.hash((Object[]) storager);
+    }
+
+    @Override
+    public boolean equals(Object otherObj){
+        if(!(otherObj instanceof ArrayMap)){
+            return false;
+        }
+        return Arrays.equals(((ArrayMap)otherObj).storager,storager);
     }
 }

@@ -7,7 +7,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.dom4j.Element;
 import org.hydrofoil.common.configuration.HydrofoilConfiguration;
-import org.hydrofoil.common.configuration.HydrofoilConfigurationProperties;
+import org.hydrofoil.common.configuration.HydrofoilConfigurationItem;
 import org.hydrofoil.common.graph.EdgeDirection;
 import org.hydrofoil.common.schema.DataSourceSchema;
 import org.hydrofoil.common.schema.EdgeSchema;
@@ -36,7 +36,7 @@ public final class SchemaManager {
     private static final String ELEMENT_EDGE = "edge";
 
     /**
-     * data source schema map
+     * collect source schema map
      */
     private final Map<String,DataSourceSchema> dataSourceSchemaMap;
 
@@ -76,12 +76,12 @@ public final class SchemaManager {
 
     /**
      * load schema
-     * @param configuration config data
+     * @param configuration config collect
      */
-    public void load(final HydrofoilConfiguration configuration) throws Exception {
-        loadDataSource(configuration.getSchemaFile(HydrofoilConfigurationProperties.SCHEMA_DATASOURCE));
-        loadDataSet(configuration.getSchemaFile(HydrofoilConfigurationProperties.SCHEMA_DATASET));
-        loadMapper(configuration.getSchemaFile(HydrofoilConfigurationProperties.SCHEMA_MAPPER));
+    void load(final HydrofoilConfiguration configuration) throws Exception {
+        loadDataSource(configuration.getStream(HydrofoilConfigurationItem.SchemaDatasource));
+        loadDataSet(configuration.getStream(HydrofoilConfigurationItem.SchemaDataset));
+        loadMapper(configuration.getStream(HydrofoilConfigurationItem.SchemaMapper));
         lastChanged = System.currentTimeMillis();
     }
 
@@ -148,8 +148,8 @@ public final class SchemaManager {
     }
 
     /**
-     * get data source schema
-     * @param dataSourceName data source name
+     * get collect source schema
+     * @param dataSourceName collect source name
      * @return schem
      */
     public DataSourceSchema getDatasourceSchema(final String dataSourceName){

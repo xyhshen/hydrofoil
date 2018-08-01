@@ -21,15 +21,21 @@ import java.io.IOException;
 public final class HydrofoilConnector implements Closeable,AutoCloseable {
 
     /**
-     * data management
+     * collect management
      */
     private Management management;
+
+    /**
+     * config
+     */
+    private HydrofoilConfiguration configuration;
 
     HydrofoilConnector(){
         this.management = new Management();
     }
 
     void init(HydrofoilConfiguration configuration) throws Exception {
+        this.configuration = configuration;
         management.load(configuration);
     }
 
@@ -62,5 +68,13 @@ public final class HydrofoilConnector implements Closeable,AutoCloseable {
     @Override
     public void close() throws IOException {
         management.close();
+    }
+
+    /**
+     * @return HydrofoilConfiguration
+     * @see HydrofoilConnector#configuration
+     **/
+    public HydrofoilConfiguration getConfiguration() {
+        return configuration;
     }
 }
