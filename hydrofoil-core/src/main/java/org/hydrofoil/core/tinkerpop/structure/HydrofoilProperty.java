@@ -2,6 +2,7 @@ package org.hydrofoil.core.tinkerpop.structure;
 
 import org.apache.tinkerpop.gremlin.structure.Element;
 import org.apache.tinkerpop.gremlin.structure.Property;
+import org.hydrofoil.common.graph.GraphProperty;
 
 import java.util.NoSuchElementException;
 
@@ -17,8 +18,12 @@ public final class HydrofoilProperty<V> implements Property<V> {
 
     private final HydrofoilVertexProperty vertexProperty;
 
-    public HydrofoilProperty(final HydrofoilVertexProperty vertexProperty){
+    private final GraphProperty graphProperty;
+
+    public HydrofoilProperty(final HydrofoilVertexProperty vertexProperty,
+                             final GraphProperty graphProperty){
         this.vertexProperty = vertexProperty;
+        this.graphProperty = graphProperty;
     }
 
     @Override
@@ -26,14 +31,15 @@ public final class HydrofoilProperty<V> implements Property<V> {
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public V value() throws NoSuchElementException {
-        return null;
+        return (V) graphProperty.content();
     }
 
     @Override
     public boolean isPresent() {
-        return true;
+        return graphProperty != null;
     }
 
     @Override

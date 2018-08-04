@@ -1,5 +1,7 @@
 package org.hydrofoil.common.util.cache;
 
+import org.hydrofoil.common.util.DataUtils;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Collection;
@@ -29,7 +31,7 @@ public final class CacheTable implements Closeable {
         this.cacheName = cacheName;
         this.expireTime = expireTime;
         this.maxSize = maxSize;
-        this.cacheNodeMap = new ConcurrentHashMap<>(maxSize / 2);
+        this.cacheNodeMap = new ConcurrentHashMap<>(DataUtils.hashMapCapacity(maxSize));
     }
 
     public Object put(final Object key,Object value){

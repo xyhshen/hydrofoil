@@ -7,12 +7,12 @@ import org.hydrofoil.common.provider.datasource.RowStore;
 import org.hydrofoil.common.schema.AbstractElementSchema;
 import org.hydrofoil.common.schema.EdgeSchema;
 import org.hydrofoil.common.schema.PropertySchema;
-import org.hydrofoil.core.standard.management.SchemaManager;
+import org.hydrofoil.common.util.DataUtils;
 import org.hydrofoil.core.standard.StandardEdge;
 import org.hydrofoil.core.standard.StandardProperty;
 import org.hydrofoil.core.standard.StandardVertex;
+import org.hydrofoil.core.standard.management.SchemaManager;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -98,7 +98,7 @@ public class EdgeMapper extends AbstractElementMapper {
     }
 
     public StandardEdge rowStoreToEdge(EdgeSchema edgeSchema, RowStore rowStore){
-        Map<String,StandardProperty> propertyMap = new HashMap<>();
+        Map<String,StandardProperty> propertyMap = DataUtils.newMapWithMaxSize(edgeSchema.getProperties().size());
         GraphVertexId[] vertexIds = getEdgeVertexId(edgeSchema,rowStore);
         StandardEdge edge = new StandardEdge(rowElementToId(edgeSchema,rowStore,GraphEdgeId.class),
                 vertexIds[0],vertexIds[1],propertyMap);

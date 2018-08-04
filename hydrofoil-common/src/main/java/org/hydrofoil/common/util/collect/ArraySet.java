@@ -44,6 +44,9 @@ public class ArraySet<E extends Comparable> implements Set<E>, Cloneable,Seriali
     }
 
     private int findIndex(E key){
+        if(isEmpty() || key == null){
+            return -1;
+        }
         return Arrays.binarySearch(keyStorager,key);
     }
 
@@ -112,12 +115,10 @@ public class ArraySet<E extends Comparable> implements Set<E>, Cloneable,Seriali
         return false;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public boolean containsAll(Collection<?> c) {
-        if(isEmpty()){
-            return false;
-        }
-        return c.stream().filter((v)->findIndex((E) v)!=-1).count() == c.size();
+        return !isEmpty() && c.stream().filter((v) -> findIndex((E) v) != -1).count() == c.size();
     }
 
     @Override

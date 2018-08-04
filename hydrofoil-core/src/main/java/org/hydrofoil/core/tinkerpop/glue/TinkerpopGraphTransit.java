@@ -1,21 +1,24 @@
 package org.hydrofoil.core.tinkerpop.glue;
 
 import org.apache.commons.collections4.IteratorUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.apache.tinkerpop.gremlin.structure.VertexProperty;
 import org.hydrofoil.common.graph.GraphVertexId;
 import org.hydrofoil.common.util.ParameterUtils;
 import org.hydrofoil.core.standard.StandardEdge;
+import org.hydrofoil.core.standard.StandardElement;
+import org.hydrofoil.core.standard.StandardProperty;
 import org.hydrofoil.core.standard.StandardVertex;
 import org.hydrofoil.core.standard.query.EdgeGraphQueryRunner;
 import org.hydrofoil.core.tinkerpop.structure.HydrofoilEdge;
 import org.hydrofoil.core.tinkerpop.structure.HydrofoilGraph;
 import org.hydrofoil.core.tinkerpop.structure.HydrofoilVertex;
+import org.hydrofoil.core.tinkerpop.structure.HydrofoilVertexProperty;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
 
 import static org.hydrofoil.common.configuration.HydrofoilConfigurationItem.TinkerpopDefaultReturnLength;
 
@@ -107,6 +110,21 @@ public final class TinkerpopGraphTransit {
             return IteratorUtils.emptyIterator();
         }
         return listVerticesByIds(graph,vertexIds.toArray(new GraphVertexId[vertexIds.size()]));
+    }
+
+    public static <V> Iterator<VertexProperty<V>> listVertexProperties(HydrofoilVertex vertex,String ...propertyKeys){
+        StandardElement standard = vertex.standard();
+        List<VertexProperty<V>> l = new ArrayList<>(ArrayUtils.getLength(propertyKeys));
+        for(String propertyKey:propertyKeys){
+            StandardProperty standardProperty = standard.property(propertyKey);
+            if(standardProperty == null){
+                continue;
+            }
+            HydrofoilVertexProperty<V> vertexProperty = new HydrofoilVertexProperty<V>(vertex,
+                    standardProperty);
+            l.add(vertexProperty);
+        }
+        return l.iterator();
     }
 
 }

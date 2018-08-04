@@ -79,6 +79,12 @@ public class ArrayMap<K extends Comparable,V> implements Map<K,V>, Cloneable, Se
         }
     }
 
+    @SuppressWarnings("unchecked")
+    public ArrayMap(final K key, final V value){
+        storager = new ArrayMapEntry[1];
+        storager[1] = new ArrayMapEntry<>(key,value);
+    }
+
     public ArrayMap(final Map<K,V> original){
         init(original);
     }
@@ -101,7 +107,10 @@ public class ArrayMap<K extends Comparable,V> implements Map<K,V>, Cloneable, Se
         return ArrayUtils.isEmpty(storager);
     }
 
-    private int findIndexByKey(K key){
+    private int findIndexByKey(final K key){
+        if(isEmpty() || key == null){
+            return -1;
+        }
         return Arrays.binarySearch(storager,new ArrayMapEntry<>(key,null));
     }
 
@@ -113,7 +122,7 @@ public class ArrayMap<K extends Comparable,V> implements Map<K,V>, Cloneable, Se
 
     @Override
     public boolean containsValue(Object value) {
-        return Stream.of(storager).filter(v->Objects.equals(v,value)).count() > 0;
+        return !isEmpty() && Stream.of(storager).filter(v -> Objects.equals(v, value)).count() > 0;
     }
 
     @SuppressWarnings("unchecked")
@@ -152,9 +161,9 @@ public class ArrayMap<K extends Comparable,V> implements Map<K,V>, Cloneable, Se
     @SuppressWarnings("unchecked")
     @Override
     public Set<K> keySet() {
-        Set<K> l = new HashSet<>();
-        Stream.of(storager).forEach(v->l.add((K) v.key));
-        return l;
+        Set<K> s = new HashSet<>();
+        Stream.of(storager).forEach(v->s.add((K) v.key));
+        return s;
     }
 
     @SuppressWarnings("unchecked")

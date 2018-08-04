@@ -6,8 +6,7 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Iterator;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * DataUtils
@@ -18,6 +17,8 @@ import java.util.Optional;
  * @date 2018/7/10 13:34
  */
 public final class DataUtils {
+
+    private static final int MAX_POWER_OF_TWO = 1 << (Integer.SIZE - 2);
 
     /**
      * get iteraot first value
@@ -52,10 +53,46 @@ public final class DataUtils {
         return null;
     }
 
-    public static Object getOptional(Optional<?> optional){
+    public static Object getOptional(final Optional<?> optional){
         if(optional == null){
             return null;
         }
         return optional.orElse(null);
+    }
+
+    public static <K, V> HashMap<K, V> newHashMapWithExpectedSize(final int expectedSize) {
+        return new HashMap<K, V>(hashMapCapacity(expectedSize));
+    }
+
+    public static <K> HashSet<K> newSetMapWithExpectedSize(final int expectedSize) {
+        return new HashSet<K>(hashMapCapacity(expectedSize));
+    }
+
+    public static <K,V> Map<K,V> newMapWithMaxSize(final int maxSize){
+        if(maxSize <= 50){
+            return new TreeMap<K,V>();
+        }
+        return newHashMapWithExpectedSize(maxSize);
+    }
+
+    public static <K> Set<K> newSetWithMaxSize(final int maxSize){
+        if(maxSize <= 50){
+            return new TreeSet<K>();
+        }
+        return newSetMapWithExpectedSize(maxSize);
+    }
+
+    public static int hashMapCapacity(final int expectedSize) {
+        if (expectedSize < 3) {
+            ParameterUtils.mustTrue(expectedSize > 0,"expectedSize");
+            return expectedSize + 1;
+        }
+        if (expectedSize < MAX_POWER_OF_TWO) {   //MAX_POWER_OF_TWO = 1 << (Integer.SIZE - 2); //Integer.SIZE = 32;
+            // This is the calculation used in JDK8 to resize when a putAll
+            // happens; it seems to be the most conservative calculation we
+            // can make.  0.75 is the default load factor.
+            return (int) ((float) expectedSize / 0.75F + 1.0F);
+        }
+        return Integer.MAX_VALUE; // any large value //MAX_VALUE = 0x7fffffff;
     }
 }

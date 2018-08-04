@@ -10,11 +10,11 @@ import org.hydrofoil.common.provider.datasource.RowStore;
 import org.hydrofoil.common.schema.AbstractElementSchema;
 import org.hydrofoil.common.schema.PropertySchema;
 import org.hydrofoil.common.schema.VertexSchema;
-import org.hydrofoil.core.standard.management.SchemaManager;
+import org.hydrofoil.common.util.DataUtils;
 import org.hydrofoil.core.standard.StandardProperty;
 import org.hydrofoil.core.standard.StandardVertex;
+import org.hydrofoil.core.standard.management.SchemaManager;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -69,9 +69,10 @@ public final class VertexMapper extends AbstractElementMapper{
     }
 
     public StandardVertex rowStoreToVertex(VertexSchema vertexSchema, RowStore rowStore){
-        Map<String,StandardProperty> propertyMap = new HashMap<>();
+        Map<String,StandardProperty> propertyMap = DataUtils.newMapWithMaxSize(vertexSchema.getProperties().size());
         StandardVertex vertex = new StandardVertex(rowElementToId(vertexSchema,rowStore,GraphVertexId.class),propertyMap);
         String tableName = MapperHelper.getRealTableName(schemaManager,vertexSchema.getTable());
+
         vertexSchema.getProperties().values().forEach((propertySchema) ->{
             if(MapperHelper.isPropertyInMainTable(propertySchema)){
                 GraphProperty graphProperty =

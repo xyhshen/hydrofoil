@@ -28,9 +28,14 @@ public final class TinkerpopExample {
         configuration.put("hydrofoil.schema.mapper.resource","mapper.xml");
         try(HydrofoilGraph graph = HydrofoilFactory.openTinkerpop(configuration)){
             Optional<Vertex> optional = graph.traversal().V(GraphElementId.VertexId("person","idnumber", "370601198205043112")).tryNext();
-            Vertex vertex = optional.get();
+            Vertex vertex = optional.orElseGet(null);
             Iterator<Edge> employ = vertex.edges(Direction.BOTH, "employ");
             Iterator<Vertex> vertices = vertex.vertices(Direction.BOTH, "employ");
+            vertices.forEachRemaining((v)->{
+                System.out.println(v.id());
+                System.out.println(v.label());
+                System.out.println(v.property("name").value());
+            });
             System.out.println(vertex);
             /*graph.traversal().E().hasId(P.eq(0)).match(__.as("aa2").has("ccc")).V().limit(100).tryNext();
             graph.traversal().V().hasId(1).properties("aaa").as("ss").tryNext();

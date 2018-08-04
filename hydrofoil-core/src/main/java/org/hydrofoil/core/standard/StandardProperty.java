@@ -39,6 +39,7 @@ public final class StandardProperty {
         this.label = label;
         this.graphProperty = graphProperty;
         this.complex = complex;
+        this.propertyId = label.hashCode() ^ (long)(graphProperty.hashCode() << 32);
     }
 
     public GraphProperty simple(){

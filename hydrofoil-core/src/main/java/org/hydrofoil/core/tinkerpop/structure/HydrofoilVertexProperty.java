@@ -1,13 +1,12 @@
 package org.hydrofoil.core.tinkerpop.structure;
 
+import org.apache.commons.collections.IteratorUtils;
 import org.apache.tinkerpop.gremlin.structure.Property;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.structure.VertexProperty;
 import org.hydrofoil.core.standard.StandardProperty;
 
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
@@ -67,12 +66,10 @@ public final class HydrofoilVertexProperty<V> implements VertexProperty<V>{
         return (Property<V>) Vertex.Exceptions.edgeAdditionsNotSupported();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <U> Iterator<Property<U>> properties(String... propertyKeys) {
-        List<Property<U>> properties = new LinkedList<>();
-        if(!standardProperty.isComplex()){
-            //properties.add(new HydrofoilProperty<>());
-        }
-        return null;
+        return IteratorUtils.singletonIterator
+                (new HydrofoilProperty<U>(this,standardProperty.simple()));
     }
 }

@@ -8,8 +8,6 @@ import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
-import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.RandomUtils;
 import org.hydrofoil.common.provider.datasource.RowQueryRequest;
 import org.hydrofoil.common.provider.datasource.RowStore;
 
@@ -55,7 +53,7 @@ public abstract class AbstractDbQueryService {
         });
         //generate main table name
         String mainName = request.getName();
-        tableAlias.put(mainName,"main" + Integer.toHexString(RandomUtils.nextInt(1,100)).toLowerCase());
+        tableAlias.put(mainName,"main" + Integer.toHexString(mainName.hashCode()).toLowerCase());
         //generate associate table name
         int i = 0;
         for(RowQueryRequest.AssociateRowQuery query:request.getAssociateQuery()){
@@ -67,7 +65,7 @@ public abstract class AbstractDbQueryService {
             Map<String,String> columnMap = columnAlias.computeIfAbsent(tableName,(k->new TreeMap<>()));
             final int i1 = i;
             MultiMapUtils.getCollection(columns,tableName).forEach((columnName)->{
-                columnMap.put(columnName, "s" + i1 + RandomStringUtils.random(8,"abcdefghijklmnopqrst"));
+                columnMap.put(columnName, "scol_" + Integer.toHexString(Objects.hash(tableName,columnName)));
             });
             i++;
         }
