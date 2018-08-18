@@ -17,27 +17,10 @@
             <artifactId>hydrofoil-common</artifactId>
             <version>${hydrofoil.version}</version>
         </dependency>
-        <!-- TinkerPop depend-->
         <dependency>
-            <groupId>org.apache.tinkerpop</groupId>
-            <artifactId>gremlin-core</artifactId>
-            <version>3.3.3</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>gossip</artifactId>
-                    <groupId>3.3.3</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.tinkerpop</groupId>
-            <artifactId>gremlin-groovy</artifactId>
-            <version>${tinkerpop.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.tinkerpop</groupId>
-            <artifactId>tinkergraph-gremlin</artifactId>
-            <version>${tinkerpop.version}</version>
+            <groupId>org.hydrofoil</groupId>
+            <artifactId>hydrofoil-tinkerpop</artifactId>
+            <version>${hydrofoil.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.tinkerpop</groupId>

@@ -1,5 +1,6 @@
 package org.hydrofoil.core.standard.internal;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.IterableUtils;
 import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
@@ -163,6 +164,29 @@ public abstract class AbstractGraphQueryRunner <E,T extends IGraphQueryRunner> i
     @Override
     public Long count() {
         return null;
+    }
+
+    @Override
+    public boolean operable(OperationType type){
+        if(CollectionUtils.isNotEmpty(elementIds)){
+            return false;
+        }
+        if(type == OperationType.paging){
+            if(CollectionUtils.size(labels) != 1){
+                return false;
+            }
+            return true;
+        }
+        if(type == OperationType.count){
+            return true;
+        }
+        if(type == OperationType.order){
+            if(CollectionUtils.size(labels) != 1){
+                return false;
+            }
+            return true;
+        }
+        return false;
     }
 
 

@@ -20,6 +20,8 @@ public final class DataUtils {
 
     private static final int MAX_POWER_OF_TWO = 1 << (Integer.SIZE - 2);
 
+    private static final int USE_HASH_MAP_MAX_SIZE = 50;
+
     /**
      * get iteraot first value
      * @param iterator iterator
@@ -61,10 +63,16 @@ public final class DataUtils {
     }
 
     public static <K, V> HashMap<K, V> newHashMapWithExpectedSize(final int expectedSize) {
+        if(expectedSize == 0){
+            return new HashMap<K,V>();
+        }
         return new HashMap<K, V>(hashMapCapacity(expectedSize));
     }
 
     public static <K> HashSet<K> newSetMapWithExpectedSize(final int expectedSize) {
+        if(expectedSize == 0){
+            return new HashSet<K>();
+        }
         return new HashSet<K>(hashMapCapacity(expectedSize));
     }
 
@@ -76,13 +84,16 @@ public final class DataUtils {
     }
 
     public static <K> Set<K> newSetWithMaxSize(final int maxSize){
-        if(maxSize <= 50){
+        if(maxSize <= USE_HASH_MAP_MAX_SIZE){
             return new TreeSet<K>();
         }
         return newSetMapWithExpectedSize(maxSize);
     }
 
     public static int hashMapCapacity(final int expectedSize) {
+        if(expectedSize == 0){
+            return 0;
+        }
         if (expectedSize < 3) {
             ParameterUtils.mustTrue(expectedSize > 0,"expectedSize");
             return expectedSize + 1;

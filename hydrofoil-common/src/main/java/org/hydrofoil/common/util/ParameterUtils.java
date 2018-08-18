@@ -132,4 +132,17 @@ public final class ParameterUtils {
         }
     }
 
+    public static void checkValueIn(final String checkValue,final String ...values){
+        if(!StringUtils.equalsAnyIgnoreCase(checkValue,values)){
+            throw new IllegalArgumentException(checkValue + "value not in set");
+        }
+    }
+
+    public static void checkValueNullable(final String checkValue,final String ...values){
+        if(StringUtils.isBlank(checkValue)){
+            return;
+        }
+        checkValueIn(checkValue,values);
+    }
+
 }

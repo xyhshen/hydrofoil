@@ -71,8 +71,13 @@ public class EdgeMapper extends AbstractElementMapper {
                 mainCondition.add(QMatch.eq(tableFieldname,value));
             });
         }
-        mainCondition.addAll(SetUtils.emptyIfNull(propertyQuerySet).stream().map((propertyQuery)->{
+        mainCondition.addAll(SetUtils.emptyIfNull(propertyQuerySet).stream().
+                filter(propertyQuery->MapperHelper.checkQueriable(schemaManager,edgeSchema,propertyQuery)).
+                map((propertyQuery)->{
             PropertySchema propertySchema = edgeSchema.getProperties().get(propertyQuery.pair().name());
+            if(propertySchema == null){
+                return null;
+            }
             QMatch.Q clone = propertyQuery.clone();
             clone.pair().name(propertySchema.getField());
             return clone;

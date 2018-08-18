@@ -13,6 +13,7 @@ import org.hydrofoil.core.standard.StandardElement;
 import org.hydrofoil.core.standard.StandardProperty;
 import org.hydrofoil.core.standard.StandardVertex;
 import org.hydrofoil.core.standard.query.EdgeGraphQueryRunner;
+import org.hydrofoil.core.standard.query.VertexGraphQueryRunner;
 import org.hydrofoil.core.tinkerpop.structure.HydrofoilEdge;
 import org.hydrofoil.core.tinkerpop.structure.HydrofoilGraph;
 import org.hydrofoil.core.tinkerpop.structure.HydrofoilVertex;
@@ -32,16 +33,7 @@ import static org.hydrofoil.common.configuration.HydrofoilConfigurationItem.Tink
  */
 public final class TinkerpopGraphTransit {
 
-    /**
-     * tinkerpop graph list all vertex
-     * @param graph graph instance
-     * @param vertexIds id's
-     * @return vertex
-     */
-    public static Iterator<Vertex> listVerticesByIds(HydrofoilGraph graph, Object... vertexIds){
-        long length = graph.getConnector().getConfiguration().getLong(TinkerpopDefaultReturnLength);
-        Iterator<StandardVertex> vertexIterator = graph.getConnector().vertices(graph.getIdManage().vertexIds(vertexIds)).
-                length(length).take();
+    private static Iterator<Vertex> returnVertexIterator(HydrofoilGraph graph,Iterator<StandardVertex> vertexIterator){
         return new Iterator<Vertex>() {
             @Override
             public boolean hasNext() {
@@ -57,7 +49,25 @@ public final class TinkerpopGraphTransit {
         };
     }
 
-    private static Iterator<Edge> executeQuery(HydrofoilGraph graph,EdgeGraphQueryRunner runner){
+    /**
+     * tinkerpop graph list all vertex
+     * @param graph graph instance
+     * @param vertexIds id's
+     * @return vertex
+     */
+    public static Iterator<Vertex> listVerticesByIds(HydrofoilGraph graph, Object... vertexIds){
+        long length = graph.getConnector().getConfiguration().getLong(TinkerpopDefaultReturnLength);
+        Iterator<StandardVertex> vertexIterator = graph.getConnector().vertices(graph.getIdManage().vertexIds(vertexIds)).
+                length(length).take();
+        return returnVertexIterator(graph,vertexIterator);
+    }
+
+    public static Iterator<Vertex> executeQuery(HydrofoilGraph graph,VertexGraphQueryRunner runner){
+        Iterator<StandardVertex> vertexIterator = runner.take();
+        return returnVertexIterator(graph,vertexIterator);
+    }
+
+    public static Iterator<Edge> executeQuery(HydrofoilGraph graph,EdgeGraphQueryRunner runner){
         Iterator<StandardEdge> edgeIterator = runner.take();
         return new Iterator<Edge>() {
             @Override

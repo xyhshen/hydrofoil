@@ -1,5 +1,7 @@
 package org.hydrofoil.example;
 
+import org.apache.tinkerpop.gremlin.process.traversal.P;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
@@ -27,6 +29,12 @@ public final class TinkerpopExample {
         configuration.put("hydrofoil.schema.dataset.resource","dataset.xml");
         configuration.put("hydrofoil.schema.mapper.resource","mapper.xml");
         try(HydrofoilGraph graph = HydrofoilFactory.openTinkerpop(configuration)){
+            graph.traversal().V().hasLabel(P.eq("person")).hasLabel(P.within("company"))
+                    .has("name","xyh").hasLabel(P.not(P.eq("aaab"))).limit(10).tryNext();
+            graph.traversal().V(1).has("aaa",P.eq(null)).tryNext();
+            graph.traversal().E().hasId(P.eq(0)).match(__.as("aa2").has("ccc")).V().limit(100).tryNext();
+            graph.traversal().V().hasId(1).properties("aaa").as("ss").tryNext();
+            graph.traversal().V().hasLabel("person").has("idnumber","3710382323").inE("ss").count().tryNext();
             Optional<Vertex> optional = graph.traversal().V(GraphElementId.VertexId("person","idnumber", "370601198205043112")).tryNext();
             Vertex vertex = optional.orElseGet(null);
             Iterator<Edge> employ = vertex.edges(Direction.BOTH, "employ");
@@ -37,10 +45,6 @@ public final class TinkerpopExample {
                 System.out.println(v.property("name").value());
             });
             System.out.println(vertex);
-            /*graph.traversal().E().hasId(P.eq(0)).match(__.as("aa2").has("ccc")).V().limit(100).tryNext();
-            graph.traversal().V().hasId(1).properties("aaa").as("ss").tryNext();
-            graph.traversal().V().hasLabel("person").has("idnumber","3710382323").inE("ss").count().tryNext();
-            graph.traversal().V(1).tryNext();*/
         }
     }
 }

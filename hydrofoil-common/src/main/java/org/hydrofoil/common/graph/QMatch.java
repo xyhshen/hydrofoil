@@ -17,9 +17,21 @@ import java.util.Objects;
 public class QMatch {
 
     public enum QType{
+        /**
+         * equal ==
+         */
         eq,
+        /**
+         * like %*%
+         */
         like,
+        /**
+         * between(a,b)
+         */
         between,
+        /**
+         * in(a,b,c,d.....)
+         */
         in
     }
 

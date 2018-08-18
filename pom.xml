@@ -12,6 +12,7 @@
         <module>hydrofoil-core</module>
         <module>hydrofoil-mysql</module>
         <module>hydrofoil-example</module>
+        <module>hydrofoil-tinkerpop</module>
     </modules>
     <packaging>pom</packaging>
     <name>hydrofoil graph engine</name>

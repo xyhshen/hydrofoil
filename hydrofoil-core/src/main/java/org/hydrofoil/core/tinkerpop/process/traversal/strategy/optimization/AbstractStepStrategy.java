@@ -32,7 +32,9 @@ abstract class AbstractStepStrategy extends AbstractTraversalStrategy<TraversalS
             return;
         }
         //execute apply
-        ParameterUtils.checkStateMessage(dispatch(traversal),"apply failed!");
+        ParameterUtils.checkStateMessage(
+                dispatch(traversal),
+                "apply failed!");
     }
 
     /**

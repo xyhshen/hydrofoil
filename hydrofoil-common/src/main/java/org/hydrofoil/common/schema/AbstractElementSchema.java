@@ -1,10 +1,10 @@
 package org.hydrofoil.common.schema;
 
 import org.dom4j.Element;
+import org.hydrofoil.common.util.DataUtils;
 import org.hydrofoil.common.util.ParameterUtils;
 import org.hydrofoil.common.util.XmlUtils;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -57,7 +57,7 @@ public abstract class AbstractElementSchema extends SchemaItem {
         List<Element> elements = XmlUtils.listElement(node, ATTR_ELEMENT_PROPERTY);
         ParameterUtils.notEmpty(elements);
 
-        Map<String,PropertySchema> properties = new HashMap<>();
+        Map<String,PropertySchema> properties = DataUtils.newHashMapWithExpectedSize(elements.size());
         //parse property schema
         for(Element element:elements){
             PropertySchema propertySchema = new PropertySchema();

@@ -1,4 +1,4 @@
-package org.hydrofoil.core.tinkerpop.glue;
+package org.hydrofoil.tinkerpop;
 
 import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.hydrofoil.common.graph.expand.ElementPredicate;

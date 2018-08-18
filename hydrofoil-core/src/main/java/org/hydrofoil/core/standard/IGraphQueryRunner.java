@@ -17,6 +17,25 @@ import java.util.Iterator;
 public interface IGraphQueryRunner <E,T extends IGraphQueryRunner> {
 
     /**
+     * query operation type
+     */
+    public enum OperationType{
+        /**
+         * data paging
+         */
+        paging,
+        /**
+         * total count
+         */
+        count,
+        /**
+         * order by
+         */
+        order
+    }
+
+
+    /**
      * get element
      * @return element
      */
@@ -89,5 +108,12 @@ public interface IGraphQueryRunner <E,T extends IGraphQueryRunner> {
      * @return this
      */
     T fields(final QMatch.Q ...query);
+
+    /**
+     * check operator is feasible
+     * @param type oprator type
+     * @return result
+     */
+    boolean operable(OperationType type);
 
 }

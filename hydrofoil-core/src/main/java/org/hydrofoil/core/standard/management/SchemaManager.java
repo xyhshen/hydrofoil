@@ -9,10 +9,7 @@ import org.dom4j.Element;
 import org.hydrofoil.common.configuration.HydrofoilConfiguration;
 import org.hydrofoil.common.configuration.HydrofoilConfigurationItem;
 import org.hydrofoil.common.graph.EdgeDirection;
-import org.hydrofoil.common.schema.DataSourceSchema;
-import org.hydrofoil.common.schema.EdgeSchema;
-import org.hydrofoil.common.schema.TableSchema;
-import org.hydrofoil.common.schema.VertexSchema;
+import org.hydrofoil.common.schema.*;
 import org.hydrofoil.common.util.XmlUtils;
 
 import java.io.InputStream;
@@ -238,6 +235,14 @@ public final class SchemaManager {
      */
     public TableSchema getTableSchema(final String name){
         return tableSchemaMap.get(name);
+    }
+
+    public ColumnSchema getColumnSchema(final String tableName,final String columnName){
+        TableSchema tableSchema = getTableSchema(tableName);
+        if(tableName == null){
+            return null;
+        }
+        return tableSchema.getColumns().get(columnName);
     }
 
 }

@@ -2,11 +2,11 @@ package org.hydrofoil.common.schema;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.dom4j.Element;
+import org.hydrofoil.common.util.DataUtils;
 import org.hydrofoil.common.util.FieldUtils;
 import org.hydrofoil.common.util.ParameterUtils;
 import org.hydrofoil.common.util.XmlUtils;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -59,8 +59,8 @@ public final class PropertySchema extends SchemaItem{
         if(!XmlUtils.hasChildren(node)){
             return;
         }
-        Map<String,PairSchema> map = new HashMap<>();
         List<Element> elements = XmlUtils.listElement(node, ATTR_PROPERTY_CHILDREN_ELEMENT);
+        Map<String,PairSchema> map = DataUtils.newHashMapWithExpectedSize(elements.size());
         for(Element element:elements){
             PairSchema pairSchema = new PairSchema();
             pairSchema.read(element);

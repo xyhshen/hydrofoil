@@ -2,8 +2,12 @@ package org.hydrofoil.common.schema;
 
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Element;
+import org.hydrofoil.common.util.DataUtils;
 import org.hydrofoil.common.util.ParameterUtils;
 import org.hydrofoil.common.util.XmlUtils;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * TableSchema
@@ -18,6 +22,8 @@ public class TableSchema extends SchemaItem{
     private static final String ATTR_TABLE_NAME = "name";
     private static final String ATTR_TABLE_DATASOURCE = "datasource";
     private static final String ATTR_TABLE_REALNAME = "realname";
+
+    private static final String ELEMENT_TABLE_COLUMN = "column";
 
     public TableSchema(){}
 
@@ -38,6 +44,20 @@ public class TableSchema extends SchemaItem{
         putItem(ATTR_TABLE_NAME,name);
         putItem(ATTR_TABLE_DATASOURCE,datasource);
         putItem(ATTR_TABLE_REALNAME,realname);
+
+        loadColumns(element);
+    }
+
+    private void loadColumns(final Element node){
+        List<Element> elements = XmlUtils.listElement(node,
+                ELEMENT_TABLE_COLUMN);
+        Map<String,ColumnSchema> map = DataUtils.newHashMapWithExpectedSize(elements.size());
+        for(Element element:elements){
+            ColumnSchema columnSchema = new ColumnSchema();
+            columnSchema.parse(element);
+            map.put(columnSchema.getColumnName(),columnSchema);
+        }
+        putSchemaItem(ELEMENT_TABLE_COLUMN,map);
     }
 
     /**
@@ -63,6 +83,10 @@ public class TableSchema extends SchemaItem{
     public String getRealName(){
         String realName = getItem(ATTR_TABLE_REALNAME);
        return StringUtils.isNotBlank(realName)?realName:getName();
+    }
+
+    public Map<String,ColumnSchema> getColumns(){
+        return getSchemaMap(ELEMENT_TABLE_COLUMN);
     }
 
 }

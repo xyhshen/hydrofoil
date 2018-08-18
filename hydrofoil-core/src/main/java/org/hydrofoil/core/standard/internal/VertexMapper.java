@@ -59,8 +59,13 @@ public final class VertexMapper extends AbstractElementMapper{
 
     public ElementMapping toMapping(String label, Set<QMatch.Q> propertyQuerySet,Long start,Long limit){
         VertexSchema vertexSchema = schemaManager.getVertexSchema(label);
-        Set<QMatch.Q> mainCondition = SetUtils.emptyIfNull(propertyQuerySet).stream().map((propertyQuery)->{
+        Set<QMatch.Q> mainCondition = SetUtils.emptyIfNull(propertyQuerySet).stream().
+                filter(propertyQuery-> MapperHelper.checkQueriable(schemaManager,vertexSchema,propertyQuery)).
+                map((propertyQuery)->{
             PropertySchema propertySchema = vertexSchema.getProperties().get(propertyQuery.pair().name());
+            if(propertySchema == null){
+                return null;
+            }
             QMatch.Q clone = propertyQuery.clone();
             clone.pair().name(propertySchema.getField());
             return clone;
