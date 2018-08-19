@@ -1,2 +1,3 @@
 # hydrofoil
-小型图数据库
+a small graph computing engine  
+not completed in so far  
