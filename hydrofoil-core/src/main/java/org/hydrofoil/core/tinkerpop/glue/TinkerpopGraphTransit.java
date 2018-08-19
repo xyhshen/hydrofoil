@@ -124,17 +124,20 @@ public final class TinkerpopGraphTransit {
 
     public static <V> Iterator<VertexProperty<V>> listVertexProperties(HydrofoilVertex vertex,String ...propertyKeys){
         StandardElement standard = vertex.standard();
-        List<VertexProperty<V>> l = new ArrayList<>(ArrayUtils.getLength(propertyKeys));
-        for(String propertyKey:propertyKeys){
-            StandardProperty standardProperty = standard.property(propertyKey);
-            if(standardProperty == null){
-                continue;
+        List<StandardProperty> standardProperties = new ArrayList<>();
+        if(ArrayUtils.isNotEmpty(propertyKeys)){
+            for(String propertyKey:propertyKeys){
+                StandardProperty standardProperty = standard.property(propertyKey);
+                if(standardProperty == null){
+                    continue;
+                }
+                standardProperties.add(standardProperty);
             }
-            HydrofoilVertexProperty<V> vertexProperty = new HydrofoilVertexProperty<V>(vertex,
-                    standardProperty);
-            l.add(vertexProperty);
+        }else{
+            standardProperties.addAll(standard.properties());
         }
-        return l.iterator();
+        return standardProperties.stream().
+                map(p->(VertexProperty<V>)new HydrofoilVertexProperty<V>(vertex,p)).iterator();
     }
 
 }

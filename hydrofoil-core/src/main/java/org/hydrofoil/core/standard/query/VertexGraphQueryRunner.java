@@ -5,11 +5,11 @@ import org.hydrofoil.common.graph.GraphVertexId;
 import org.hydrofoil.common.provider.datasource.RowStore;
 import org.hydrofoil.common.schema.VertexSchema;
 import org.hydrofoil.common.util.ParameterUtils;
-import org.hydrofoil.core.standard.management.Management;
 import org.hydrofoil.core.standard.StandardVertex;
 import org.hydrofoil.core.standard.internal.AbstractGraphQueryRunner;
 import org.hydrofoil.core.standard.internal.ElementMapping;
 import org.hydrofoil.core.standard.internal.VertexMapper;
+import org.hydrofoil.core.standard.management.Management;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -57,5 +57,13 @@ public final class VertexGraphQueryRunner extends AbstractGraphQueryRunner<Stand
     @Override
     protected StandardVertex handleRowToElement(ElementMapping mapping, RowStore rowStore) {
         return vertexMapper.rowStoreToVertex((VertexSchema) mapping.getSchemaItem(),rowStore);
+    }
+
+    @Override
+    public boolean operable(OperationType type) {
+        if(!super.operable(type)){
+            return false;
+        }
+        return vertexMapper.checkQueriable(labels,propertyQuerySet);
     }
 }

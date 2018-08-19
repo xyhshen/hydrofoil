@@ -6,13 +6,13 @@ import org.hydrofoil.common.graph.GraphEdgeId;
 import org.hydrofoil.common.provider.datasource.RowStore;
 import org.hydrofoil.common.schema.EdgeSchema;
 import org.hydrofoil.common.util.ParameterUtils;
-import org.hydrofoil.core.standard.management.Management;
 import org.hydrofoil.core.standard.StandardEdge;
 import org.hydrofoil.core.standard.StandardVertex;
 import org.hydrofoil.core.standard.internal.AbstractGraphQueryRunner;
 import org.hydrofoil.core.standard.internal.EdgeMapper;
 import org.hydrofoil.core.standard.internal.ElementMapping;
 import org.hydrofoil.core.standard.internal.VertexMapper;
+import org.hydrofoil.core.standard.management.Management;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -135,5 +135,13 @@ public class EdgeGraphQueryRunner extends AbstractGraphQueryRunner<StandardEdge,
     public EdgeGraphQueryRunner direction(EdgeDirection direction) {
         this.direction = direction;
         return this;
+    }
+
+    @Override
+    public boolean operable(OperationType type) {
+        if(!super.operable(type)){
+            return false;
+        }
+        return edgeMapper.checkQueriable(labels,propertyQuerySet);
     }
 }

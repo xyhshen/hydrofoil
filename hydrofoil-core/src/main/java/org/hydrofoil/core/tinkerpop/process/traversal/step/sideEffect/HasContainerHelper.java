@@ -15,6 +15,7 @@ import org.hydrofoil.core.tinkerpop.glue.TinkerpopElementUtils;
 import org.hydrofoil.core.tinkerpop.structure.HydrofoilGraph;
 
 import java.util.*;
+import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 
 /**
@@ -26,6 +27,24 @@ import java.util.stream.Collectors;
  * @date 2018/8/18 14:55
  */
 public final class HasContainerHelper {
+
+    private static boolean isUsableHasSpecial(HasContainer hasContainer){
+        if(!StringUtils.equalsIgnoreCase(hasContainer.getKey(),
+                T.label.getAccessor())){
+            return false;
+        }
+        BiPredicate<?, ?> bp = hasContainer.getBiPredicate();
+        return bp == Compare.eq ||
+                bp == Compare.neq ||
+                bp == Contains.within ||
+                bp == Contains.without;
+    }
+
+    static boolean isHasContainerQueriable(final HydrofoilGraphStep<?,?> graphStep){
+        return graphStep.getHasContainers().stream().
+                filter(p->!isUsableHasSpecial(p)).
+                filter(p->!TinkerpopElementUtils.isPredicateQueriable(p.getKey(),p.getPredicate())).count() == 0;
+    }
 
     static IGraphQueryRunner buildQueryRunner(final Traversal.Admin<?, ?> traversal,final HydrofoilGraphStep<?,?> graphStep){
         HydrofoilGraph graph = (HydrofoilGraph) DataUtils.

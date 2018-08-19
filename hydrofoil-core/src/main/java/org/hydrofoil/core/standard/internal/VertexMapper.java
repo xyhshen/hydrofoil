@@ -44,6 +44,11 @@ public final class VertexMapper extends AbstractElementMapper{
         return elementId instanceof GraphVertexId;
     }
 
+    @Override
+    protected AbstractElementSchema getSchema(String label) {
+        return schemaManager.getVertexSchema(label);
+    }
+
     public ElementMapping toMapping(GraphVertexId vertexId){
         VertexSchema vertexSchema = schemaManager.getVertexSchema(vertexId.label());
         Set<QMatch.Q> mainCondition = new HashSet<>();

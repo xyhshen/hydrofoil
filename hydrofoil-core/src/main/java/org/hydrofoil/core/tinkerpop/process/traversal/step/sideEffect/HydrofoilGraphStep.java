@@ -104,4 +104,8 @@ public final class HydrofoilGraphStep<S, E extends Element> extends GraphStep<S,
     void setGraphQueryRunner(final IGraphQueryRunner graphQueryRunner){
         this.graphQueryRunner = graphQueryRunner;
     }
+
+    IGraphQueryRunner getGraphQueryRunner(){
+        return graphQueryRunner;
+    }
 }

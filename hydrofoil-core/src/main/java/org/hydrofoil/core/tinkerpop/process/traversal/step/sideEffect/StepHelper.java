@@ -6,6 +6,7 @@ import org.apache.tinkerpop.gremlin.process.traversal.Step;
 import org.apache.tinkerpop.gremlin.process.traversal.Traversal;
 import org.apache.tinkerpop.gremlin.process.traversal.step.HasContainerHolder;
 import org.apache.tinkerpop.gremlin.process.traversal.step.filter.HasStep;
+import org.apache.tinkerpop.gremlin.process.traversal.step.filter.RangeGlobalStep;
 import org.apache.tinkerpop.gremlin.process.traversal.step.map.GraphStep;
 import org.apache.tinkerpop.gremlin.process.traversal.step.map.NoOpBarrierStep;
 import org.apache.tinkerpop.gremlin.process.traversal.step.sideEffect.IdentityStep;
@@ -26,6 +27,14 @@ import java.util.Iterator;
  */
 public final class StepHelper {
 
+    static Step<?,?> getNextExecutableStep(GraphStep<?,?> graphStep){
+        Step<?, ?> step = graphStep.getNextStep();
+        while (step instanceof IdentityStep){
+            step = step.getNextStep();
+        }
+        return step;
+    }
+
     @SuppressWarnings("unchecked")
     public static <E> Iterator<E> filter(Iterator<E> iterator, HasContainerHolder holder){
         return IteratorUtils.filteredIterator(iterator,
@@ -36,6 +45,30 @@ public final class StepHelper {
         return step instanceof HasStep ||
                 step instanceof NoOpBarrierStep ||
                 step instanceof IdentityStep;
+    }
+
+    static void assignPagingStep(
+            Traversal.Admin<?, ?> traversal,
+            HydrofoilGraphStep<?,?> graphStep
+    ){
+        IGraphQueryRunner graphQueryRunner = graphStep.getGraphQueryRunner();
+        Step<?, ?> step = getNextExecutableStep(graphStep);
+        //find range step,only global
+        if(!(step instanceof RangeGlobalStep)){
+            return;
+        }
+        RangeGlobalStep rangeGlobalStep = (RangeGlobalStep) step;
+        if(!HasContainerHelper.isHasContainerQueriable(graphStep)){
+            return;
+        }
+        if(!graphQueryRunner.operable(IGraphQueryRunner.OperationType.paging)){
+            return;
+        }
+        //set ranger
+        graphQueryRunner.offset(rangeGlobalStep.getLowRange());
+        graphQueryRunner.length(rangeGlobalStep.getHighRange());
+        //remove current step
+        traversal.removeStep(rangeGlobalStep);
     }
 
     @SuppressWarnings("unchecked")
@@ -57,9 +90,11 @@ public final class StepHelper {
             currentStep = currentStep.getNextStep();
         }
         if(ArrayUtils.isEmpty(newGraphStep.getIds())){
+            //build and assign graph query runner
             IGraphQueryRunner graphQueryRunner = HasContainerHelper.
                     buildQueryRunner(traversal, newGraphStep);
             newGraphStep.setGraphQueryRunner(graphQueryRunner);
+            assignPagingStep(traversal,newGraphStep);
         }
     }
 }

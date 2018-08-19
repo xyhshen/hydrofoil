@@ -41,6 +41,11 @@ public class EdgeMapper extends AbstractElementMapper {
         return elementId instanceof GraphEdgeId;
     }
 
+    @Override
+    protected AbstractElementSchema getSchema(String label) {
+        return schemaManager.getEdgeSchema(label);
+    }
+
     public ElementMapping toMapping(GraphEdgeId edgeId){
         EdgeSchema edgeSchema = schemaManager.getEdgeSchema(edgeId.label());
         Set<QMatch.Q> mainCondition = new HashSet<>();

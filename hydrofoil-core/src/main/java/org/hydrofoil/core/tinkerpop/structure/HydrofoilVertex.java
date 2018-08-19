@@ -1,8 +1,6 @@
 package org.hydrofoil.core.tinkerpop.structure;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.tinkerpop.gremlin.structure.*;
-import org.hydrofoil.common.util.ParameterUtils;
 import org.hydrofoil.core.standard.StandardVertex;
 import org.hydrofoil.core.tinkerpop.glue.TinkerpopGraphTransit;
 
@@ -51,7 +49,6 @@ public class HydrofoilVertex extends HydrofoilElement implements Vertex {
 
     @Override
     public <V> Iterator<VertexProperty<V>> properties(String... propertyKeys) {
-        ParameterUtils.mustTrueMessage(ArrayUtils.isNotEmpty(propertyKeys),"property keys not is empty");
         return TinkerpopGraphTransit.listVertexProperties(this,propertyKeys);
     }
 }

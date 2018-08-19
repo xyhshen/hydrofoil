@@ -2,6 +2,7 @@ package org.hydrofoil.core.standard;
 
 import org.hydrofoil.common.graph.GraphElementId;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -65,5 +66,13 @@ public class StandardElement {
      */
     public StandardProperty property(String label){
         return propertyMap.get(label);
+    }
+
+    /**
+     * get all property
+     * @return property list
+     */
+    public Collection<StandardProperty> properties(){
+        return propertyMap.values();
     }
 }

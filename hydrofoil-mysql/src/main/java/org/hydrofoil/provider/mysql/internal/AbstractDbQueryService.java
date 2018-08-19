@@ -8,8 +8,12 @@ import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.hydrofoil.common.provider.datasource.RowQueryRequest;
 import org.hydrofoil.common.provider.datasource.RowStore;
+import org.hydrofoil.common.util.LogUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -23,6 +27,8 @@ import java.util.*;
  * @date 2018/7/5 11:46
  */
 public abstract class AbstractDbQueryService {
+
+    private static Logger logger = LoggerFactory.getLogger(AbstractDbQueryService.class);
 
     private BasicDataSource dataSource;
 
@@ -53,19 +59,21 @@ public abstract class AbstractDbQueryService {
         });
         //generate main table name
         String mainName = request.getName();
-        tableAlias.put(mainName,"main" + Integer.toHexString(mainName.hashCode()).toLowerCase());
+        tableAlias.put(mainName,"maintbl");
         //generate associate table name
         int i = 0;
         for(RowQueryRequest.AssociateRowQuery query:request.getAssociateQuery()){
-            tableAlias.put(query.getName(),"secondary" + i++);
+            tableAlias.put(query.getName(),"sectbl" + i++);
         }
         //generate column name
         i = 0;
+        MutableInt columnIdCnt = new MutableInt(1);
         for(String tableName:columns.keySet()){
             Map<String,String> columnMap = columnAlias.computeIfAbsent(tableName,(k->new TreeMap<>()));
             final int i1 = i;
             MultiMapUtils.getCollection(columns,tableName).forEach((columnName)->{
-                columnMap.put(columnName, "scol_" + Integer.toHexString(Objects.hash(tableName,columnName)));
+                columnMap.put(columnName, "ocol_" + Integer.toHexString(columnIdCnt.toInteger()));
+                columnIdCnt.add(1);
             });
             i++;
         }
@@ -107,6 +115,10 @@ public abstract class AbstractDbQueryService {
     public Collection<RowStore> executeQuery() throws SQLException {
         List<String> params = new ArrayList<>();
         String sql = crateQuerySql(params);
+
+        //output current sql
+        LogUtils.printDebug(logger,"current execute sql:" + sql);
+
         List<Map<String, Object>> results = new QueryRunner(dataSource).
                 query(sql, new MapListHandler(), params.toArray());
         return processResult(results);

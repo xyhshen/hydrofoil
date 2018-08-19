@@ -50,7 +50,11 @@ final class MapperHelper {
         }
         PropertySchema propertySchema = elementSchema.
                 getProperties().get(query.pair().name());
-        ColumnSchema columnSchema = schemaManager.getColumnSchema(propertySchema.getTable(),
+        String tableName = elementSchema.getTable();
+        if(!isPropertyInMainTable(propertySchema)){
+            tableName = propertySchema.getTable();
+        }
+        ColumnSchema columnSchema = schemaManager.getColumnSchema(tableName,
                 propertySchema.getField());
         if(query.type() != QMatch.QType.like){
             if(propertySchema.isPrimary()){
@@ -60,7 +64,9 @@ final class MapperHelper {
                 return false;
             }
         }else{
-            if(columnSchema == null || !columnSchema.isSupportedTextIndex()){
+            if(columnSchema == null ||
+                    !(columnSchema.isSupportedTextIndex() ||
+                    columnSchema.isSupportedNormalIndex())){
                 return false;
             }
         }

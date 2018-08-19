@@ -78,7 +78,31 @@ public final class MysqlDbQueryService extends AbstractDbQueryService{
                     .append(q.isNot()?" not like ":" like ")
                     .append(StringUtils.isNotBlank(joinField)?joinField:"?");
             if(StringUtils.isBlank(joinField)){
-                params.add("%" + Objects.toString(q.pair().first(),"") + "%");
+                params.add(Objects.toString(q.pair().first(),"") + "%");
+            }
+        }
+        if(q.type() == QMatch.QType.gt ||
+                q.type() == QMatch.QType.gte ||
+                q.type() == QMatch.QType.lt ||
+                q.type() == QMatch.QType.lte){
+            String symbol = "";
+            if(q.type() == QMatch.QType.gt){
+                symbol = ">";
+            }
+            if(q.type() == QMatch.QType.gte){
+                symbol = ">=";
+            }
+            if(q.type() == QMatch.QType.lt){
+                symbol = "<";
+            }
+            if(q.type() == QMatch.QType.lte){
+                symbol = "<=";
+            }
+            sql.append(getColumnAlias(tableName,q.pair().name()))
+                    .append(" ").append(symbol).append(" ")
+                    .append(StringUtils.isNotBlank(joinField)?joinField:"?");
+            if(StringUtils.isBlank(joinField)){
+                params.add(Objects.toString(q.pair().first(),""));
             }
         }
         if(q.type() == QMatch.QType.between){

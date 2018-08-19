@@ -132,6 +132,21 @@ public abstract class AbstractElementMapper<E extends StandardElement> {
         return clz.isAssignableFrom(GraphVertexId.class)? (EID) builder.buildVertexId() : (EID) builder.buildEdgeId();
     }
 
+    protected abstract AbstractElementSchema getSchema(String label);
+
+    public boolean checkQueriable(
+                                  Collection<String> labels,
+                                  Collection<QMatch.Q> propertyQuerySet){
+        for(String label:labels){
+            final AbstractElementSchema schema = getSchema(label);
+            if(propertyQuerySet.stream().
+                    filter(query->!MapperHelper.checkQueriable(schemaManager,schema,query)).count() > 0){
+                return false;
+            }
+        }
+        return true;
+    }
+
 
 
 }

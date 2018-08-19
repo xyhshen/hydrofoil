@@ -1,17 +1,15 @@
 package org.hydrofoil.example;
 
-import org.apache.tinkerpop.gremlin.process.traversal.P;
-import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
-import org.apache.tinkerpop.gremlin.structure.Direction;
-import org.apache.tinkerpop.gremlin.structure.Edge;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
+import org.apache.tinkerpop.gremlin.structure.Property;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.hydrofoil.common.configuration.HydrofoilConfiguration;
-import org.hydrofoil.common.graph.GraphElementId;
 import org.hydrofoil.core.HydrofoilFactory;
 import org.hydrofoil.core.tinkerpop.structure.HydrofoilGraph;
+import org.hydrofoil.tinkerpop.EP;
 
-import java.util.Iterator;
-import java.util.Optional;
+import java.util.List;
+import java.util.Map;
 
 /**
  * TinkerpopExample
@@ -29,22 +27,22 @@ public final class TinkerpopExample {
         configuration.put("hydrofoil.schema.dataset.resource","dataset.xml");
         configuration.put("hydrofoil.schema.mapper.resource","mapper.xml");
         try(HydrofoilGraph graph = HydrofoilFactory.openTinkerpop(configuration)){
-            graph.traversal().V().hasLabel(P.eq("person")).hasLabel(P.within("company"))
-                    .has("name","xyh").hasLabel(P.not(P.eq("aaab"))).limit(10).tryNext();
-            graph.traversal().V(1).has("aaa",P.eq(null)).tryNext();
-            graph.traversal().E().hasId(P.eq(0)).match(__.as("aa2").has("ccc")).V().limit(100).tryNext();
-            graph.traversal().V().hasId(1).properties("aaa").as("ss").tryNext();
-            graph.traversal().V().hasLabel("person").has("idnumber","3710382323").inE("ss").count().tryNext();
-            Optional<Vertex> optional = graph.traversal().V(GraphElementId.VertexId("person","idnumber", "370601198205043112")).tryNext();
-            Vertex vertex = optional.orElseGet(null);
-            Iterator<Edge> employ = vertex.edges(Direction.BOTH, "employ");
-            Iterator<Vertex> vertices = vertex.vertices(Direction.BOTH, "employ");
-            vertices.forEachRemaining((v)->{
-                System.out.println(v.id());
-                System.out.println(v.label());
-                System.out.println(v.property("name").value());
+            final GraphTraversalSource g = graph.traversal();
+            List<Vertex> vertices = g.V().hasLabel("person").
+                    has("name", EP.like("张")).limit(10).toList();
+            vertices.stream().forEach(v->{
+                System.out.println((String)v.value("name"));
+                System.out.println((String)v.value("idnumber"));
+                System.out.println((String)v.value("gender"));
+                System.out.println((String)v.value("address"));
+                System.out.println((String)v.value("workunit"));
             });
-            System.out.println(vertex);
+            List<? extends Property<Object>> properties = g.V().hasLabel("person").
+                    has("idnumber", "371102198509180158").properties().toList();
+            System.out.println(properties);
+            final List<Map<Object, Object>> maps = g.V().hasLabel("person").
+                    has("name", EP.like("钱")).limit(10).in().valueMap(false).toList();
+            System.out.println(maps);
         }
     }
 }

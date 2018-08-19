@@ -26,6 +26,22 @@ public class QMatch {
          */
         like,
         /**
+         *  greater than >
+         */
+        gt,
+        /**
+         * greater than equal >=
+         */
+        gte,
+        /**
+         * less than <
+         */
+        lt,
+        /**
+         * less than equal <=
+         */
+        lte,
+        /**
          * between(a,b)
          */
         between,
@@ -121,6 +137,34 @@ public class QMatch {
      */
     public static Q like(String name,Object value){
         return new Q(QType.like).pair(new FieldPair(name,value));
+    }
+
+    /**
+     * create gt match
+     * @param name name
+     * @param value value
+     * @return query match
+     */
+    public static Q gt(String name,Object value){
+        return new Q(QType.gt).pair(new FieldPair(name,value));
+    }
+
+    /**
+     * create gte match
+     * @param name name
+     * @param value value
+     * @return query match
+     */
+    public static Q gte(String name,Object value){
+        return new Q(QType.gte).pair(new FieldPair(name,value));
+    }
+
+    public static Q lt(String name,Object value){
+        return new Q(QType.lt).pair(new FieldPair(name,value));
+    }
+
+    public static Q lte(String name,Object value){
+        return new Q(QType.lte).pair(new FieldPair(name,value));
     }
 
     /**
