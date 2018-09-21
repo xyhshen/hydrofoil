@@ -16,6 +16,17 @@ import java.util.function.BiPredicate;
 public enum ElementPredicate implements BiPredicate<Object, Object> {
 
     /**
+     * prefix Predicate
+     */
+    prefix{
+        @Override
+        public boolean test(final Object first, final Object second) {
+            String a = Objects.toString(first,null);
+            String b = Objects.toString(second,null);
+            return StringUtils.indexOf(a,b) == 0;
+        }
+    },
+    /**
      * like Predicate
      */
     like{

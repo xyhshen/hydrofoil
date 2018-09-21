@@ -2,6 +2,11 @@ package org.hydrofoil.common.util;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
+
+import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
+import java.util.Date;
 
 /**
  * EncodeUtils
@@ -39,6 +44,27 @@ public final class EncodeUtils {
         } catch (Exception e) {
             return "";
         }
+    }
+
+    public static String charsetEncode(final String s,final String charsetName){
+        if(StringUtils.isEmpty(s)){
+            return null;
+        }
+        try {
+            return new String(s.getBytes(charsetName));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static Date parseDate(final String s, final String pattern){
+        try {
+            return DateUtils.parseDate(s,pattern);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
 }

@@ -2,10 +2,8 @@ package org.hydrofoil.core.tinkerpop.glue;
 
 import org.apache.commons.collections4.IteratorUtils;
 import org.apache.commons.lang.ArrayUtils;
-import org.apache.tinkerpop.gremlin.structure.Direction;
-import org.apache.tinkerpop.gremlin.structure.Edge;
-import org.apache.tinkerpop.gremlin.structure.Vertex;
-import org.apache.tinkerpop.gremlin.structure.VertexProperty;
+import org.apache.tinkerpop.gremlin.structure.*;
+import org.hydrofoil.common.graph.GraphProperty;
 import org.hydrofoil.common.graph.GraphVertexId;
 import org.hydrofoil.common.util.ParameterUtils;
 import org.hydrofoil.core.standard.StandardEdge;
@@ -14,10 +12,7 @@ import org.hydrofoil.core.standard.StandardProperty;
 import org.hydrofoil.core.standard.StandardVertex;
 import org.hydrofoil.core.standard.query.EdgeGraphQueryRunner;
 import org.hydrofoil.core.standard.query.VertexGraphQueryRunner;
-import org.hydrofoil.core.tinkerpop.structure.HydrofoilEdge;
-import org.hydrofoil.core.tinkerpop.structure.HydrofoilGraph;
-import org.hydrofoil.core.tinkerpop.structure.HydrofoilVertex;
-import org.hydrofoil.core.tinkerpop.structure.HydrofoilVertexProperty;
+import org.hydrofoil.core.tinkerpop.structure.*;
 
 import java.util.*;
 
@@ -138,6 +133,20 @@ public final class TinkerpopGraphTransit {
         }
         return standardProperties.stream().
                 map(p->(VertexProperty<V>)new HydrofoilVertexProperty<V>(vertex,p)).iterator();
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <U> Iterator<Property<U>> listProperties(HydrofoilVertexProperty vertexProperty, String... propertyKeys){
+        List<Property<U>> properties = new ArrayList<>(1);
+        if(vertexProperty.standard().isComplex()){
+            final Map<String, GraphProperty> propertyMap = vertexProperty.standard().properties();
+            propertyMap.forEach((k,v)->{
+                properties.add(new HydrofoilProperty(vertexProperty,v,k));
+            });
+        }else{
+
+        }
+        return properties.iterator();
     }
 
 }

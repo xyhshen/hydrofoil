@@ -86,7 +86,7 @@ public abstract class AbstractElementMapper<E extends StandardElement> {
             }else{
                 RowQueryRequest.AssociateRowQuery associateRowQuery =
                         associateRowQueryMap.computeIfAbsent(MapperHelper.getRealTableName(schemaManager,
-                                propertySchema.getTable()),(v)->new RowQueryRequest.AssociateRowQuery().setName(v));
+                                propertySchema.getLinkTable()),(v)->new RowQueryRequest.AssociateRowQuery().setName(v));
                 if(MapUtils.isEmpty(propertySchema.getChildren())){
                     associateRowQuery.getFields().add(propertySchema.getField());
                 }else{

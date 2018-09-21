@@ -3,7 +3,6 @@ package org.hydrofoil.common.schema;
 import org.apache.commons.lang3.BooleanUtils;
 import org.dom4j.Element;
 import org.hydrofoil.common.util.DataUtils;
-import org.hydrofoil.common.util.FieldUtils;
 import org.hydrofoil.common.util.ParameterUtils;
 import org.hydrofoil.common.util.XmlUtils;
 
@@ -21,52 +20,65 @@ import java.util.Map;
 public final class PropertySchema extends SchemaItem{
 
     private static final String ATTR_PROPERTY_LABEL = "label";
+    private static final String ATTR_PROPERTY_NAME = "name";
     private static final String ATTR_PROPERTY_FIELD = "field";
     private static final String ATTR_PROPERTY_PRIMARY = "primary";
 
-    private static final String ATTR_PROPERTY_TABLE = "table";
-    private static final String ATTR_PROPERTY_REF_FIELD = "ref-field";
+    private static final String ATTR_PROPERTY_LINK_TABLE = "link-table";
     private static final String ATTR_PROPERTY_MULTIPLE = "multiple";
 
-    private static final String ATTR_PROPERTY_CHILDREN_ELEMENT = "pair";
+    private static final String NODE_PROPERTY_CHILDREN_ELEMENT = "pair";
 
-    public PropertySchema(){}
+    /**
+     * is subclass property
+     */
+    private final boolean subclass;
+
+    public PropertySchema(){
+        this.subclass = false;
+    }
+
+    public PropertySchema(final boolean subclass){
+        this.subclass = subclass;
+    }
 
     @Override
     void parse(Element node){
         //basic info
         String label = XmlUtils.attributeStringValue(node,ATTR_PROPERTY_LABEL);
+        String name = XmlUtils.attributeStringValue(node,ATTR_PROPERTY_NAME);
         String field = XmlUtils.attributeStringValue(node,ATTR_PROPERTY_FIELD);
         String primary = XmlUtils.attributeStringValue(node,ATTR_PROPERTY_PRIMARY,"false");
-        String table = XmlUtils.attributeStringValue(node,ATTR_PROPERTY_TABLE);
-        String reffield = XmlUtils.attributeStringValue(node,ATTR_PROPERTY_REF_FIELD);
+        String linkTable = XmlUtils.attributeStringValue(node,ATTR_PROPERTY_LINK_TABLE);
         String multiple = XmlUtils.attributeStringValue(node,ATTR_PROPERTY_MULTIPLE,"false");
 
-        ParameterUtils.notBlank(label);
-
-        putItem(ATTR_PROPERTY_LABEL,label);
+        if(!subclass){
+            ParameterUtils.notBlank(label);
+            putItem(ATTR_PROPERTY_LABEL,label);
+            putItem(ATTR_PROPERTY_PRIMARY,primary);
+            putItem(ATTR_PROPERTY_LINK_TABLE,linkTable);
+            putItem(ATTR_PROPERTY_MULTIPLE,multiple);
+            //load children property
+            loadChildren(node);
+        }else{
+            ParameterUtils.notBlank(name);
+            putItem(ATTR_PROPERTY_NAME,name);
+        }
         putItem(ATTR_PROPERTY_FIELD,field);
-        putItem(ATTR_PROPERTY_PRIMARY,primary);
-        putItem(ATTR_PROPERTY_TABLE,table);
-        putItem(ATTR_PROPERTY_REF_FIELD, FieldUtils.toMap(reffield));
-        putItem(ATTR_PROPERTY_MULTIPLE,multiple);
-
-        //load children property
-        loadChildren(node);
     }
 
     private void loadChildren(final Element node){
         if(!XmlUtils.hasChildren(node)){
             return;
         }
-        List<Element> elements = XmlUtils.listElement(node, ATTR_PROPERTY_CHILDREN_ELEMENT);
-        Map<String,PairSchema> map = DataUtils.newHashMapWithExpectedSize(elements.size());
+        List<Element> elements = XmlUtils.listElement(node, NODE_PROPERTY_CHILDREN_ELEMENT);
+        Map<String,PropertySchema> map = DataUtils.newHashMapWithExpectedSize(elements.size());
         for(Element element:elements){
-            PairSchema pairSchema = new PairSchema();
+            PropertySchema pairSchema = new PropertySchema(true);
             pairSchema.read(element);
             map.put(pairSchema.getName(),pairSchema);
         }
-        putSchemaItem(ATTR_PROPERTY_CHILDREN_ELEMENT,map);
+        putSchemaItem(NODE_PROPERTY_CHILDREN_ELEMENT,map);
     }
 
     public String getLabel(){
@@ -77,24 +89,24 @@ public final class PropertySchema extends SchemaItem{
         return getItem(ATTR_PROPERTY_FIELD);
     }
 
+    public String getName(){
+        return getItem(ATTR_PROPERTY_NAME);
+    }
+
     public boolean isPrimary(){
         return BooleanUtils.toBoolean(getItem(ATTR_PROPERTY_PRIMARY));
     }
 
-    public String getTable(){
-        return getItem(ATTR_PROPERTY_TABLE);
-    }
-
-    public Map<String,String> getReffield(){
-        return getItemMap(ATTR_PROPERTY_FIELD);
+    public String getLinkTable(){
+        return getItem(ATTR_PROPERTY_LINK_TABLE);
     }
 
     public boolean isMultiple(){
         return BooleanUtils.toBoolean(getItem(ATTR_PROPERTY_MULTIPLE));
     }
 
-    public Map<String,PairSchema> getChildren(){
-        return getSchemaMap(ATTR_PROPERTY_CHILDREN_ELEMENT);
+    public Map<String,PropertySchema> getChildren(){
+        return getSchemaMap(NODE_PROPERTY_CHILDREN_ELEMENT);
     }
 
 }

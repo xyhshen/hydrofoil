@@ -6,7 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.Collection;
 
 /**
- * AssetUtils
+ * Parameter transform and verify
  * <p>
  * package org.hydrofoil.common.util
  *
@@ -14,6 +14,7 @@ import java.util.Collection;
  * @date 2018/6/30 11:07
  */
 public final class ParameterUtils {
+
 
     /**
      * string not blank verify

@@ -1,10 +1,10 @@
 package org.hydrofoil.core.tinkerpop.structure;
 
-import org.apache.commons.collections.IteratorUtils;
 import org.apache.tinkerpop.gremlin.structure.Property;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.structure.VertexProperty;
 import org.hydrofoil.core.standard.StandardProperty;
+import org.hydrofoil.core.tinkerpop.glue.TinkerpopGraphTransit;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -29,6 +29,10 @@ public final class HydrofoilVertexProperty<V> implements VertexProperty<V>{
         this.standardProperty = standardProperty;
     }
 
+    public StandardProperty standard(){
+        return standardProperty;
+    }
+
     @Override
     public String key() {
         return standardProperty.label();
@@ -37,7 +41,7 @@ public final class HydrofoilVertexProperty<V> implements VertexProperty<V>{
     @SuppressWarnings("unchecked")
     @Override
     public V value() throws NoSuchElementException {
-        return (V) standardProperty.simple().content();
+        return (V) standardProperty.property().content();
     }
 
     @Override
@@ -69,7 +73,6 @@ public final class HydrofoilVertexProperty<V> implements VertexProperty<V>{
     @SuppressWarnings("unchecked")
     @Override
     public <U> Iterator<Property<U>> properties(String... propertyKeys) {
-        return IteratorUtils.singletonIterator
-                (new HydrofoilProperty<U>(this,standardProperty.simple()));
+        return TinkerpopGraphTransit.listProperties(this,propertyKeys);
     }
 }

@@ -1,5 +1,6 @@
 package org.hydrofoil.common.util;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.IteratorUtils;
 import org.apache.commons.io.FileUtils;
 
@@ -21,6 +22,12 @@ public final class DataUtils {
     private static final int MAX_POWER_OF_TWO = 1 << (Integer.SIZE - 2);
 
     private static final int USE_HASH_MAP_MAX_SIZE = 50;
+
+    @SuppressWarnings("unchecked")
+    public static <V> V collectFirst(Collection<V> c){
+        return CollectionUtils.isNotEmpty(c)?
+                (V) getOptional(c.stream().findFirst()) :null;
+    }
 
     /**
      * get iteraot first value

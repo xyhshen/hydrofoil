@@ -23,7 +23,7 @@ public class TableSchema extends SchemaItem{
     private static final String ATTR_TABLE_DATASOURCE = "datasource";
     private static final String ATTR_TABLE_REALNAME = "realname";
 
-    private static final String ELEMENT_TABLE_COLUMN = "column";
+    private static final String NODE_TABLE_COLUMN = "column";
 
     public TableSchema(){}
 
@@ -50,14 +50,14 @@ public class TableSchema extends SchemaItem{
 
     private void loadColumns(final Element node){
         List<Element> elements = XmlUtils.listElement(node,
-                ELEMENT_TABLE_COLUMN);
+                NODE_TABLE_COLUMN);
         Map<String,ColumnSchema> map = DataUtils.newHashMapWithExpectedSize(elements.size());
         for(Element element:elements){
             ColumnSchema columnSchema = new ColumnSchema();
             columnSchema.parse(element);
             map.put(columnSchema.getColumnName(),columnSchema);
         }
-        putSchemaItem(ELEMENT_TABLE_COLUMN,map);
+        putSchemaItem(NODE_TABLE_COLUMN,map);
     }
 
     /**
@@ -86,7 +86,7 @@ public class TableSchema extends SchemaItem{
     }
 
     public Map<String,ColumnSchema> getColumns(){
-        return getSchemaMap(ELEMENT_TABLE_COLUMN);
+        return getSchemaMap(NODE_TABLE_COLUMN);
     }
 
 }

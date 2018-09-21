@@ -1,7 +1,5 @@
 package org.hydrofoil.common.provider;
 
-import org.hydrofoil.common.schema.DataSourceSchema;
-
 /**
  * IDataProvider
  * <p>
@@ -24,9 +22,9 @@ public interface IDataProvider {
 
     /**
      * connect datasource
-     * @param dataSourceSchema datasource schema
+     * @param dataSourceContext datasource context
      * @return collect source's instance
      */
-    IDataSource connect(DataSourceSchema dataSourceSchema);
+    IDataSource connect(IDataSourceContext dataSourceContext);
 
 }

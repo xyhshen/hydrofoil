@@ -9,8 +9,10 @@ import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.hydrofoil.common.provider.IDataSourceContext;
 import org.hydrofoil.common.provider.datasource.RowQueryRequest;
 import org.hydrofoil.common.provider.datasource.RowStore;
+import org.hydrofoil.common.schema.ColumnSchema;
 import org.hydrofoil.common.util.LogUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,8 +42,14 @@ public abstract class AbstractDbQueryService {
 
     protected Map<String,Map<String,String>> columnAlias;
 
-    AbstractDbQueryService(BasicDataSource dataSource,RowQueryRequest request){
+    private IDataSourceContext dataSourceContext;
+
+    AbstractDbQueryService(
+            BasicDataSource dataSource,
+            IDataSourceContext dataSourceContext,
+            RowQueryRequest request){
         this.dataSource = dataSource;
+        this.dataSourceContext = dataSourceContext;
         this.request = request;
         columnAlias = new HashMap<>();
         tableAlias = new HashMap<>();
@@ -155,6 +163,30 @@ public abstract class AbstractDbQueryService {
         });
         return rowStores;
     }
+
+    /**
+     * transform result value to accpet type
+     * @param tableName table name
+     * @param columnName column name
+     * @param value raw value
+     * @return result
+     */
+    private Object transformValue(final String tableName,final String columnName,final Object value){
+        try {
+            return handleQueryResult(dataSourceContext.getColumnSchema(tableName, columnName),value);
+        } catch (SQLException e) {
+            LogUtils.callError(logger,"handleQueryResult",e);
+        }
+        return null;
+    }
+
+    /**
+     * handle result value
+     * @param columnSchema schema
+     * @param value value
+     * @return result,is accpet type
+     */
+    protected abstract Object handleQueryResult(final ColumnSchema columnSchema,final Object value) throws SQLException;
 
 
 }

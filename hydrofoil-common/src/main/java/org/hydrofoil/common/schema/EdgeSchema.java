@@ -17,8 +17,8 @@ import java.util.Map;
  */
 public final class EdgeSchema extends AbstractElementSchema{
 
-    private static final String ATTR_EDGE_SOURCE_ELEMENT = "source";
-    private static final String ATTR_EDGE_TARGET_ELEMENT = "target";
+    private static final String NODE_EDGE_SOURCE_ELEMENT = "source";
+    private static final String NODE_EDGE_TARGET_ELEMENT = "target";
 
     private static final String ATTR_EDGE_VERTEX_LABEL = "label";
     private static final String ATTR_EDGE_VERTEX_FIELD = "field";
@@ -29,8 +29,8 @@ public final class EdgeSchema extends AbstractElementSchema{
     void parse(final Element node){
         super.parse(node);
         //parse edge info
-        Element source = node.element(ATTR_EDGE_SOURCE_ELEMENT);
-        Element target = node.element(ATTR_EDGE_TARGET_ELEMENT);
+        Element source = node.element(NODE_EDGE_SOURCE_ELEMENT);
+        Element target = node.element(NODE_EDGE_TARGET_ELEMENT);
 
         ParameterUtils.notNull(source);
         ParameterUtils.notNull(target);

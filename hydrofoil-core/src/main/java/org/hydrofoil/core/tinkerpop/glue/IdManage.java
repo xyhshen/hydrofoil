@@ -1,23 +1,18 @@
 package org.hydrofoil.core.tinkerpop.glue;
 
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.hydrofoil.common.graph.GraphEdgeId;
 import org.hydrofoil.common.graph.GraphElementId;
 import org.hydrofoil.common.graph.GraphVertexId;
-import org.hydrofoil.common.schema.PropertySchema;
-import org.hydrofoil.common.util.EncodeUtils;
+import org.hydrofoil.common.schema.AbstractElementSchema;
+import org.hydrofoil.common.util.DataUtils;
 import org.hydrofoil.core.standard.management.SchemaManager;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * IdManage
@@ -29,109 +24,21 @@ import java.util.stream.Collectors;
  */
 public final class IdManage {
 
-    private static final char ID_PREFIX_VERTEX = 'v';
+    private static final String ID_PREFIX_VERTEX = "vertex";
 
-    private static final char ID_PREFIX_EDGE = 'e';
+    private static final String ID_PREFIX_EDGE = "edge";
 
     private static final char ID_RAW_SPLIT = '-';
 
-    private final AtomicLong lastSchemaChanged;
+    private static final char ID_FIELD_SPLIT = ':';
 
     /**
      * schema manager
      */
     private final SchemaManager schemaManager;
 
-    private final Map<Integer,String> vertexOrderReverseMap;
-
-    private final Map<Integer,String> edgeOrderReverseMap;
-
-    private final Object lockObject;
-
-    /**
-     * element schema order sequence
-     */
-    static final class ElementSchemaOrder{
-
-        /**
-         * sequence
-         */
-        private Integer order;
-
-        /**
-         * unique sequence
-         */
-        private List<String> uniqueOrder;
-
-        Integer order(){
-            return order;
-        }
-
-        /**
-         * @return String>
-         * @see ElementSchemaOrder#uniqueOrder
-         **/
-        List<String> uniqueOrder() {
-            return uniqueOrder;
-        }
-    }
-
-    /**
-     * order
-     */
-    private Map<String,ElementSchemaOrder> vertexOrderMap;
-    //
-    private Map<String,ElementSchemaOrder> edgeOrderMap;
-
     public IdManage(SchemaManager schemaManager){
         this.schemaManager = schemaManager;
-        vertexOrderReverseMap = new HashMap<>();
-        edgeOrderReverseMap = new HashMap<>();
-        vertexOrderMap = new HashMap<>();
-        edgeOrderMap = new HashMap<>();
-        lastSchemaChanged = new AtomicLong(0L);
-        lockObject = new Object();
-    }
-
-    private static List<String> getUniquePropertiesOrder(final Map<String,PropertySchema> propertySchemaMap){
-        return propertySchemaMap.values().stream().filter(PropertySchema::isPrimary).
-                sorted((o1, o2) -> StringUtils.compareIgnoreCase(o1.getLabel(),o2.getLabel())).
-                map(PropertySchema::getLabel).collect(Collectors.toList());
-    }
-
-    private void loadOrderMap(){
-        //check schema is changed
-        Long lastChanged = schemaManager.getLastChanged();
-        if(!lastSchemaChanged.compareAndSet(lastSchemaChanged.get(),lastChanged)){
-            return;
-        }
-
-        synchronized(lockObject){
-            //calc vertex schema order
-            {
-                List<String> orders = schemaManager.getVertexSchemaMap().keySet().stream().
-                        sorted().collect(Collectors.toList());
-                for(int i = 0;i < orders.size();i++){
-                    ElementSchemaOrder order = new ElementSchemaOrder();
-                    order.order = i;
-                    order.uniqueOrder = getUniquePropertiesOrder(schemaManager.getVertexSchemaMap().get(orders.get(i)).getProperties());
-                    vertexOrderMap.put(orders.get(i),order);
-                    vertexOrderReverseMap.put(i,orders.get(i));
-                }
-            }
-            //calc edge schema order
-            {
-                List<String> orders = schemaManager.getEdgeSchemaMap().keySet().stream().
-                        sorted().collect(Collectors.toList());
-                for(int i = 0;i < orders.size();i++){
-                    ElementSchemaOrder order = new ElementSchemaOrder();
-                    order.order = i;
-                    order.uniqueOrder = getUniquePropertiesOrder(schemaManager.getEdgeSchemaMap().get(orders.get(i)).getProperties());
-                    edgeOrderMap.put(orders.get(i),order);
-                    edgeOrderReverseMap.put(i,orders.get(i));
-                }
-            }
-        }
     }
 
     @SuppressWarnings("unchecked")
@@ -140,31 +47,27 @@ public final class IdManage {
             return null;
         }
 
-        //load order map
-        loadOrderMap();
-
-        char type = '0';
-        ElementSchemaOrder schemaOrder = null;
+        String type = "";
         if(elementId instanceof GraphVertexId){
             type = ID_PREFIX_VERTEX;
-            schemaOrder = vertexOrderMap.get(elementId.label());
         }
         if(elementId instanceof GraphEdgeId){
             type = ID_PREFIX_EDGE;
-            schemaOrder = edgeOrderMap.get(elementId.label());
-        }
-        if(schemaOrder == null){
-            return null;
         }
         //format:type,order,
         StringBuilder idstring = new StringBuilder();
-        idstring.append(type).append(schemaOrder.order());
-        StringBuilder uniquestring = new StringBuilder();
-        for(String label:schemaOrder.uniqueOrder()){
-            uniquestring.append(ID_RAW_SPLIT).append(EncodeUtils.
-                    base64(MapUtils.getString(elementId.unique(),label)));
+        idstring.append(type).append(ID_RAW_SPLIT).append(elementId.label()).append(ID_RAW_SPLIT);
+        if(elementId.unique().size() == 1){
+            idstring.append(Objects.toString(DataUtils.collectFirst(elementId.unique().values()),null));
+        }else{
+            elementId.unique().forEach((k,v)->{
+                idstring.append(k).append(ID_FIELD_SPLIT);
+                idstring.append(Objects.toString(v,null)).append(ID_RAW_SPLIT);
+            });
+            idstring.deleteCharAt(idstring.length() - 1);
         }
-        return idstring.append(uniquestring);
+
+        return idstring.toString();
     }
 
     public Object[] tinkerpopIds(final GraphElementId ...elementIds){
@@ -179,7 +82,7 @@ public final class IdManage {
     }
 
     @SuppressWarnings("unchecked")
-    public <E extends GraphElementId> E elementId(Object id){
+    public <E extends GraphElementId> E elementId(final Object id){
         if(id instanceof GraphElementId){
             return (E)ObjectUtils.clone((GraphElementId) id);
         }
@@ -187,38 +90,55 @@ public final class IdManage {
         if(StringUtils.isBlank(idstring)){
             return null;
         }
-        String[] idchunks = StringUtils.split(idstring, "-");
-        if(ArrayUtils.isEmpty(idchunks) || idchunks.length < 2){
+
+        int typeOf = StringUtils.indexOf(idstring,ID_RAW_SPLIT);
+        if(typeOf == -1){
             return null;
         }
-
-        //re load order map
-        loadOrderMap();
-
-        GraphElementId.GraphElementBuilder builder;
-        //get prefix
-        String prefix = idchunks[0];
-        //get label order seq
-        Integer seq = NumberUtils.toInt(idchunks[1]);
-        ElementSchemaOrder schemaOrder;
-        boolean vertexOrEdge;
-        //check element type
-        if(prefix.charAt(0) == ID_PREFIX_VERTEX){
-            builder = GraphElementId.builder(vertexOrderReverseMap.get(seq));
-            schemaOrder = vertexOrderMap.get(vertexOrderReverseMap.get(seq));
-            vertexOrEdge = true;
+        String type = StringUtils.substring(idstring,0,typeOf);
+        int labelOf = StringUtils.indexOf(idstring,typeOf + 1,ID_RAW_SPLIT);
+        if(labelOf == -1){
+            return null;
+        }
+        String label = StringUtils.substring(idstring,typeOf + 1,labelOf);
+        AbstractElementSchema elementSchema = null;
+        if(StringUtils.equalsIgnoreCase(type,ID_PREFIX_VERTEX)){
+            elementSchema = schemaManager.getVertexSchema(label);
+        }
+        if(StringUtils.equalsIgnoreCase(type,ID_PREFIX_EDGE)){
+            elementSchema = schemaManager.getEdgeSchema(label);
+        }
+        if(elementSchema == null){
+            return null;
+        }
+        GraphElementId.GraphElementBuilder builder =
+                GraphElementId.builder(elementSchema.getLabel());
+        String fieldstring = idstring.substring(labelOf + 1,idstring.length());
+        final String[] fieldChunks = StringUtils.split(fieldstring, ID_RAW_SPLIT);
+        if(fieldChunks.length <= 0){
+            return null;
+        }
+        if(elementSchema.getPrimaryKeys().size() == 1 &&
+                fieldChunks[0].indexOf(ID_FIELD_SPLIT) == -1){
+            builder.unique(DataUtils.collectFirst(elementSchema.getPrimaryKeys()),fieldChunks[0]);
         }else{
-            builder = GraphElementId.builder(edgeOrderReverseMap.get(seq));
-            schemaOrder = edgeOrderMap.get(edgeOrderReverseMap.get(seq));
-            vertexOrEdge = false;
+            Map<String,String> fields = DataUtils.newHashMapWithExpectedSize(elementSchema.getPrimaryKeys().size());
+            Stream.of(fieldChunks).forEach(s->{
+                String[] fs = StringUtils.split(s,ID_FIELD_SPLIT);
+                if(fs.length < 2){
+                    return;
+                }
+                fields.put(fs[0],fs[1]);
+            });
+            for(String primaryKey:elementSchema.getPrimaryKeys()){
+                if(fields.containsKey(primaryKey)){
+                    return null;
+                }
+                builder.unique(primaryKey,fields.get(primaryKey));
+            }
         }
-        //set unique property
-        for(int i = 2;i < idchunks.length;i++){
-            String label = schemaOrder.uniqueOrder().get(i);
-            String value = EncodeUtils.base64Decode(idchunks[i]);
-            builder.unique(label,value);
-        }
-        return vertexOrEdge? (E) builder.buildVertexId() : (E) builder.buildEdgeId();
+        return StringUtils.equalsIgnoreCase(type,ID_PREFIX_VERTEX)?
+                (E) builder.buildVertexId() : (E) builder.buildEdgeId();
     }
 
     public GraphVertexId[] vertexIds(Object ...ids){

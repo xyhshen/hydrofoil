@@ -21,6 +21,15 @@ public class EP<V> extends P<V> {
     }
 
     /**
+     * prefix query
+     * @param value value
+     * @return P
+     */
+    public static <V> P<V> prefix(final V value) {
+        return new EP(ElementPredicate.prefix, value);
+    }
+
+    /**
      * like query
      * @param value value
      * @return P

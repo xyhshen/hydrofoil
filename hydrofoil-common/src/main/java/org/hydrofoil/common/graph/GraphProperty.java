@@ -1,9 +1,16 @@
 package org.hydrofoil.common.graph;
 
+import org.apache.commons.lang3.StringUtils;
+import org.hydrofoil.common.util.bean.BinaryArrayBlob;
+import org.hydrofoil.common.util.DataUtils;
 import org.hydrofoil.common.util.ParameterUtils;
+import org.hydrofoil.common.util.bean.Beans;
 
 import java.net.URL;
+import java.sql.Blob;
 import java.util.Date;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 /**
  * GraphProperty
@@ -18,23 +25,124 @@ public final class GraphProperty {
     /**
      * property atom type
      */
-    public enum PropertyType{
+    public enum PropertyType implements Function{
 
-        String("string",String.class,null),
-        Byte("short",Byte.class,null),
-        Short("short",Short.class,null),
-        Integer("integer",Integer.class,null),
-        Long("long",Long.class,null),
-        Float("float",Float.class,null),
-        Double("double",Double.class,null),
-        Date("date", Date.class,null),
-        Url("url", URL.class,null),
-        Bytes("bytes",byte[].class,null);
+        /**
+         * string
+         */
+        String("string",String.class,null) {
+            @Override
+            protected Object transform(Object o) {
+                return Beans.toString(o);
+            }
+        },
+        /**
+         * byte char
+         */
+        Byte("byte",Byte.class,0) {
+            @Override
+            protected Object transform(Object o) {
+                return Beans.toByte(o);
+            }
+        },
+        /**
+         * char
+         */
+        Char("char",Character.class,0) {
+            @Override
+            protected Object transform(Object o) {
+                return Beans.toCharacter(o);
+            }
+        },
+        /**
+         * byte char
+         */
+        Boolean("boolean",Boolean.class,false) {
+            @Override
+            protected Object transform(Object o) {
+                return Beans.toBoolean(o);
+            }
+        },
+        /**
+         * short 16bit
+         */
+        Short("short",Short.class,0) {
+            @Override
+            protected Object transform(Object o) {
+                return Beans.toLong(o).shortValue();
+            }
+        },
+        /**
+         * int 32bit
+         */
+        Integer("integer",Integer.class,0) {
+            @Override
+            protected Object transform(Object o) {
+                return Beans.toLong(o).intValue();
+            }
+        },
+        /**
+         * long 64bit
+         */
+        Long("long",Long.class,0L) {
+            @Override
+            protected Object transform(Object o) {
+                return Beans.toLong(o);
+            }
+        },
+        /**
+         * float
+         */
+        Float("float",Float.class,0f) {
+            @Override
+            protected Object transform(Object o) {
+                return Beans.toDouble(o).floatValue();
+            }
+        },
+        /**
+         * double
+         */
+        Double("double",Double.class,0d) {
+            @Override
+            protected Object transform(Object o) {
+                return Beans.toDouble(o);
+            }
+        },
+        /**
+         * date
+         */
+        Date("date", Date.class,null) {
+            @Override
+            protected Object transform(Object o) {
+                return Beans.toDate(o);
+            }
+        },
+        /**
+         * url
+         */
+        Url("url", URL.class,null) {
+            @Override
+            protected Object transform(Object o) {
+                return Beans.toURL(o);
+            }
+        },
+        /**
+         * big data,blob
+         */
+        Blob("blob",BinaryArrayBlob.class,null) {
+            @Override
+            protected Object transform(Object o) {
+                if(o instanceof Blob){
+                    return o;
+                }
+                return null;
+            }
+        };
 
         /**
          * type java class
          */
-        private final Class<?> clz;
+        private final Class<?> valueClass;
 
         /**
          * name
@@ -46,14 +154,14 @@ public final class GraphProperty {
          */
         private final Object nullValue;
 
-        PropertyType(final String name,final Class<?> clz,final Object nullValue){
+        PropertyType(final String name,final Class<?> valueClass,final Object nullValue){
             this.name = name;
-            this.clz = clz;
+            this.valueClass = valueClass;
             this.nullValue = nullValue;
         }
 
         public boolean isMatch(final Object value){
-            return value != null && clz.isAssignableFrom(value.getClass());
+            return value != null && valueClass.isAssignableFrom(value.getClass());
         }
 
         public static boolean checkValue(final Object value){
@@ -67,6 +175,35 @@ public final class GraphProperty {
             }
             return false;
         }
+
+        public static String[] names(){
+            return Stream.of(PropertyType.values()).
+                    map(PropertyType::typeName).
+                    toArray(String[]::new);
+        }
+
+        public static PropertyType ofTypeName(String name){
+            return (PropertyType) DataUtils.getOptional(Stream.of(PropertyType.values()).
+                    filter(p->StringUtils.equalsIgnoreCase(name,p.typeName())).
+                    findFirst());
+        }
+
+        public String typeName(){
+            return name;
+        }
+
+        @Override
+        public Object apply(Object o) {
+            if(o == null){
+                return nullValue;
+            }
+            if(o.getClass().equals(valueClass)){
+                return o;
+            }
+            return transform(o);
+        }
+
+        protected abstract Object transform(Object o);
     }
 
     /**
@@ -133,6 +270,18 @@ public final class GraphProperty {
                 (Byte) PropertyType.Byte.nullValue;
     }
 
+    public Boolean toBoolean(){
+        return PropertyType.Boolean.isMatch(content)?
+                (Boolean) content:
+                (Boolean) PropertyType.Boolean.nullValue;
+    }
+
+    public Character toChar(){
+        return PropertyType.Char.isMatch(content)?
+                (Character) content:
+                (Character) PropertyType.Char.nullValue;
+    }
+
     public Date toDate(){
         return PropertyType.Date.isMatch(content)?
                 (Date) content:
@@ -151,10 +300,10 @@ public final class GraphProperty {
                 (Double) PropertyType.Double.nullValue;
     }
 
-    public byte[] toBytes(){
-        return PropertyType.Bytes.isMatch(content)?
-                (byte[]) content:
-                (byte[]) PropertyType.Bytes.nullValue;
+    public Blob toBlob(){
+        return (Blob) (PropertyType.Blob.isMatch(content)?
+                        content:
+                        PropertyType.Blob.nullValue);
     }
 
     public URL toURL(){

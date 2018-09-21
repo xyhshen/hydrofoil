@@ -38,7 +38,7 @@ final class MapperHelper {
     }
 
     static boolean isPropertyInMainTable(PropertySchema propertySchema){
-        return StringUtils.isBlank(propertySchema.getTable());
+        return StringUtils.isBlank(propertySchema.getLinkTable());
     }
 
     static boolean checkQueriable(SchemaManager schemaManager,
@@ -52,7 +52,7 @@ final class MapperHelper {
                 getProperties().get(query.pair().name());
         String tableName = elementSchema.getTable();
         if(!isPropertyInMainTable(propertySchema)){
-            tableName = propertySchema.getTable();
+            tableName = propertySchema.getLinkTable();
         }
         ColumnSchema columnSchema = schemaManager.getColumnSchema(tableName,
                 propertySchema.getField());

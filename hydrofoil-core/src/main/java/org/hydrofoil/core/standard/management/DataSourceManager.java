@@ -3,7 +3,10 @@ package org.hydrofoil.core.standard.management;
 import org.apache.commons.io.IOUtils;
 import org.hydrofoil.common.provider.IDataProvider;
 import org.hydrofoil.common.provider.IDataSource;
+import org.hydrofoil.common.provider.IDataSourceContext;
+import org.hydrofoil.common.schema.ColumnSchema;
 import org.hydrofoil.common.schema.DataSourceSchema;
+import org.hydrofoil.common.schema.TableSchema;
 import org.hydrofoil.common.util.LangUtils;
 import org.hydrofoil.common.util.ParameterUtils;
 
@@ -49,7 +52,9 @@ public final class DataSourceManager implements Closeable {
                         getDatasourceSchema(name);
                 ParameterUtils.notNull(datasourceSchema,"collect source schema" + name);
                 IDataProvider provider = loadProvider(datasourceSchema.getProvider());
-                IDataSource connect = provider.connect(datasourceSchema);
+                IDataSource connect = provider.connect(
+                        new DefaultDatasourceContext(management.getSchemaManager(),
+                        datasourceSchema));
                 ParameterUtils.nullMessage(connect,"collect source " + name
                         + " connect failed");
                 return connect;
@@ -74,10 +79,36 @@ public final class DataSourceManager implements Closeable {
     public void close() throws IOException {
         //close all datasource
         synchronized (dataSourceMap){
-            dataSourceMap.forEach((k,v)->{
-                IOUtils.closeQuietly(v);
-            });
+            dataSourceMap.values().forEach(IOUtils::closeQuietly);
             dataSourceMap.clear();
         }
+    }
+}
+
+class DefaultDatasourceContext implements IDataSourceContext{
+
+    private DataSourceSchema dataSourceSchema;
+
+    private SchemaManager schemaManager;
+
+    DefaultDatasourceContext(
+            SchemaManager schemaManager,
+            DataSourceSchema dataSourceSchema){
+        this.schemaManager = schemaManager;
+        this.dataSourceSchema = dataSourceSchema;
+    }
+
+    @Override
+    public ColumnSchema getColumnSchema(String tableName, String columnName) {
+        final TableSchema tableSchema = schemaManager.getTableSchema(tableName);
+        if(tableName == null){
+            return null;
+        }
+        return tableSchema.getColumns().get(columnName);
+    }
+
+    @Override
+    public DataSourceSchema getDatasourceSchema() {
+        return dataSourceSchema;
     }
 }

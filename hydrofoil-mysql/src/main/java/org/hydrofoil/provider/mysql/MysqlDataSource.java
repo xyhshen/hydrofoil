@@ -2,6 +2,7 @@ package org.hydrofoil.provider.mysql;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.hydrofoil.common.provider.IDataSource;
+import org.hydrofoil.common.provider.IDataSourceContext;
 import org.hydrofoil.common.provider.datasource.RowQueryRequest;
 import org.hydrofoil.common.provider.datasource.RowQueryResponse;
 import org.hydrofoil.common.provider.datasource.RowStore;
@@ -24,13 +25,16 @@ import java.util.Iterator;
 public final class MysqlDataSource implements IDataSource {
 
     private BasicDataSource dataSource;
+    private IDataSourceContext dataSourceContext;
 
-    MysqlDataSource(BasicDataSource dataSource){
+    MysqlDataSource(BasicDataSource dataSource,
+                    IDataSourceContext dataSourceContext){
         this.dataSource = dataSource;
+        this.dataSourceContext = dataSourceContext;
     }
 
     private AbstractDbQueryService getQueryServeice(RowQueryRequest query){
-        AbstractDbQueryService dbQueryService = new MysqlDbQueryService(dataSource,query);
+        AbstractDbQueryService dbQueryService = new MysqlDbQueryService(dataSource,dataSourceContext,query);
         dbQueryService.init();
         return dbQueryService;
     }

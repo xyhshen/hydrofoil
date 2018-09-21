@@ -1,34 +1,28 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <mapper>
     <vertices>
-        <vertex label="person" table="person">
+        <vertex label="movie" table="movie">
             <properties>
-                <property primary="true" label="idnumber" field="idnumber" />
-                <property label="name" field="name" />
-                <property label="gender" field="gender" />
-                <property label="telphone" field="telphone" />
-                <property label="spouseName" field="spouseName" />
-                <property label="workunit" field="workunit" />
-                <property label="address" field="address" />
+                <property primary="true" label="movieid" field="movieid" />
+                <property label="name" field="moviename" />
+                <property label="income" field="income" />
+                <property label="boxoffice" field="boxoffice" />
+                <property label="company" link-table="company" field="company" />
+                <property label="type" link-table="type" field="type" multiple="true" />
+                <property label="director" link-table="director" field="director_name" />
+                <property label="publish" link-table="publish" multiple="true" >
+                    <pair name="area" field="area" />
+                    <pair name="time" field="time" />
+                </property>
             </properties>
-        </vertex>
-        <vertex label="company" table="companys">
-            <properties>
-                <property primary="true" label="name" field="name" />
-                <property label="address" field="address" />
-                <property label="scope" field="scope" />
-            </properties>
+            <links>
+                <link table="company" join-field="movieid=movieid" />
+                <link table="type" join-field="movieid=movieid" />
+                <link table="publish" join-field="movieid=movieid" />
+                <link table="director" join-field="movieid=movieid" />
+            </links>
         </vertex>
     </vertices>
     <edges>
-        <edge label="employ" table="person">
-            <source label="company" field="name=workunit" />
-            <target label="person"  field="idnumber=idnumber" />
-            <properties>
-                <property primary="true" label="idnumber" field="idnumber" />
-                <property primary="true" label="workunit" field="workunit" />
-                <property label="name" field="name" />
-            </properties>
-        </edge>
     </edges>
 </mapper>

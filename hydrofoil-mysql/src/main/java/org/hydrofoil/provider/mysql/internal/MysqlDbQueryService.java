@@ -6,9 +6,13 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.hydrofoil.common.graph.QMatch;
+import org.hydrofoil.common.provider.IDataSourceContext;
 import org.hydrofoil.common.provider.datasource.RowQueryRequest;
+import org.hydrofoil.common.schema.ColumnSchema;
+import org.hydrofoil.common.util.SqlUtils;
 import org.hydrofoil.common.util.bean.FieldTriple;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
 
@@ -22,8 +26,8 @@ import java.util.Objects;
  */
 public final class MysqlDbQueryService extends AbstractDbQueryService{
 
-    public MysqlDbQueryService(BasicDataSource dataSource, RowQueryRequest request) {
-        super(dataSource, request);
+    public MysqlDbQueryService(BasicDataSource dataSource, IDataSourceContext dataSourceContext, RowQueryRequest request) {
+        super(dataSource,dataSourceContext, request);
     }
 
     /**
@@ -188,5 +192,14 @@ public final class MysqlDbQueryService extends AbstractDbQueryService{
     @Override
     protected String crateCountSql(List<String> params) {
         return null;
+    }
+
+    @Override
+    protected Object handleQueryResult(ColumnSchema columnSchema, Object value) throws SQLException {
+        try {
+            return SqlUtils.rawDataToAcceptData(columnSchema,value);
+        } catch (Exception e) {
+            throw new SQLException(e);
+        }
     }
 }

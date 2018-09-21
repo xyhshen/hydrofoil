@@ -26,31 +26,39 @@ public final class StandardProperty {
     private String label;
 
     /**
-     *
+     * property entity
      */
-    private Object graphProperty;
+    private Object entity;
 
     /**
      * is complex property,property wrap item is map
      */
     private boolean complex;
 
-    public StandardProperty(String label,Object graphProperty,boolean complex){
-        this.label = label;
-        this.graphProperty = graphProperty;
-        this.complex = complex;
-        this.propertyId = label.hashCode() ^ (long)(graphProperty.hashCode() << 32);
+    public StandardProperty(String label,GraphProperty property){
+        this(label,property,false);
     }
 
-    public GraphProperty simple(){
+    public StandardProperty(String label,Map<String,GraphProperty> propertyMap){
+        this(label,propertyMap,true);
+    }
+
+    public StandardProperty(String label,Object entity,boolean complex){
+        this.label = label;
+        this.entity = entity;
+        this.complex = complex;
+        this.propertyId = label.hashCode() ^ ((long)entity.hashCode() << 32);
+    }
+
+    public GraphProperty property(){
         ParameterUtils.mustTrueMessage(!complex,"property not is simple");
-        return (GraphProperty) graphProperty;
+        return (GraphProperty) entity;
     }
 
     @SuppressWarnings("unchecked")
-    public Map<String,GraphProperty> map(){
+    public Map<String,GraphProperty> properties(){
         ParameterUtils.mustTrueMessage(complex,"property not is simple map");
-        return (Map<String, GraphProperty>) graphProperty;
+        return (Map<String, GraphProperty>) entity;
     }
 
     /**

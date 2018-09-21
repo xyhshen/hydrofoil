@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <datasources>
-    <datasource name="gongan" provider="mysql">
-        <url>jdbc:mysql://10.110.18.53:3306/gongan?useUnicode=true&amp;characterEncoding=utf-8&amp;useOldAliasMetadataBehavior=true&amp;allowMultiQueries=true</url>
+    <datasource name="movie" provider="mysql">
+        <url>jdbc:mysql://10.110.13.139:3306/testgraph?useUnicode=true&amp;characterEncoding=utf-8&amp;useOldAliasMetadataBehavior=true&amp;allowMultiQueries=true</url>
         <username>root</username>
-        <password>123456a?</password>
+        <password>123456</password>
     </datasource>
 </datasources>

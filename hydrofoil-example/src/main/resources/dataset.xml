@@ -1,8 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <dataSets>
-    <table name="person" datasource="gongan" realname="person1">
-        <column name="idnumber" index-type="normal" />
-        <column name="name" index-type="normal" />
+    <table name="movie" datasource="movie" realname="movie">
+        <column name="moviename" index-type="normal" />
     </table>
-    <table name="companys" datasource="gongan" />
+    <table name="company" datasource="movie" >
+        <column name="company" index-type="normal" />
+    </table>
+    <table name="publish" datasource="movie" >
+        <column name="area" index-type="normal" />
+        <column name="time" accpet-type="date" raw-format="yyyy年MM月dd日" index-type="normal" />
+    </table>
+    <table name="type" datasource="movie">
+        <column name="type" index-type="normal" />
+    </table>
+    <table name="director" datasource="movie">
+        <column name="director_name" index-type="normal" />
+    </table>
 </dataSets>

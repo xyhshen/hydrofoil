@@ -35,7 +35,7 @@ public final class DataProviderTest {
         map.put(Username.getName(),"root");
         map.put(Password.getName(),"123456a?");
         dataSourceSchema.putItem("configitem",map);
-        dataSource = new DataProvider().connect(dataSourceSchema);
+        dataSource = new DataProvider().connect(null);
     }
 
     @After

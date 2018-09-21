@@ -10,6 +10,7 @@ import org.hydrofoil.common.configuration.HydrofoilConfiguration;
 import org.hydrofoil.common.configuration.HydrofoilConfigurationItem;
 import org.hydrofoil.common.graph.EdgeDirection;
 import org.hydrofoil.common.schema.*;
+import org.hydrofoil.common.util.DataUtils;
 import org.hydrofoil.common.util.XmlUtils;
 
 import java.io.InputStream;
@@ -63,11 +64,11 @@ public final class SchemaManager {
     private volatile Long lastChanged;
 
     SchemaManager(){
-        dataSourceSchemaMap = new HashMap<>();
-        tableSchemaMap = new HashMap<>();
-        vertexSchemaMap = new HashMap<>();
-        edgeSchemaMap = new HashMap<>();
-        vertexEdgeSchemaMap = new HashMap<>();
+        dataSourceSchemaMap = DataUtils.newHashMapWithExpectedSize(10);
+        tableSchemaMap = DataUtils.newHashMapWithExpectedSize(50);
+        vertexSchemaMap = DataUtils.newHashMapWithExpectedSize(50);
+        edgeSchemaMap = DataUtils.newHashMapWithExpectedSize(50);
+        vertexEdgeSchemaMap = DataUtils.newHashMapWithExpectedSize(50);
         lastChanged = 0L;
     }
 

@@ -20,7 +20,7 @@ public final class DataSourceSchema extends SchemaItem{
     private static final String ATTR_DATASOURCE_NAME = "name";
     private static final String ATTR_DATASOURCE_PROVIDER = "provider";
 
-    private static final String ELEMENT_DATASOURCE_CONFIGITEM = "configitem";
+    private static final String NODE_DATASOURCE_CONFIGITEM = "configitem";
 
     public DataSourceSchema(){}
 
@@ -37,7 +37,7 @@ public final class DataSourceSchema extends SchemaItem{
         putItem(ATTR_DATASOURCE_PROVIDER,provider);
 
         //config info
-        putItem(ELEMENT_DATASOURCE_CONFIGITEM,XmlUtils.toStringMap(element));
+        putItem(NODE_DATASOURCE_CONFIGITEM,XmlUtils.toStringMap(element));
     }
 
     /**
@@ -61,6 +61,6 @@ public final class DataSourceSchema extends SchemaItem{
      * @return config item map
      */
     public Map<String,String> getConfigItems(){
-        return getItemMap(ELEMENT_DATASOURCE_CONFIGITEM);
+        return getItemMap(NODE_DATASOURCE_CONFIGITEM);
     }
 }

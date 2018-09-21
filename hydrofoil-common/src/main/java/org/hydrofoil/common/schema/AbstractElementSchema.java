@@ -5,6 +5,8 @@ import org.hydrofoil.common.util.DataUtils;
 import org.hydrofoil.common.util.ParameterUtils;
 import org.hydrofoil.common.util.XmlUtils;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -20,10 +22,16 @@ public abstract class AbstractElementSchema extends SchemaItem {
 
     private static final String ATTR_ELEMENT_LABEL =            "label";
     private static final String ATTR_ELEMENT_TABLE =            "table";
-    private static final String ATTR_ELEMENT_PROPERTIES =      "properties";
-    private static final String ATTR_ELEMENT_PROPERTY =         "property";
+    private static final String NODE_ELEMENT_LINKS =            "links";
+    private static final String NODE_ELEMENT_LINK =            "link";
+    private static final String NODE_ELEMENT_PROPERTIES =      "properties";
+    private static final String NODE_ELEMENT_PROPERTY =         "property";
 
-    AbstractElementSchema(){}
+    private List<String> primaryKeys;
+
+    AbstractElementSchema(){
+        primaryKeys = new ArrayList<>(1);
+    }
 
     public String getLabel(){
         return getItem(ATTR_ELEMENT_LABEL);
@@ -34,7 +42,11 @@ public abstract class AbstractElementSchema extends SchemaItem {
     }
 
     public Map<String,PropertySchema> getProperties(){
-        return getSchemaMap(ATTR_ELEMENT_PROPERTIES);
+        return getSchemaMap(NODE_ELEMENT_PROPERTIES);
+    }
+
+    public Map<String,LinkSchema> getLinks(){
+        return getSchemaMap(NODE_ELEMENT_LINKS);
     }
 
     @Override
@@ -50,11 +62,13 @@ public abstract class AbstractElementSchema extends SchemaItem {
         putItem(ATTR_ELEMENT_TABLE,tablename);
 
         // load element properties
-        loadProperties(node.element(ATTR_ELEMENT_PROPERTIES));
+        loadProperties(node.element(NODE_ELEMENT_PROPERTIES));
+        //load element links
+        loadLinks(node.element(NODE_ELEMENT_LINKS));
     }
 
     private void loadProperties(final Element node){
-        List<Element> elements = XmlUtils.listElement(node, ATTR_ELEMENT_PROPERTY);
+        List<Element> elements = XmlUtils.listElement(node, NODE_ELEMENT_PROPERTY);
         ParameterUtils.notEmpty(elements);
 
         Map<String,PropertySchema> properties = DataUtils.newHashMapWithExpectedSize(elements.size());
@@ -63,9 +77,27 @@ public abstract class AbstractElementSchema extends SchemaItem {
             PropertySchema propertySchema = new PropertySchema();
             propertySchema.read(element);
             properties.put(propertySchema.getLabel(),propertySchema);
+            if(propertySchema.isPrimary()){
+                primaryKeys.add(propertySchema.getLabel());
+            }
         }
+        ParameterUtils.notEmpty(primaryKeys);
+        putSchemaItem(NODE_ELEMENT_PROPERTIES,properties);
+    }
 
-        putSchemaItem(ATTR_ELEMENT_PROPERTIES,properties);
+    private void loadLinks(final Element node){
+        List<Element> elements = XmlUtils.listElement(node, NODE_ELEMENT_LINK);
+        Map<String,LinkSchema> links = DataUtils.newHashMapWithExpectedSize(elements.size());
+        for(Element element:elements){
+            LinkSchema linkSchema = new LinkSchema();
+            linkSchema.read(element);
+            links.put(linkSchema.getTable(),linkSchema);
+        }
+        putSchemaItem(NODE_ELEMENT_LINKS,links);
+    }
+
+    public Collection<String> getPrimaryKeys(){
+        return primaryKeys;
     }
 
 }

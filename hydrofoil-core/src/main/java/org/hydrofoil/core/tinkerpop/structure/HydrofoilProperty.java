@@ -20,15 +20,19 @@ public final class HydrofoilProperty<V> implements Property<V> {
 
     private final GraphProperty graphProperty;
 
+    private final String propertyKey;
+
     public HydrofoilProperty(final HydrofoilVertexProperty vertexProperty,
-                             final GraphProperty graphProperty){
+                             final GraphProperty graphProperty,
+                             final String propertyKey){
         this.vertexProperty = vertexProperty;
         this.graphProperty = graphProperty;
+        this.propertyKey = propertyKey;
     }
 
     @Override
     public String key() {
-        return null;
+        return propertyKey;
     }
 
     @SuppressWarnings("unchecked")
