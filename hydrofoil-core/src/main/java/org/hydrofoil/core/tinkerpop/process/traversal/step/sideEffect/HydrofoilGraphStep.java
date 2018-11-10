@@ -9,11 +9,11 @@ import org.apache.tinkerpop.gremlin.structure.Element;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.hydrofoil.common.util.DataUtils;
 import org.hydrofoil.common.util.ParameterUtils;
-import org.hydrofoil.core.standard.IGraphQueryRunner;
-import org.hydrofoil.core.standard.query.EdgeGraphQueryRunner;
-import org.hydrofoil.core.standard.query.VertexGraphQueryRunner;
+import org.hydrofoil.core.engine.IGraphQueryRunner;
+import org.hydrofoil.core.engine.query.EdgeGraphQueryRunner;
+import org.hydrofoil.core.engine.query.VertexGraphQueryRunner;
 import org.hydrofoil.core.tinkerpop.glue.TinkerpopGraphTransit;
-import org.hydrofoil.core.tinkerpop.structure.HydrofoilGraph;
+import org.hydrofoil.core.tinkerpop.structure.HydrofoilTinkerpopGraph;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -56,7 +56,7 @@ public final class HydrofoilGraphStep<S, E extends Element> extends GraphStep<S,
     @SuppressWarnings("unchecked")
     private Iterator<E> queryGraph(){
         ParameterUtils.notNull(graphQueryRunner,"graph query runner");
-        HydrofoilGraph graph = (HydrofoilGraph)DataUtils.getOptional(traversal.getGraph());
+        HydrofoilTinkerpopGraph graph = (HydrofoilTinkerpopGraph)DataUtils.getOptional(traversal.getGraph());
         Iterator<E> iterator = null;
         if(returnsVertex()){
             iterator = (Iterator<E>) TinkerpopGraphTransit.

@@ -3,7 +3,7 @@ package org.hydrofoil.core.tinkerpop.structure;
 import org.apache.tinkerpop.gremlin.structure.Property;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.structure.VertexProperty;
-import org.hydrofoil.core.standard.StandardProperty;
+import org.hydrofoil.core.engine.EngineProperty;
 import org.hydrofoil.core.tinkerpop.glue.TinkerpopGraphTransit;
 
 import java.util.Iterator;
@@ -19,29 +19,29 @@ import java.util.NoSuchElementException;
  */
 public final class HydrofoilVertexProperty<V> implements VertexProperty<V>{
 
-    private final StandardProperty standardProperty;
+    private final EngineProperty engineProperty;
 
     private final HydrofoilVertex vertex;
 
     public HydrofoilVertexProperty(final HydrofoilVertex vertex,
-                                   final StandardProperty standardProperty){
+                                   final EngineProperty engineProperty){
         this.vertex = vertex;
-        this.standardProperty = standardProperty;
+        this.engineProperty = engineProperty;
     }
 
-    public StandardProperty standard(){
-        return standardProperty;
+    public EngineProperty standard(){
+        return engineProperty;
     }
 
     @Override
     public String key() {
-        return standardProperty.label();
+        return engineProperty.label();
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public V value() throws NoSuchElementException {
-        return (V) standardProperty.property().content();
+        return (V) engineProperty.property().content();
     }
 
     @Override
@@ -61,7 +61,7 @@ public final class HydrofoilVertexProperty<V> implements VertexProperty<V>{
 
     @Override
     public Object id() {
-        return standardProperty.id();
+        return engineProperty.id();
     }
 
     @SuppressWarnings("unchecked")

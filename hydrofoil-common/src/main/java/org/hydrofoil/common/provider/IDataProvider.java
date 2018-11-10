@@ -25,6 +25,6 @@ public interface IDataProvider {
      * @param dataSourceContext datasource context
      * @return collect source's instance
      */
-    IDataSource connect(IDataSourceContext dataSourceContext);
+    IDataConnector connect(IDataConnectContext dataSourceContext);
 
 }

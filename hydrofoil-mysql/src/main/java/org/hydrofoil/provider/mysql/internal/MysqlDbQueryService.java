@@ -6,8 +6,8 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.hydrofoil.common.graph.QMatch;
-import org.hydrofoil.common.provider.IDataSourceContext;
-import org.hydrofoil.common.provider.datasource.RowQueryRequest;
+import org.hydrofoil.common.provider.IDataConnectContext;
+import org.hydrofoil.common.provider.datasource.RowQueryScan;
 import org.hydrofoil.common.schema.ColumnSchema;
 import org.hydrofoil.common.util.SqlUtils;
 import org.hydrofoil.common.util.bean.FieldTriple;
@@ -26,7 +26,7 @@ import java.util.Objects;
  */
 public final class MysqlDbQueryService extends AbstractDbQueryService{
 
-    public MysqlDbQueryService(BasicDataSource dataSource, IDataSourceContext dataSourceContext, RowQueryRequest request) {
+    public MysqlDbQueryService(BasicDataSource dataSource, IDataConnectContext dataSourceContext, RowQueryScan request) {
         super(dataSource,dataSourceContext, request);
     }
 
@@ -71,7 +71,7 @@ public final class MysqlDbQueryService extends AbstractDbQueryService{
         StringBuilder sql = new StringBuilder();
         if(q.type() == QMatch.QType.eq){
             sql.append(getColumnAlias(tableName,q.pair().name()))
-                    .append(q.isNot()?"!=":"=")
+                    .append("=")
                     .append(StringUtils.isNotBlank(joinField)?joinField:"?");
             if(StringUtils.isBlank(joinField)){
                 params.add(Objects.toString(q.pair().first(),""));
@@ -79,7 +79,7 @@ public final class MysqlDbQueryService extends AbstractDbQueryService{
         }
         if(q.type() == QMatch.QType.like){
             sql.append(getColumnAlias(tableName,q.pair().name()))
-                    .append(q.isNot()?" not like ":" like ")
+                    .append(" like ")
                     .append(StringUtils.isNotBlank(joinField)?joinField:"?");
             if(StringUtils.isBlank(joinField)){
                 params.add(Objects.toString(q.pair().first(),"") + "%");
@@ -111,14 +111,14 @@ public final class MysqlDbQueryService extends AbstractDbQueryService{
         }
         if(q.type() == QMatch.QType.between){
             sql.append(getColumnAlias(tableName,q.pair().name()))
-                    .append(q.isNot()?" not between ":" between ")
+                    .append(" between ")
                     .append("? and ? ");
             params.add(Objects.toString(q.pair().first(),""));
             params.add(Objects.toString(((FieldTriple)q.pair()).last(),""));
         }
         if(q.type() == QMatch.QType.in){
             sql.append(getColumnAlias(tableName,q.pair().name()))
-                    .append(q.isNot()?" not in ":" in ")
+                    .append(" in ")
                     .append("(");
             List<Object> l = (List<Object>) q.pair().first();
             MutableBoolean first = new MutableBoolean(true);
@@ -143,7 +143,7 @@ public final class MysqlDbQueryService extends AbstractDbQueryService{
     private String createAssociateQuerySql(List<String> params){
         StringBuilder sql = new StringBuilder();
         request.getAssociateQuery().forEach((rowQuery)->{
-            sql.append("inner join ").append(rowQuery.getName()).
+            sql.append("left join ").append(rowQuery.getName()).
                     append(" as ").append(tableAlias.get(rowQuery.getName()));
             if(!rowQuery.getMatch().isEmpty()){
                 sql.append(" on ");
@@ -152,7 +152,7 @@ public final class MysqlDbQueryService extends AbstractDbQueryService{
                     if(first.isFalse()){
                         sql.append(" and ");
                     }
-                    sql.append(toWhereSection(rowQuery.getName(),q.getMatch(),getColumnAlias(q.getName(),q.getFieldname()),params));
+                    sql.append(toWhereSection(rowQuery.getName(),q.getMatch(),getColumnAlias(q.getName(),q.getJoinField()),params));
                 });
             }
         });

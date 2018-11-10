@@ -2,7 +2,7 @@ package org.hydrofoil.core.tinkerpop.structure;
 
 import org.apache.tinkerpop.gremlin.structure.Element;
 import org.apache.tinkerpop.gremlin.structure.Graph;
-import org.hydrofoil.core.standard.StandardElement;
+import org.hydrofoil.core.engine.EngineElement;
 
 /**
  * HydrofoilElement
@@ -14,17 +14,17 @@ import org.hydrofoil.core.standard.StandardElement;
  */
 public abstract class HydrofoilElement implements Element {
 
-    protected final StandardElement standardElement;
+    protected final EngineElement engineElement;
 
-    protected final HydrofoilGraph graph;
+    protected final HydrofoilTinkerpopGraph graph;
 
     protected final Object id;
 
-    HydrofoilElement(HydrofoilGraph graph,
-                               StandardElement standardElement){
+    HydrofoilElement(HydrofoilTinkerpopGraph graph,
+                               EngineElement engineElement){
         this.graph = graph;
-        this.standardElement = standardElement;
-        this.id = graph.getIdManage().tinkerpopId(standardElement.elementId());
+        this.engineElement = engineElement;
+        this.id = graph.getIdManage().tinkerpopId(engineElement.elementId());
     }
 
     @Override
@@ -34,10 +34,10 @@ public abstract class HydrofoilElement implements Element {
 
     @Override
     public String label() {
-        if(standardElement == null){
+        if(engineElement == null){
             return null;
         }
-        return standardElement.elementId().label();
+        return engineElement.elementId().label();
     }
 
     @Override
@@ -46,10 +46,10 @@ public abstract class HydrofoilElement implements Element {
     }
 
     /**
-     * get standard element
+     * get engine element
      * @return element
      */
-    public StandardElement standard(){
-        return standardElement;
+    public EngineElement standard(){
+        return engineElement;
     }
 }

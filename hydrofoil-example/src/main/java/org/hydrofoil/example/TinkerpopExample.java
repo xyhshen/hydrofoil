@@ -5,7 +5,7 @@ import org.apache.tinkerpop.gremlin.structure.Property;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.hydrofoil.common.configuration.HydrofoilConfiguration;
 import org.hydrofoil.core.HydrofoilFactory;
-import org.hydrofoil.core.tinkerpop.structure.HydrofoilGraph;
+import org.hydrofoil.core.tinkerpop.structure.HydrofoilTinkerpopGraph;
 import org.hydrofoil.tinkerpop.EP;
 
 import java.util.List;
@@ -26,7 +26,7 @@ public final class TinkerpopExample {
         configuration.put("hydrofoil.schema.datasource.resource","datasource.xml");
         configuration.put("hydrofoil.schema.dataset.resource","dataset.xml");
         configuration.put("hydrofoil.schema.mapper.resource","mapper.xml");
-        try(HydrofoilGraph graph = HydrofoilFactory.openTinkerpop(configuration)){
+        try(HydrofoilTinkerpopGraph graph = HydrofoilFactory.open(configuration)){
             final GraphTraversalSource g = graph.traversal();
             List<Vertex> vertices = g.V().hasLabel("person").
                     has("name", EP.like("张")).limit(10).toList();

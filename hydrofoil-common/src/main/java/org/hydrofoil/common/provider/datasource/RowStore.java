@@ -1,11 +1,12 @@
 package org.hydrofoil.common.provider.datasource;
 
-import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.ObjectUtils;
+import org.hydrofoil.common.util.ParameterUtils;
 import org.hydrofoil.common.util.bean.FieldPair;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * RowStore
@@ -17,10 +18,35 @@ import java.util.TreeMap;
  */
 public final class RowStore {
 
-    private Map<String,Map<String,FieldPair>> dataSet;
+    private final Object[] rowFull;
 
-    public RowStore(){
-        this.dataSet = new TreeMap<>();
+    private final RowColumnInformation information;
+
+    private final String collectSetName;
+
+    RowStore(final RowColumnInformation informatio){
+        this.rowFull = new Object[informatio.size()];
+        this.information = informatio;
+        this.collectSetName = null;
+    }
+
+    private RowStore(final RowColumnInformation information, final String collectSetName){
+        this.information = information;
+        this.collectSetName = collectSetName;
+        this.rowFull = new Object[information.size(collectSetName)];
+    }
+
+    /**
+     * put a sub row field
+     * @param fieldname field name
+     * @param value value
+     * @return this
+     */
+    public RowStore put(final String fieldname,final Object value){
+        ParameterUtils.notBlank(collectSetName);
+        Integer fieldIndex =  information.index(collectSetName,fieldname);
+        rowFull[fieldIndex] = value;
+        return this;
     }
 
     /**
@@ -29,9 +55,17 @@ public final class RowStore {
      * @param pair field pair
      * @return this
      */
-    public RowStore put(String name,FieldPair pair){
-        Map<String, FieldPair> fieldPairMap = dataSet.computeIfAbsent(name, (k) -> new HashMap<>());
-        fieldPairMap.put(pair.name(),pair);
+    public RowStore put(final String name, final FieldPair pair){
+        Integer collectIndex = information.index(name);
+        Integer fieldIndex =  information.index(name,pair.name());
+        ParameterUtils.mustTrue(ObjectUtils.allNotNull(collectIndex,fieldIndex));
+        Object o = rowFull[collectIndex];
+        if(o == null || o instanceof Collection){
+            rowFull[collectIndex] = new Object[information.size(pair.name())];
+            o = rowFull[collectIndex];
+        }
+        Object[] cells = (Object[]) o;
+        cells[fieldIndex] = pair.first();
         return this;
     }
 
@@ -42,8 +76,28 @@ public final class RowStore {
      * @param value field value
      * @return this
      */
-    public RowStore put(String name,String fieldname,Object value){
+    public RowStore put(final String name,final String fieldname,final Object value){
         return put(name,new FieldPair(fieldname,value));
+    }
+
+    /**
+     * create a sub row
+     * @param name collect name
+     * @return new sub row
+     */
+    @SuppressWarnings("unchecked")
+    public RowStore createRow(final String name){
+        Integer collectIndex = information.index(name);
+        ParameterUtils.notNull(collectIndex);
+        Object o = rowFull[collectIndex];
+        if(o == null || !(o instanceof Collection)){
+            rowFull[collectIndex] = new ArrayList();
+            o = rowFull[collectIndex];
+        }
+        List<RowStore> r = (List<RowStore>) o;
+        RowStore row = new RowStore(information,name);
+        r.add(row);
+        return row;
     }
 
     /**
@@ -52,12 +106,18 @@ public final class RowStore {
      * @param fieldname fieldname
      * @return field pair
      */
-    public FieldPair field(String name,String fieldname){
-        Map<String, FieldPair> fieldPairMap = dataSet.get(name);
-        if(fieldPairMap == null){
+    public FieldPair field(final String name,final String fieldname){
+        Integer collectIndex = information.index(name);
+        Integer fieldIndex =  information.index(name,fieldname);
+        if(!ObjectUtils.allNotNull(collectIndex,fieldIndex)){
             return null;
         }
-        return fieldPairMap.get(fieldname);
+        Object o = rowFull[collectIndex];
+        if(o == null || o instanceof Collection){
+            return null;
+        }
+        Object[] cells = (Object[]) o;
+        return new FieldPair(fieldname,cells[fieldIndex]);
     }
 
     /**
@@ -66,9 +126,25 @@ public final class RowStore {
      * @param fieldname field name
      * @return value
      */
-    public Object value(String name,String fieldname){
+    public Object value(final String name,final String fieldname){
         FieldPair field = field(name, fieldname);
         return field!=null?field.first():null;
+    }
+
+    /**
+     * get sub row
+     * @param name collect name
+     * @return rowstore list
+     */
+    @SuppressWarnings("unchecked")
+    public Collection<RowStore> rows(final String name){
+        Integer collectIndex = information.index(name);
+        ParameterUtils.notNull(collectIndex);
+        Object o = rowFull[collectIndex];
+        if(o == null || !(o instanceof Collection)){
+            return null;
+        }
+        return (Collection<RowStore>) o;
     }
 
 }

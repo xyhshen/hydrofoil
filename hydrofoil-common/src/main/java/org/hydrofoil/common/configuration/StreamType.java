@@ -12,6 +12,9 @@ import java.util.function.Function;
  */
 enum StreamType {
 
+    /**
+     * by local file,load stream
+     */
     Local("local",(path)-> {
         try {
             return FileUtils.openInputStream(new File((String) path));
@@ -20,6 +23,9 @@ enum StreamType {
         }
         return null;
     }),
+    /**
+     * by resource
+     */
     Resource("resource",(path)->{
         InputStream resourceAsStream = Thread.currentThread().
                 getContextClassLoader().getResourceAsStream((String) path);
@@ -28,6 +34,9 @@ enum StreamType {
         }
         return null;
     }),
+    /**
+     * stream
+     */
     Stream("stream",(object)->(InputStream) object);
 
     private final String name;

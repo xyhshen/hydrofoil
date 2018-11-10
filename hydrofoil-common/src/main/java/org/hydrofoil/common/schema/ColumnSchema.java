@@ -3,8 +3,11 @@ package org.hydrofoil.common.schema;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Element;
 import org.hydrofoil.common.graph.GraphProperty;
-import org.hydrofoil.common.util.ParameterUtils;
-import org.hydrofoil.common.util.XmlUtils;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.BiConsumer;
 
 /**
  * ColumnSchema
@@ -28,6 +31,21 @@ public class ColumnSchema extends SchemaItem{
      */
     public static final String COLUMN_INDEX_TYPE_NORMAL = "normal";
     public static final String COLUMN_INDEX_TYPE_TEXT = "text";
+    public static final String COLUMN_INDEX_TYPE_PRIMARY = "primary";
+
+    private static final List<BiConsumer<Element,SchemaItem>> DEFINES = Arrays.asList(
+            SchemaItems.attributeDefine(ATTR_COLUMN_NAME,true),
+            SchemaItems.attributeDefine(ATTR_COLUMN_INDEX_TYPE,false,
+                    p->StringUtils.equalsAnyIgnoreCase(Objects.toString(p),
+                            COLUMN_INDEX_TYPE_NORMAL,COLUMN_INDEX_TYPE_TEXT,COLUMN_INDEX_TYPE_PRIMARY)),
+            SchemaItems.attributeDefine(ATTR_COLUMN_ACCEPT_TYPE,false,
+                    p->StringUtils.equalsAnyIgnoreCase(Objects.toString(p),
+                            GraphProperty.PropertyType.names()),
+                    GraphProperty.PropertyType.String.typeName()),
+            SchemaItems.attributeDefine(ATTR_COLUMN_RAW_TYPE),
+            SchemaItems.attributeDefine(ATTR_COLUMN_RAW_FORMAT),
+            SchemaItems.attributeDefine(ATTR_COLUMN_RAW_ENCODE,false,null,"utf-8")
+    );
 
     /**
      * column data accept type
@@ -37,27 +55,11 @@ public class ColumnSchema extends SchemaItem{
     public ColumnSchema(){}
 
     @Override
-    void parse(final Element element){
-        String name = XmlUtils.attributeStringValue(element,ATTR_COLUMN_NAME);
-        String indexType = XmlUtils.attributeStringValue(element,ATTR_COLUMN_INDEX_TYPE,"");
-        String acceptType = XmlUtils.attributeStringValue(element,ATTR_COLUMN_ACCEPT_TYPE, GraphProperty.PropertyType.String.typeName());
-        String rawType = XmlUtils.attributeStringValue(element,ATTR_COLUMN_RAW_TYPE,"");
-        String rawFormat = XmlUtils.attributeStringValue(element,ATTR_COLUMN_RAW_FORMAT,"");
-        String rawEncode = XmlUtils.attributeStringValue(element,ATTR_COLUMN_RAW_ENCODE,"utf-8");
-
-        ParameterUtils.notBlank(name);
-        ParameterUtils.checkValueNullable(indexType,COLUMN_INDEX_TYPE_NORMAL,
-                COLUMN_INDEX_TYPE_TEXT);
-        ParameterUtils.checkValueIn(acceptType, GraphProperty.PropertyType.names());
-
-        putItem(ATTR_COLUMN_NAME,name);
-        putItem(ATTR_COLUMN_INDEX_TYPE,indexType);
-        putItem(ATTR_COLUMN_RAW_TYPE,rawType);
-        putItem(ATTR_COLUMN_RAW_FORMAT,rawFormat);
-        putItem(ATTR_COLUMN_RAW_ENCODE,rawEncode);
-
+    void parse(final Element node){
+        //load schema
+        loadSchema(node,DEFINES);
         //set accept type
-        this.acceptType = GraphProperty.PropertyType.ofTypeName(acceptType);
+        this.acceptType = GraphProperty.PropertyType.ofTypeName(getItem(ATTR_COLUMN_ACCEPT_TYPE));
     }
 
     /**
@@ -86,6 +88,11 @@ public class ColumnSchema extends SchemaItem{
                 COLUMN_INDEX_TYPE_TEXT);
     }
 
+    public boolean isSupportedPrimaryIndex(){
+        return StringUtils.equalsIgnoreCase(getIndexType(),
+                COLUMN_INDEX_TYPE_PRIMARY);
+    }
+
     public GraphProperty.PropertyType getAcceptType(){
         return acceptType;
     }
@@ -100,5 +107,10 @@ public class ColumnSchema extends SchemaItem{
 
     public String getRawEncode(){
         return getItem(ATTR_COLUMN_RAW_ENCODE);
+    }
+
+    @Override
+    public String getId(){
+        return getColumnName();
     }
 }

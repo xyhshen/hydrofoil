@@ -26,6 +26,10 @@ public class QMatch {
          */
         like,
         /**
+         * like *%
+         */
+        prefix,
+        /**
          *  greater than >
          */
         gt,
@@ -48,20 +52,19 @@ public class QMatch {
         /**
          * in(a,b,c,d.....)
          */
-        in
+        in,
+        /**
+         * Q1 and Q2
+         */
+        and
     }
 
-    public final static class Q implements Cloneable{
+    public static class Q implements Cloneable{
 
         /**
          * query type
          */
         private final QType type;
-
-        /**
-         * use not
-         */
-        private boolean not;
 
         /**
          * field value
@@ -89,8 +92,12 @@ public class QMatch {
             return this;
         }
 
-        public boolean isNot(){
-            return not;
+        public Q[] subquery(){
+            if(pair instanceof FieldTriple){
+                FieldTriple triple = (FieldTriple) pair;
+                return new Q[]{(Q) triple.first(), (Q) triple.last()};
+            }
+            return new Q[]{(Q) pair.first()};
         }
 
         @Override
@@ -109,12 +116,10 @@ public class QMatch {
             return Objects.equals(this,obj);
         }
 
-        @SuppressWarnings("MethodDoesntCallSuperMethod")
         @Override
         public Q clone(){
             Q query = new Q(this.type);
             query.pair = pair.clone();
-            query.not = not;
             return query;
         }
     }
@@ -137,6 +142,16 @@ public class QMatch {
      */
     public static Q like(String name,Object value){
         return new Q(QType.like).pair(new FieldPair(name,value));
+    }
+
+    /**
+     * create prefix match
+     * @param name field name
+     * @param value field value
+     * @return query match
+     */
+    public static Q prefix(String name,Object value){
+        return new Q(QType.prefix).pair(new FieldPair(name,value));
     }
 
     /**
@@ -186,6 +201,16 @@ public class QMatch {
      */
     public static Q in(String name,Object ...values){
         return new Q(QType.in).pair(new FieldPair(name, Arrays.asList(values)));
+    }
+
+    /**
+     * and match
+     * @param left left query
+     * @param right right query
+     * @return query match
+     */
+    public static Q and(Q left,Q right){
+        return new Q(QType.and).pair(new FieldTriple("and",left,right));
     }
 
 }

@@ -7,7 +7,9 @@ import org.hydrofoil.common.util.XmlUtils;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 /**
  * SchemaItem
@@ -54,6 +56,10 @@ public class SchemaItem {
      */
     void parse(final Element element){
         //empty
+    }
+
+    void loadSchema(Element node,final List<BiConsumer<Element,SchemaItem>> defines){
+        defines.forEach(o->o.accept(node,this));
     }
 
     /**
@@ -179,5 +185,13 @@ public class SchemaItem {
     public <C extends SchemaItem> Map<String,C> getSchemaMap(final String name){
         Object o = schemaMap.get(name);
         return o != null?(Map<String,C>)o:null;
+    }
+
+    /**
+     * get schema id,need to be defined separately
+     * @return schema id
+     */
+    public String getId(){
+        return null;
     }
 }

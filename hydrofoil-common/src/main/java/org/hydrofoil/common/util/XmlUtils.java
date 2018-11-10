@@ -22,6 +22,8 @@ import java.util.TreeMap;
  */
 public final class XmlUtils {
 
+    private XmlUtils(){}
+
     /**
      * get attribute value for string
      * @param element node
@@ -100,6 +102,9 @@ public final class XmlUtils {
         Map<String,String> map = new TreeMap<>();
         elements.forEach((v)->{
             Element children = (Element) v;
+            if(hasChildren(children)){
+                return;
+            }
             map.put(children.getName(),children.getText());
         });
         return map;

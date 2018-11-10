@@ -8,7 +8,7 @@ import org.hydrofoil.common.graph.GraphElementId;
 import org.hydrofoil.common.graph.GraphVertexId;
 import org.hydrofoil.common.schema.AbstractElementSchema;
 import org.hydrofoil.common.util.DataUtils;
-import org.hydrofoil.core.standard.management.SchemaManager;
+import org.hydrofoil.core.engine.management.SchemaManager;
 
 import java.util.Map;
 import java.util.Objects;

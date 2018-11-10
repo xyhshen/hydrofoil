@@ -71,7 +71,6 @@ public class FieldPair implements Cloneable {
         return StringUtils.equals(name,((FieldPair)object).name);
     }
 
-    @SuppressWarnings("MethodDoesntCallSuperMethod")
     @Override
     public FieldPair clone(){
         return new FieldPair(name,first);

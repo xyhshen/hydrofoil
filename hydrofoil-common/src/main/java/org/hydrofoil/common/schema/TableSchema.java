@@ -6,8 +6,10 @@ import org.hydrofoil.common.util.DataUtils;
 import org.hydrofoil.common.util.ParameterUtils;
 import org.hydrofoil.common.util.XmlUtils;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 /**
  * TableSchema
@@ -21,31 +23,35 @@ public class TableSchema extends SchemaItem{
 
     private static final String ATTR_TABLE_NAME = "name";
     private static final String ATTR_TABLE_DATASOURCE = "datasource";
+    private static final String ATTR_TABLE_NAMESPACE = "namespace";
     private static final String ATTR_TABLE_REALNAME = "realname";
 
     private static final String NODE_TABLE_COLUMN = "column";
+    private static final String NODE_TABLE_OPTION = "option";
+
+    private static final String ATTR_TABLE_OPTION_NAME = "name";
+
+    private static final List<BiConsumer<Element,SchemaItem>> DEFINES = Arrays.asList(
+            SchemaItems.attributeDefine(ATTR_TABLE_NAME,true),
+            SchemaItems.attributeDefine(ATTR_TABLE_DATASOURCE,true),
+            SchemaItems.attributeDefine(ATTR_TABLE_REALNAME),
+            SchemaItems.attributeDefine(ATTR_TABLE_NAMESPACE),
+            SchemaItems.nodeDefine(NODE_TABLE_COLUMN,ColumnSchema.class)
+    );
 
     public TableSchema(){}
 
     /**
      * parse
-     * @param element xml root
+     * @param node xml root
      */
     @Override
-    void parse(final Element element){
+    void parse(final Element node){
         //base info
-        String name = XmlUtils.attributeStringValue(element,ATTR_TABLE_NAME);
-        String datasource = XmlUtils.attributeStringValue(element,ATTR_TABLE_DATASOURCE);
-        String realname = XmlUtils.attributeStringValue(element,ATTR_TABLE_REALNAME);
+        loadSchema(node,DEFINES);
 
-        ParameterUtils.notBlank(name);
-        ParameterUtils.notBlank(datasource);
-
-        putItem(ATTR_TABLE_NAME,name);
-        putItem(ATTR_TABLE_DATASOURCE,datasource);
-        putItem(ATTR_TABLE_REALNAME,realname);
-
-        loadColumns(element);
+        //load option
+        loadOptions(node);
     }
 
     private void loadColumns(final Element node){
@@ -58,6 +64,18 @@ public class TableSchema extends SchemaItem{
             map.put(columnSchema.getColumnName(),columnSchema);
         }
         putSchemaItem(NODE_TABLE_COLUMN,map);
+    }
+
+    private void loadOptions(final Element node){
+        List<Element> elements = XmlUtils.listElement(node,
+                NODE_TABLE_OPTION);
+        Map<String,String> map = DataUtils.newHashMapWithExpectedSize(elements.size());
+        for(Element element:elements){
+            String name = element.attributeValue(ATTR_TABLE_OPTION_NAME);
+            ParameterUtils.notBlank(name);
+            map.put(name,element.getStringValue());
+        }
+        putItem(NODE_TABLE_OPTION,map);
     }
 
     /**
@@ -81,12 +99,36 @@ public class TableSchema extends SchemaItem{
      * @return table real name
      */
     public String getRealName(){
-        String realName = getItem(ATTR_TABLE_REALNAME);
-       return StringUtils.isNotBlank(realName)?realName:getName();
+        return StringUtils.defaultString(getItem(ATTR_TABLE_REALNAME),getName());
     }
 
+    /**
+     * get table namespace,or path
+     * @return namespace
+     */
+    public String getNamespace(){
+        return getItem(ATTR_TABLE_NAMESPACE);
+    }
+
+    /**
+     * get column define
+     * @return column map
+     */
     public Map<String,ColumnSchema> getColumns(){
         return getSchemaMap(NODE_TABLE_COLUMN);
+    }
+
+    /**
+     * get option map
+     * @return option map
+     */
+    public Map<String,String> getOptions(){
+        return getItemMap(NODE_TABLE_OPTION);
+    }
+
+    @Override
+    public String getId(){
+        return getName();
     }
 
 }

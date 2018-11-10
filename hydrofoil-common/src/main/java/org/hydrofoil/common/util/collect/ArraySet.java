@@ -17,7 +17,7 @@ import static org.hydrofoil.common.util.ParameterUtils.checkSupport;
  * @author xie_yh
  * @date 2018/7/31 10:55
  */
-public class ArraySet<E extends Comparable> implements Set<E>, Cloneable,Serializable {
+public class ArraySet<E extends Comparable<? super E>> implements Set<E>, Cloneable,Serializable {
 
     /**
      * key Storager array

@@ -8,11 +8,11 @@ import org.apache.tinkerpop.gremlin.process.traversal.step.util.HasContainer;
 import org.apache.tinkerpop.gremlin.structure.T;
 import org.hydrofoil.common.graph.QMatch;
 import org.hydrofoil.common.util.DataUtils;
-import org.hydrofoil.core.standard.IGraphQueryRunner;
-import org.hydrofoil.core.standard.management.SchemaManager;
-import org.hydrofoil.core.standard.query.VertexGraphQueryRunner;
+import org.hydrofoil.core.engine.IGraphQueryRunner;
+import org.hydrofoil.core.engine.management.SchemaManager;
+import org.hydrofoil.core.engine.query.VertexGraphQueryRunner;
 import org.hydrofoil.core.tinkerpop.glue.TinkerpopElementUtils;
-import org.hydrofoil.core.tinkerpop.structure.HydrofoilGraph;
+import org.hydrofoil.core.tinkerpop.structure.HydrofoilTinkerpopGraph;
 
 import java.util.*;
 import java.util.function.BiPredicate;
@@ -47,7 +47,7 @@ public final class HasContainerHelper {
     }
 
     static IGraphQueryRunner buildQueryRunner(final Traversal.Admin<?, ?> traversal,final HydrofoilGraphStep<?,?> graphStep){
-        HydrofoilGraph graph = (HydrofoilGraph) DataUtils.
+        HydrofoilTinkerpopGraph graph = (HydrofoilTinkerpopGraph) DataUtils.
                 getOptional(traversal.getGraph());
         IGraphQueryRunner graphQueryRunner;
         if(graphStep.returnsVertex()){
@@ -61,7 +61,7 @@ public final class HasContainerHelper {
     }
 
     @SuppressWarnings("unchecked")
-    static void extractLabels(final HydrofoilGraph graph,final IGraphQueryRunner graphQueryRunner,final List<HasContainer> hasContainers){
+    static void extractLabels(final HydrofoilTinkerpopGraph graph, final IGraphQueryRunner graphQueryRunner, final List<HasContainer> hasContainers){
         Set<String> elementLabels = DataUtils.newSetWithMaxSize(5);
         SchemaManager schemaManager = graph.getConnector().getManagement().getSchemaManager();
         Set<String> schemaLabels;
@@ -104,7 +104,7 @@ public final class HasContainerHelper {
         return values.stream().filter(p->!schemaLabels.contains(p)).collect(Collectors.toSet());
     }
 
-    static void extractPropertyQuery(final HydrofoilGraph graph,
+    static void extractPropertyQuery(final HydrofoilTinkerpopGraph graph,
                                      final IGraphQueryRunner graphQueryRunner,
                                      final List<HasContainer> hasContainers){
         List<QMatch.Q> fieldQuerys = new ArrayList<>(hasContainers.size());

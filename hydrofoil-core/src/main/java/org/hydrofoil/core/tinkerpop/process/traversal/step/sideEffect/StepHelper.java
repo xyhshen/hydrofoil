@@ -13,7 +13,7 @@ import org.apache.tinkerpop.gremlin.process.traversal.step.sideEffect.IdentitySt
 import org.apache.tinkerpop.gremlin.process.traversal.step.util.HasContainer;
 import org.apache.tinkerpop.gremlin.process.traversal.util.TraversalHelper;
 import org.apache.tinkerpop.gremlin.structure.Element;
-import org.hydrofoil.core.standard.IGraphQueryRunner;
+import org.hydrofoil.core.engine.IGraphQueryRunner;
 
 import java.util.Iterator;
 

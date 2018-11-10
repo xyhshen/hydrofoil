@@ -1,8 +1,8 @@
 package org.hydrofoil.provider.mysql;
 
 import org.hydrofoil.common.graph.QMatch;
-import org.hydrofoil.common.provider.IDataSource;
-import org.hydrofoil.common.provider.datasource.RowQueryRequest;
+import org.hydrofoil.common.provider.IDataConnector;
+import org.hydrofoil.common.provider.datasource.RowQueryScan;
 import org.hydrofoil.common.provider.datasource.RowQueryResponse;
 import org.hydrofoil.common.schema.DataSourceSchema;
 import org.junit.After;
@@ -25,7 +25,7 @@ import static org.hydrofoil.provider.mysql.MysqlDatasourceSchema.DatasourceItem.
  */
 public final class DataProviderTest {
 
-    private IDataSource dataSource;
+    private IDataConnector dataSource;
 
     @Before
     public void init(){
@@ -49,7 +49,7 @@ public final class DataProviderTest {
 
     @Test
     public void testSendQuery(){
-        RowQueryRequest query = new RowQueryRequest();
+        RowQueryScan query = new RowQueryScan();
         query.setName("person");
         query.getFields().add("idnumber");
         query.getFields().add("name");
@@ -62,7 +62,7 @@ public final class DataProviderTest {
         query.getUniqueField().add("address");
         query.getMatch().add(QMatch.like("address","济南"));
         {
-            RowQueryRequest.AssociateRowQuery associateRowQuery = new RowQueryRequest.AssociateRowQuery();
+            RowQueryScan.AssociateRowQuery associateRowQuery = new RowQueryScan.AssociateRowQuery();
             associateRowQuery.setName("airpanl_link");
             associateRowQuery.getFields().add("idnumber");
             associateRowQuery.getFields().add("key");
@@ -70,7 +70,7 @@ public final class DataProviderTest {
             associateRowQuery.getFields().add("name");
             associateRowQuery.getFields().add("startTime");
             associateRowQuery.getFields().add("startSite");
-            associateRowQuery.getMatch().add(new RowQueryRequest.AssociateMatch(
+            associateRowQuery.getMatch().add(new RowQueryScan.AssociateMatch(
                     QMatch.eq("idnumber",null),
                     "person",
                     "idnumber"
@@ -78,7 +78,7 @@ public final class DataProviderTest {
             query.getAssociateQuery().add(associateRowQuery);
         }
         query.setOffset(0L).setLimit(100L);
-        RowQueryResponse response = dataSource.sendQuery(query);
+        RowQueryResponse response = dataSource.scanRow(query);
         System.out.println(response);
     }
 

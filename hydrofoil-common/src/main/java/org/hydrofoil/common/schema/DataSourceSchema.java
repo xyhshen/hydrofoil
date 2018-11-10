@@ -1,10 +1,12 @@
 package org.hydrofoil.common.schema;
 
 import org.dom4j.Element;
-import org.hydrofoil.common.util.ParameterUtils;
 import org.hydrofoil.common.util.XmlUtils;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 /**
  * DataSourceSchema
@@ -22,22 +24,31 @@ public final class DataSourceSchema extends SchemaItem{
 
     private static final String NODE_DATASOURCE_CONFIGITEM = "configitem";
 
+    private static final List<BiConsumer<Element,SchemaItem>> DEFINES = Arrays.asList(
+            SchemaItems.attributeDefine(ATTR_DATASOURCE_NAME,true),
+            SchemaItems.attributeDefine(ATTR_DATASOURCE_PROVIDER,true),
+            SchemaItems.nodeDefine(NODE_DATASOURCE_CONFIGITEM)
+    );
+
     public DataSourceSchema(){}
 
     @Override
-    void parse(final Element element){
+    void parse(final Element node){
         //base info
-        String name = XmlUtils.attributeStringValue(element,ATTR_DATASOURCE_NAME);
-        String provider = XmlUtils.attributeStringValue(element,ATTR_DATASOURCE_PROVIDER);
+        loadSchema(node,DEFINES);
+        //load option
+        loadChildrenOption(node);
+    }
 
-        ParameterUtils.notBlank(name);
-        ParameterUtils.notBlank(provider);
-
-        putItem(ATTR_DATASOURCE_NAME,name);
-        putItem(ATTR_DATASOURCE_PROVIDER,provider);
-
-        //config info
-        putItem(NODE_DATASOURCE_CONFIGITEM,XmlUtils.toStringMap(element));
+    private void loadChildrenOption(final Element node){
+        List<Element> elements = XmlUtils.listElement(node);
+        for(Element element:elements){
+            if(!XmlUtils.hasChildren(element)){
+                continue;
+            }
+            Map<String,String> optionMap = XmlUtils.toStringMap(element);
+            putItem(element.getName(),optionMap);
+        }
     }
 
     /**
@@ -62,5 +73,10 @@ public final class DataSourceSchema extends SchemaItem{
      */
     public Map<String,String> getConfigItems(){
         return getItemMap(NODE_DATASOURCE_CONFIGITEM);
+    }
+
+    @Override
+    public String getId(){
+        return getDatasourceName();
     }
 }

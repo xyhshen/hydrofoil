@@ -6,7 +6,7 @@ import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Property;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.hydrofoil.common.util.DataUtils;
-import org.hydrofoil.core.standard.StandardEdge;
+import org.hydrofoil.core.engine.EngineEdge;
 import org.hydrofoil.core.tinkerpop.glue.TinkerpopGraphTransit;
 
 import java.util.Iterator;
@@ -22,9 +22,9 @@ import java.util.Iterator;
 @SuppressWarnings("unchecked")
 public class HydrofoilEdge extends HydrofoilElement implements Edge {
 
-    public HydrofoilEdge(HydrofoilGraph graph,
-                         StandardEdge standardEdge) {
-        super(graph, standardEdge);
+    public HydrofoilEdge(HydrofoilTinkerpopGraph graph,
+                         EngineEdge engineEdge) {
+        super(graph, engineEdge);
     }
 
     @Override
@@ -40,16 +40,16 @@ public class HydrofoilEdge extends HydrofoilElement implements Edge {
 
     @Override
     public Vertex outVertex() {
-        StandardEdge standardEdge = (StandardEdge) standardElement;
+        EngineEdge engineEdge = (EngineEdge) engineElement;
         return DataUtils.iteratorFirst(TinkerpopGraphTransit.listVerticesByIds(graph,
-                standardEdge.sourceId()));
+                engineEdge.sourceId()));
     }
 
     @Override
     public Vertex inVertex() {
-        StandardEdge standardEdge = (StandardEdge) standardElement;
+        EngineEdge engineEdge = (EngineEdge) engineElement;
         return DataUtils.iteratorFirst(TinkerpopGraphTransit.listVerticesByIds(graph,
-                standardEdge.targetId()));
+                engineEdge.targetId()));
     }
 
     @Override

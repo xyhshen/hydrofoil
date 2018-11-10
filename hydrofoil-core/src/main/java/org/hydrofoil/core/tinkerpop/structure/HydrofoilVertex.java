@@ -1,7 +1,7 @@
 package org.hydrofoil.core.tinkerpop.structure;
 
 import org.apache.tinkerpop.gremlin.structure.*;
-import org.hydrofoil.core.standard.StandardVertex;
+import org.hydrofoil.core.engine.EngineVertex;
 import org.hydrofoil.core.tinkerpop.glue.TinkerpopGraphTransit;
 
 import java.util.Iterator;
@@ -17,8 +17,8 @@ import java.util.Iterator;
 @SuppressWarnings("unchecked")
 public class HydrofoilVertex extends HydrofoilElement implements Vertex {
 
-    public HydrofoilVertex(HydrofoilGraph graph,
-                           StandardVertex standardVertex) {
+    public HydrofoilVertex(HydrofoilTinkerpopGraph graph,
+                           EngineVertex standardVertex) {
         super(graph, standardVertex);
     }
 

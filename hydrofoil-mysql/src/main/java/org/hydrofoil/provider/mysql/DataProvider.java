@@ -2,8 +2,8 @@ package org.hydrofoil.provider.mysql;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.hydrofoil.common.provider.IDataProvider;
-import org.hydrofoil.common.provider.IDataSource;
-import org.hydrofoil.common.provider.IDataSourceContext;
+import org.hydrofoil.common.provider.IDataConnector;
+import org.hydrofoil.common.provider.IDataConnectContext;
 import org.hydrofoil.common.schema.DataSourceSchema;
 
 import static org.hydrofoil.provider.mysql.MysqlDatasourceSchema.DatasourceItem.*;
@@ -19,9 +19,9 @@ import static org.hydrofoil.provider.mysql.MysqlDatasourceSchema.DatasourceItem.
 public final class DataProvider implements IDataProvider {
 
     @Override
-    public IDataSource connect(IDataSourceContext dataSourceContext) {
+    public IDataConnector connect(IDataConnectContext dataSourceContext) {
         BasicDataSource datasource = createDatasource(dataSourceContext.getDatasourceSchema());
-        return new MysqlDataSource(datasource,dataSourceContext);
+        return new MysqlDataConnector(datasource,dataSourceContext);
     }
 
     private BasicDataSource createDatasource(DataSourceSchema dataSourceSchema){

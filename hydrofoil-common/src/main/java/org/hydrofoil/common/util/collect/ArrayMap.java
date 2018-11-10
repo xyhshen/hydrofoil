@@ -20,7 +20,7 @@ import static org.hydrofoil.common.util.ParameterUtils.checkSupport;
  * @author xie_yh
  * @date 2018/7/30 18:54
  */
-public class ArrayMap<K extends Comparable,V> implements Map<K,V>, Cloneable, Serializable {
+public class ArrayMap<K extends Comparable<? super K>,V> implements Map<K,V>, Cloneable, Serializable {
 
     private ArrayMapEntry<K,V>[] storager;
 

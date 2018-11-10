@@ -1,7 +1,7 @@
 package org.hydrofoil.core;
 
 import org.hydrofoil.common.configuration.HydrofoilConfiguration;
-import org.hydrofoil.core.tinkerpop.structure.HydrofoilGraph;
+import org.hydrofoil.core.tinkerpop.structure.HydrofoilTinkerpopGraph;
 
 /**
  * HydrofoilFactory
@@ -14,26 +14,26 @@ import org.hydrofoil.core.tinkerpop.structure.HydrofoilGraph;
 public final class HydrofoilFactory {
 
     /**
-     * connect graph
+     * create graph
      * @param configuration graph config
      * @return connector
      * @throws Exception
      */
-    public static HydrofoilConnector connect(HydrofoilConfiguration configuration) throws Exception {
-        HydrofoilConnector connector = new HydrofoilConnector();
-        connector.init(configuration);
-        return connector;
+    public static HydrofoilGraph create(HydrofoilConfiguration configuration) throws Exception {
+        HydrofoilGraph graph = new HydrofoilGraph();
+        graph.init(configuration);
+        return graph;
     }
 
     /**
-     * connect graph,to tinkerpop style
+     * create graph,to tinkerpop style
      * @param configuration graph config
      * @return tinkerpop graph object
      * @throws Exception
      */
-    public static HydrofoilGraph openTinkerpop(HydrofoilConfiguration configuration)  throws Exception {
-        HydrofoilConnector connector = connect(configuration);
-        return new HydrofoilGraph(connector);
+    public static HydrofoilTinkerpopGraph open(HydrofoilConfiguration configuration)  throws Exception {
+        HydrofoilGraph graph = create(configuration);
+        return new HydrofoilTinkerpopGraph(graph);
     }
 
 }

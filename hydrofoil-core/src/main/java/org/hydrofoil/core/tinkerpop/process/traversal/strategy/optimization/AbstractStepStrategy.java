@@ -5,7 +5,7 @@ import org.apache.tinkerpop.gremlin.process.traversal.TraversalStrategy;
 import org.apache.tinkerpop.gremlin.process.traversal.strategy.AbstractTraversalStrategy;
 import org.hydrofoil.common.util.DataUtils;
 import org.hydrofoil.common.util.ParameterUtils;
-import org.hydrofoil.core.tinkerpop.structure.HydrofoilGraph;
+import org.hydrofoil.core.tinkerpop.structure.HydrofoilTinkerpopGraph;
 
 /**
  * AbstractStepStrategy
@@ -18,12 +18,12 @@ import org.hydrofoil.core.tinkerpop.structure.HydrofoilGraph;
 abstract class AbstractStepStrategy extends AbstractTraversalStrategy<TraversalStrategy.ProviderOptimizationStrategy> implements TraversalStrategy.ProviderOptimizationStrategy{
 
     /**
-     * judge is HydrofoilGraph's traversal
+     * judge is HydrofoilTinkerpopGraph's traversal
      * @param traversal traversal
      * @return result
      */
     private static boolean isInHydrofoilGraph(final Traversal.Admin<?, ?> traversal){
-        return DataUtils.getOptional(traversal.getGraph()) instanceof HydrofoilGraph;
+        return DataUtils.getOptional(traversal.getGraph()) instanceof HydrofoilTinkerpopGraph;
     }
 
     @Override

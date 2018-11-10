@@ -1,17 +1,19 @@
 package org.hydrofoil.core.tinkerpop.glue;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.IteratorUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.tinkerpop.gremlin.structure.*;
 import org.hydrofoil.common.graph.GraphProperty;
 import org.hydrofoil.common.graph.GraphVertexId;
+import org.hydrofoil.common.util.DataUtils;
 import org.hydrofoil.common.util.ParameterUtils;
-import org.hydrofoil.core.standard.StandardEdge;
-import org.hydrofoil.core.standard.StandardElement;
-import org.hydrofoil.core.standard.StandardProperty;
-import org.hydrofoil.core.standard.StandardVertex;
-import org.hydrofoil.core.standard.query.EdgeGraphQueryRunner;
-import org.hydrofoil.core.standard.query.VertexGraphQueryRunner;
+import org.hydrofoil.core.engine.EngineEdge;
+import org.hydrofoil.core.engine.EngineElement;
+import org.hydrofoil.core.engine.EngineProperty;
+import org.hydrofoil.core.engine.EngineVertex;
+import org.hydrofoil.core.engine.query.EdgeGraphQueryRunner;
+import org.hydrofoil.core.engine.query.VertexGraphQueryRunner;
 import org.hydrofoil.core.tinkerpop.structure.*;
 
 import java.util.*;
@@ -28,7 +30,7 @@ import static org.hydrofoil.common.configuration.HydrofoilConfigurationItem.Tink
  */
 public final class TinkerpopGraphTransit {
 
-    private static Iterator<Vertex> returnVertexIterator(HydrofoilGraph graph,Iterator<StandardVertex> vertexIterator){
+    private static Iterator<Vertex> returnVertexIterator(HydrofoilTinkerpopGraph graph, Iterator<EngineVertex> vertexIterator){
         return new Iterator<Vertex>() {
             @Override
             public boolean hasNext() {
@@ -37,7 +39,7 @@ public final class TinkerpopGraphTransit {
 
             @Override
             public Vertex next() {
-                final StandardVertex next = vertexIterator.next();
+                final EngineVertex next = vertexIterator.next();
                 ParameterUtils.nullMessage(next,"vertex is null");
                 return new HydrofoilVertex(graph,next);
             }
@@ -50,20 +52,20 @@ public final class TinkerpopGraphTransit {
      * @param vertexIds id's
      * @return vertex
      */
-    public static Iterator<Vertex> listVerticesByIds(HydrofoilGraph graph, Object... vertexIds){
+    public static Iterator<Vertex> listVerticesByIds(HydrofoilTinkerpopGraph graph, Object... vertexIds){
         long length = graph.getConnector().getConfiguration().getLong(TinkerpopDefaultReturnLength);
-        Iterator<StandardVertex> vertexIterator = graph.getConnector().vertices(graph.getIdManage().vertexIds(vertexIds)).
+        Iterator<EngineVertex> vertexIterator = graph.getConnector().vertices(graph.getIdManage().vertexIds(vertexIds)).
                 length(length).take();
         return returnVertexIterator(graph,vertexIterator);
     }
 
-    public static Iterator<Vertex> executeQuery(HydrofoilGraph graph,VertexGraphQueryRunner runner){
-        Iterator<StandardVertex> vertexIterator = runner.take();
+    public static Iterator<Vertex> executeQuery(HydrofoilTinkerpopGraph graph, VertexGraphQueryRunner runner){
+        Iterator<EngineVertex> vertexIterator = runner.take();
         return returnVertexIterator(graph,vertexIterator);
     }
 
-    public static Iterator<Edge> executeQuery(HydrofoilGraph graph,EdgeGraphQueryRunner runner){
-        Iterator<StandardEdge> edgeIterator = runner.take();
+    public static Iterator<Edge> executeQuery(HydrofoilTinkerpopGraph graph, EdgeGraphQueryRunner runner){
+        Iterator<EngineEdge> edgeIterator = runner.take();
         return new Iterator<Edge>() {
             @Override
             public boolean hasNext() {
@@ -72,7 +74,7 @@ public final class TinkerpopGraphTransit {
 
             @Override
             public Edge next() {
-                final StandardEdge next = edgeIterator.next();
+                final EngineEdge next = edgeIterator.next();
                 ParameterUtils.nullMessage(next,"edge is null");
                 return new HydrofoilEdge(graph,next);
             }
@@ -85,30 +87,30 @@ public final class TinkerpopGraphTransit {
      * @param edgeIds id's
      * @return edge
      */
-    public static Iterator<Edge> listEdgesByIds(HydrofoilGraph graph, Object... edgeIds){
+    public static Iterator<Edge> listEdgesByIds(HydrofoilTinkerpopGraph graph, Object... edgeIds){
         long length = graph.getConnector().getConfiguration().getLong(TinkerpopDefaultReturnLength);
         return executeQuery(graph,graph.getConnector().edges(graph.getIdManage().edgeIds(edgeIds)).
                 length(length));
     }
 
-    public static Iterator<Edge> listEdgesByVertex(HydrofoilGraph graph, HydrofoilVertex vertex,
+    public static Iterator<Edge> listEdgesByVertex(HydrofoilTinkerpopGraph graph, HydrofoilVertex vertex,
                                                    Direction direction, String ...labels){
         return executeQuery(graph,graph.getConnector().edges().
-                vertex((StandardVertex) vertex.standard()).
+                vertex((EngineVertex) vertex.standard()).
                 labels(labels).direction(TinkerpopElementUtils.toStdDirection(direction)));
     }
 
-    public static Iterator<Vertex> listEdgeVerticesByVertex(HydrofoilGraph graph, HydrofoilVertex vertex,
-                                                   Direction direction, String ...labels){
+    public static Iterator<Vertex> listEdgeVerticesByVertex(HydrofoilTinkerpopGraph graph, HydrofoilVertex vertex,
+                                                            Direction direction, String ...labels){
         Set<GraphVertexId> vertexIds = new HashSet<>();
         Iterator<Edge> edgeIterator = executeQuery(graph, graph.getConnector().edges().
-                vertex((StandardVertex) vertex.standard()).
+                vertex((EngineVertex) vertex.standard()).
                 labels(labels).direction(TinkerpopElementUtils.toStdDirection(direction)));
         edgeIterator.forEachRemaining((e)->{
             HydrofoilEdge edge = (HydrofoilEdge) e;
-            StandardEdge standardEdge = (StandardEdge) edge.standard();
-            vertexIds.add(standardEdge.sourceId());
-            vertexIds.add(standardEdge.targetId());
+            EngineEdge engineEdge = (EngineEdge) edge.standard();
+            vertexIds.add(engineEdge.sourceId());
+            vertexIds.add(engineEdge.targetId());
         });
         vertexIds.remove(vertex.standard().elementId());
         if(vertexIds.isEmpty()){
@@ -117,34 +119,38 @@ public final class TinkerpopGraphTransit {
         return listVerticesByIds(graph,vertexIds.toArray(new GraphVertexId[vertexIds.size()]));
     }
 
-    public static <V> Iterator<VertexProperty<V>> listVertexProperties(HydrofoilVertex vertex,String ...propertyKeys){
-        StandardElement standard = vertex.standard();
-        List<StandardProperty> standardProperties = new ArrayList<>();
-        if(ArrayUtils.isNotEmpty(propertyKeys)){
-            for(String propertyKey:propertyKeys){
-                StandardProperty standardProperty = standard.property(propertyKey);
-                if(standardProperty == null){
-                    continue;
-                }
-                standardProperties.add(standardProperty);
-            }
-        }else{
-            standardProperties.addAll(standard.properties());
+    public static <V> Iterator<VertexProperty<V>> listVertexProperties(HydrofoilVertex vertex,String ...propertyLabels){
+        EngineElement standard = vertex.standard();
+        Collection<EngineProperty> standardProperties = standard.properties(propertyLabels);
+        if(CollectionUtils.isEmpty(standardProperties)){
+            return Collections.emptyIterator();
         }
         return standardProperties.stream().
                 map(p->(VertexProperty<V>)new HydrofoilVertexProperty<V>(vertex,p)).iterator();
     }
 
     @SuppressWarnings("unchecked")
-    public static <U> Iterator<Property<U>> listProperties(HydrofoilVertexProperty vertexProperty, String... propertyKeys){
+    public static <U> Iterator<Property<U>> listProperties(final HydrofoilVertexProperty vertexProperty, String... propertyKeys){
         List<Property<U>> properties = new ArrayList<>(1);
         if(vertexProperty.standard().isComplex()){
             final Map<String, GraphProperty> propertyMap = vertexProperty.standard().properties();
-            propertyMap.forEach((k,v)->{
-                properties.add(new HydrofoilProperty(vertexProperty,v,k));
+            Set<String> nameKeySet;
+            if(ArrayUtils.isEmpty(propertyKeys)){
+                nameKeySet = vertexProperty.standard().properties().keySet();
+            }else{
+                nameKeySet = DataUtils.newSetWithMaxSize(propertyKeys.length);
+                nameKeySet.addAll(Arrays.asList(propertyKeys));
+            }
+            nameKeySet.forEach((key)->{
+                final GraphProperty graphProperty = vertexProperty.standard().properties().get(key);
+                if(graphProperty == null){
+                    return;
+                }
+                properties.add(new HydrofoilProperty(vertexProperty,graphProperty,key));
             });
         }else{
-
+            properties.add(new HydrofoilProperty(vertexProperty,vertexProperty.standard().property(),
+                    vertexProperty.standard().label()));
         }
         return properties.iterator();
     }

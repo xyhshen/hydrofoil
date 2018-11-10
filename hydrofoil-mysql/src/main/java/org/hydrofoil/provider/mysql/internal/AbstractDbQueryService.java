@@ -8,9 +8,10 @@ import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.hydrofoil.common.provider.IDataSourceContext;
-import org.hydrofoil.common.provider.datasource.RowQueryRequest;
+import org.hydrofoil.common.provider.IDataConnectContext;
+import org.hydrofoil.common.provider.datasource.RowQueryScan;
 import org.hydrofoil.common.provider.datasource.RowStore;
 import org.hydrofoil.common.schema.ColumnSchema;
 import org.hydrofoil.common.util.LogUtils;
@@ -34,7 +35,7 @@ public abstract class AbstractDbQueryService {
 
     private BasicDataSource dataSource;
 
-    protected RowQueryRequest request;
+    protected RowQueryScan request;
 
     protected MultiValuedMap<String,String> columns;
 
@@ -42,12 +43,12 @@ public abstract class AbstractDbQueryService {
 
     protected Map<String,Map<String,String>> columnAlias;
 
-    private IDataSourceContext dataSourceContext;
+    private IDataConnectContext dataSourceContext;
 
     AbstractDbQueryService(
             BasicDataSource dataSource,
-            IDataSourceContext dataSourceContext,
-            RowQueryRequest request){
+            IDataConnectContext dataSourceContext,
+            RowQueryScan request){
         this.dataSource = dataSource;
         this.dataSourceContext = dataSourceContext;
         this.request = request;
@@ -70,7 +71,7 @@ public abstract class AbstractDbQueryService {
         tableAlias.put(mainName,"maintbl");
         //generate associate table name
         int i = 0;
-        for(RowQueryRequest.AssociateRowQuery query:request.getAssociateQuery()){
+        for(RowQueryScan.AssociateRowQuery query:request.getAssociateQuery()){
             tableAlias.put(query.getName(),"sectbl" + i++);
         }
         //generate column name
@@ -98,6 +99,9 @@ public abstract class AbstractDbQueryService {
      * @return full name
      */
     protected String getColumnAlias(String tableName,String columnName){
+        if(StringUtils.isBlank(columnName)){
+            return null;
+        }
         return tableAlias.get(tableName) + "." + columnName;
     }
 

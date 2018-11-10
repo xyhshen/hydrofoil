@@ -109,4 +109,12 @@ public final class PropertySchema extends SchemaItem{
         return getSchemaMap(NODE_PROPERTY_CHILDREN_ELEMENT);
     }
 
+    @Override
+    public String getId(){
+        if(subclass){
+            return getName();
+        }
+        return getLabel();
+    }
+
 }
