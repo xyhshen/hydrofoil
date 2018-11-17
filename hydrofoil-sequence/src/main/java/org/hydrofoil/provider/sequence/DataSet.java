@@ -1,5 +1,6 @@
 package org.hydrofoil.provider.sequence;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -57,7 +58,7 @@ public final class DataSet {
             SearchArrayList<String,Integer> index = new SearchArrayList<>();
             int columnSeq = fileTable.getHeader().get(columnName);
             for(int i = 0;i < fileTable.getRows().size();i++){
-                index.add(fileTable.getRows().get(i)[columnSeq],i);
+                index.add(fileTable.getRows().get(i).values()[columnSeq],i);
             }
             indexMap.put(columnName,index);
         });
@@ -81,6 +82,9 @@ public final class DataSet {
 
     List<FileRow> selectWhere(final List<Pair<QMatch.Q,String>> matches){
         List<Integer> l = new ArrayList<>();
+        if(CollectionUtils.isEmpty(matches)){
+            return fileTable.getRows();
+        }
         for(Pair<QMatch.Q,String> match:matches){
             QMatch.Q q = match.getLeft();
             SearchArrayList<String, Integer> index = indexMap.get(q.pair().name());

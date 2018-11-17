@@ -1,9 +1,8 @@
 package org.hydrofoil.common.provider.datasource;
 
+import org.hydrofoil.common.provider.datasource.response.FailedRowQueryResponse;
+
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
 
 /**
  * RowQueryResponse
@@ -11,93 +10,42 @@ import java.util.Iterator;
  * package org.hydrofoil.common.provider.datasource
  *
  * @author xie_yh
- * @date 2018/7/4 10:36
+ * @date 2018/11/15 18:30
  */
-public class RowQueryResponse implements Iterable<RowStore>,AutoCloseable{
+public interface RowQueryResponse extends AutoCloseable {
 
     /**
-     * request id
+     * get query id
+     * @return query id
      */
-    private Long id;
+    Long id();
 
     /**
-     * state
+     * is performance succeed
+     * @return result
      */
-    private boolean succeed;
+    boolean isSucceed();
 
     /**
-     * exception
+     * if failed,return exception
+     * @return excepiton
      */
-    private SQLException exception;
+    SQLException getException();
 
     /**
-     * default row store
+     * get rows,if
+     * @return row store
      */
-    private Collection<RowStore> defaultRowStore;
-
-    public RowQueryResponse(boolean succeed){
-        this.succeed = succeed;
-        this.defaultRowStore = new ArrayList<>(5);
-    }
-
-    public RowQueryResponse(boolean succeed,Collection<RowStore> defaultRowStore){
-        this.succeed = succeed;
-        this.defaultRowStore = defaultRowStore;
-    }
-
-    @Override
-    public void close() throws Exception {}
+    Iterable<RowStore> getRows();
 
     /**
-     * @return $field.TypeName
-     * @see RowQueryResponse#succeed
-     **/
-    public boolean isSucceed() {
-        return succeed;
+     * return total
+     * @return total
+     */
+    Long count();
+
+    static RowQueryResponse createFailedResponse(Long id,SQLException exception){
+        return new FailedRowQueryResponse(id,exception);
     }
 
-    /**
-     * @return RowStore>
-     * @see RowQueryResponse#defaultRowStore
-     **/
-    public Collection<RowStore> getDefaultRowStore() {
-        return defaultRowStore;
-    }
-
-    /**
-     * @return SQLException
-     * @see RowQueryResponse#exception
-     **/
-    public SQLException getException() {
-        return exception;
-    }
-
-    /**
-     * @param exception SQLException
-     * @see RowQueryResponse#exception
-     **/
-    public void setException(SQLException exception) {
-        this.exception = exception;
-    }
-
-    /**
-     * @return Long
-     * @see RowQueryResponse#id
-     **/
-    public Long getId() {
-        return id;
-    }
-
-    /**
-     * @param id Long
-     * @see RowQueryResponse#id
-     **/
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    @Override
-    public Iterator<RowStore> iterator() {
-        return defaultRowStore.iterator();
-    }
 }

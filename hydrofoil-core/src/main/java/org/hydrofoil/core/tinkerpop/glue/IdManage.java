@@ -6,7 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hydrofoil.common.graph.GraphEdgeId;
 import org.hydrofoil.common.graph.GraphElementId;
 import org.hydrofoil.common.graph.GraphVertexId;
-import org.hydrofoil.common.schema.AbstractElementSchema;
+import org.hydrofoil.common.schema.BaseElementSchema;
 import org.hydrofoil.common.util.DataUtils;
 import org.hydrofoil.core.engine.management.SchemaManager;
 
@@ -101,7 +101,7 @@ public final class IdManage {
             return null;
         }
         String label = StringUtils.substring(idstring,typeOf + 1,labelOf);
-        AbstractElementSchema elementSchema = null;
+        BaseElementSchema elementSchema = null;
         if(StringUtils.equalsIgnoreCase(type,ID_PREFIX_VERTEX)){
             elementSchema = schemaManager.getVertexSchema(label);
         }

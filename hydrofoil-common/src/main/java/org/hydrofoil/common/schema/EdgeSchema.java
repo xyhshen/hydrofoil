@@ -15,7 +15,7 @@ import java.util.Map;
  * @author xie_yh
  * @date 2018/7/3 16:22
  */
-public final class EdgeSchema extends AbstractElementSchema{
+public final class EdgeSchema extends BaseElementSchema {
 
     private static final String NODE_EDGE_SOURCE_ELEMENT = "source";
     private static final String NODE_EDGE_TARGET_ELEMENT = "target";

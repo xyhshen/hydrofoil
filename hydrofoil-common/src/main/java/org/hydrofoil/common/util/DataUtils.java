@@ -3,6 +3,8 @@ package org.hydrofoil.common.util;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.IterableUtils;
 import org.apache.commons.collections4.IteratorUtils;
+import org.apache.commons.collections4.MultiValuedMap;
+import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -154,6 +156,17 @@ public final class DataUtils {
         return newSetMapWithExpectedSize(maxSize);
     }
 
+    public static <K,V> MultiValuedMap<K,V> newMultiMapWithMaxSize(final int expectedSize){
+        return newMultiMapWithMaxSize(expectedSize,0);
+    }
+
+    public static <K,V> MultiValuedMap<K,V> newMultiMapWithMaxSize(final int expectedSize,final int listSize){
+        if(expectedSize == 0){
+            return new ArrayListValuedHashMap<>();
+        }
+        return new ArrayListValuedHashMap<K, V>(hashMapCapacity(expectedSize),listSize);
+    }
+
     public static int hashMapCapacity(final int expectedSize) {
         if(expectedSize == 0){
             return 0;
@@ -203,16 +216,17 @@ public final class DataUtils {
         return new ArraySet<>(Stream.of(a).collect(Collectors.toSet()));
     }
 
-    public static <T,R> Iterator<R> newIterator(Iterator<T> iterator, Function<T,R> function){
+    public static <T,R> Iterator<R> newIterator(final Iterator<T> iterator, final Function<T,R> function){
         return new Iterator<R>() {
             @Override
             public boolean hasNext() {
                 return iterator.hasNext();
             }
 
+            @SuppressWarnings("unchecked")
             @Override
             public R next() {
-                final T t = iterator.next();
+                T t = iterator.next();
                 return function.apply(t);
             }
         };

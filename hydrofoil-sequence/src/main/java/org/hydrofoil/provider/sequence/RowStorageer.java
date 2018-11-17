@@ -56,7 +56,7 @@ public final class RowStorageer {
             return combineRowKeyValue(crossRow, joinRowMap, rowQueryScan);
         }).filter(Objects::nonNull).collect(Collectors.toList());
         rowStores = DataUtils.ranger(rowStores,rowQueryScan.getOffset(),rowQueryScan.getLimit());
-        return new RowQueryResponse(true,rowStores);
+        return rowQueryScan.createResponse(rowStores);
     }
 
     RowQueryResponse getRows(final RowQueryGet rowQueryGet){
@@ -67,7 +67,21 @@ public final class RowStorageer {
             final Map<String, Collection<FileRow>> joinRowMap = joinOnAll(crossRow, rowQueryGet,false);
             return combineRowKeyValue(crossRow, joinRowMap, rowQueryGet);
         }).collect(Collectors.toList());
-        return new RowQueryResponse(true,rowStores);
+        return rowQueryGet.createResponse(rowStores);
+    }
+
+    RowQueryResponse countRow(final RowQueryCount rowQueryCount){
+        final DataSet dataSet = getDataSet(rowQueryCount.getName());
+        final List<FileRow> crossRows = dataSet.selectWhere(rowQueryCount.getMatch().stream().map((q) ->
+                Pair.of(q, "")).collect(Collectors.toList()));
+        Integer count = crossRows.stream().map(crossRow -> {
+            final Map<String, Collection<FileRow>> joinRowMap = joinOnAll(crossRow, rowQueryCount,true);
+            if(joinRowMap == null){
+                return 0;
+            }
+            return 1;
+        }).reduce((v1,v2)->v1+v2).orElse(0);
+        return rowQueryCount.createResponse(count);
     }
 
     private RowStore combineRowKeyValue(FileRow crossRow,Map<String,Collection<FileRow>> joinRowMap,BaseRowQuery baseRowQuery){

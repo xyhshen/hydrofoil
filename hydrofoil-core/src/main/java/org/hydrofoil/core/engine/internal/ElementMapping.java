@@ -1,6 +1,6 @@
 package org.hydrofoil.core.engine.internal;
 
-import org.hydrofoil.common.provider.datasource.RowQueryScan;
+import org.hydrofoil.common.provider.datasource.BaseRowQuery;
 import org.hydrofoil.common.schema.SchemaItem;
 
 /**
@@ -17,7 +17,7 @@ public final class ElementMapping{
 
     private SchemaItem schemaItem;
 
-    private RowQueryScan queryRequest;
+    private BaseRowQuery queryRequest;
 
     private Object context;
 
@@ -57,7 +57,7 @@ public final class ElementMapping{
      * @return RowQueryScan
      * @see ElementMapping#queryRequest
      **/
-    public RowQueryScan getQueryRequest() {
+    public BaseRowQuery getQueryRequest() {
         return queryRequest;
     }
 
@@ -65,7 +65,7 @@ public final class ElementMapping{
      * @param queryRequest RowQueryScan
      * @see ElementMapping#queryRequest
      **/
-    public void setQueryRequest(RowQueryScan queryRequest) {
+    public void setQueryRequest(BaseRowQuery queryRequest) {
         this.queryRequest = queryRequest;
     }
 

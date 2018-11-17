@@ -16,7 +16,7 @@ import java.util.function.BiConsumer;
  * @author xie_yh
  * @date 2018/7/3 13:59
  */
-public abstract class AbstractElementSchema extends SchemaItem {
+public abstract class BaseElementSchema extends SchemaItem {
 
     private static final String ATTR_ELEMENT_LABEL =            "label";
     private static final String ATTR_ELEMENT_TABLE =            "table";
@@ -32,7 +32,7 @@ public abstract class AbstractElementSchema extends SchemaItem {
 
     private List<String> primaryKeys;
 
-    AbstractElementSchema(){
+    BaseElementSchema(){
         primaryKeys = new ArrayList<>(1);
     }
 

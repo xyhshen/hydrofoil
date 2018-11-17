@@ -2,6 +2,7 @@ package org.hydrofoil.core.engine.internal;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hydrofoil.common.graph.QMatch;
+import org.hydrofoil.common.provider.datasource.BaseRowQuery;
 import org.hydrofoil.common.provider.datasource.RowStore;
 import org.hydrofoil.common.schema.*;
 import org.hydrofoil.common.util.ParameterUtils;
@@ -50,7 +51,7 @@ interface MapperHelper {
      * @param query query field
      * @return result
      */
-    default boolean checkQueriable(AbstractElementSchema elementSchema,
+    default boolean checkQueriable(BaseElementSchema elementSchema,
                                  QMatch.Q query){
         PropertySchema propertySchema = elementSchema.
                 getProperties().get(query.pair().name());
@@ -77,7 +78,7 @@ interface MapperHelper {
         return true;
     }
 
-    default Object getPropertyValue(AbstractElementSchema elementSchema, PropertySchema propertySchema, RowStore rowStore){
+    default Object getPropertyValue(BaseElementSchema elementSchema, PropertySchema propertySchema, RowStore rowStore){
         Object value;
         if(isPropertyInMainTable(propertySchema)){
             value = rowStore.value(elementSchema.getTable(),propertySchema.getField());
@@ -88,6 +89,14 @@ interface MapperHelper {
         }
 
         return value;
+    }
+
+    default ElementMapping createMappingElement(BaseRowQuery rowQuery,BaseElementSchema elementSchema){
+        ElementMapping elementMapping = new ElementMapping();
+        elementMapping.setSchemaItem(elementSchema);
+        elementMapping.setQueryRequest(rowQuery);
+        elementMapping.setDatasource(getDatasourceName(elementSchema.getTable()));
+        return elementMapping;
     }
 
 }

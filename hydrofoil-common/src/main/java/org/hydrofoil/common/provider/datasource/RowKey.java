@@ -15,23 +15,26 @@ import java.util.Map;
  */
 public final class RowKey {
 
-    private final Map<String,String> keyValueMap;
+    private final Map<String,Object> keyValueMap;
 
-    private RowKey(final Map<String,String> keyValueMap){
+    private RowKey(final Map<String,Object> keyValueMap){
         this.keyValueMap = keyValueMap;
     }
 
-    public static RowKey of(String ...keyvalues){
-        final Map<String, String> rawMap = DataUtils.toMap(keyvalues);
-        RowKey rowKey = new RowKey(new ArrayMap<>(rawMap));
-        return rowKey;
+    public static RowKey of(final String ...keyvalues){
+        final Map<String, Object> rawMap = DataUtils.toMap(keyvalues);
+        return new RowKey(new ArrayMap<>(rawMap));
+    }
+
+    public static RowKey of(final Map<String,Object> keyValueMap){
+        return new RowKey(new ArrayMap<>(keyValueMap));
     }
 
     /**
      * @return String>
      * @see RowKey#keyValueMap
      **/
-    public Map<String, String> getKeyValueMap() {
+    public Map<String, Object> getKeyValueMap() {
         return keyValueMap;
     }
 }

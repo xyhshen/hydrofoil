@@ -1,7 +1,9 @@
 package org.hydrofoil.common.provider.datasource;
 
 import org.hydrofoil.common.graph.QMatch;
+import org.hydrofoil.common.provider.datasource.response.RowStoreResponse;
 import org.hydrofoil.common.util.DataUtils;
+import org.hydrofoil.common.util.ParameterUtils;
 
 import java.util.Set;
 
@@ -41,6 +43,13 @@ public final class RowQueryScan extends BaseRowQuery {
         this.match = DataUtils.newSetWithMaxSize(0);
         this.offset = 0L;
         this.limit = Long.MAX_VALUE;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public RowQueryResponse createResponse(Object o) {
+        ParameterUtils.mustTrue(o instanceof Iterable);
+        return new RowStoreResponse(getId(), (Iterable<RowStore>) o);
     }
 
     /**

@@ -8,7 +8,6 @@ import org.hydrofoil.common.util.ParameterUtils;
 import org.hydrofoil.core.engine.EngineVertex;
 import org.hydrofoil.core.engine.internal.AbstractGraphQueryRunner;
 import org.hydrofoil.core.engine.internal.ElementMapping;
-import org.hydrofoil.core.engine.internal.VertexMapper;
 import org.hydrofoil.core.engine.management.Management;
 
 import java.util.ArrayList;
@@ -27,7 +26,6 @@ public final class VertexGraphQueryRunner extends AbstractGraphQueryRunner<Engin
 
     public VertexGraphQueryRunner(Management management) {
         super(management);
-        this.vertexMapper = new VertexMapper(management.getSchemaManager());
     }
 
     @Override

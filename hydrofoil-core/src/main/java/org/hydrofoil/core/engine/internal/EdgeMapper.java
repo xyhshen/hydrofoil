@@ -1,20 +1,16 @@
 package org.hydrofoil.core.engine.internal;
 
 import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.collections4.SetUtils;
 import org.hydrofoil.common.graph.*;
 import org.hydrofoil.common.provider.datasource.RowStore;
-import org.hydrofoil.common.schema.AbstractElementSchema;
+import org.hydrofoil.common.schema.BaseElementSchema;
 import org.hydrofoil.common.schema.EdgeSchema;
-import org.hydrofoil.common.schema.PropertySchema;
 import org.hydrofoil.core.engine.EngineEdge;
 import org.hydrofoil.core.engine.EngineVertex;
 import org.hydrofoil.core.engine.management.SchemaManager;
 
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * EdgeMapper
@@ -30,7 +26,7 @@ public class EdgeMapper extends AbstractElementMapper {
     }
 
     @Override
-    protected AbstractElementSchema getElementSchema(String label) {
+    protected BaseElementSchema getElementSchema(String label) {
         return schemaManager.getEdgeSchema(label);
     }
 
@@ -40,25 +36,14 @@ public class EdgeMapper extends AbstractElementMapper {
     }
 
     @Override
-    protected AbstractElementSchema getSchema(String label) {
+    protected BaseElementSchema getSchema(String label) {
         return schemaManager.getEdgeSchema(label);
     }
 
-    public ElementMapping toMapping(GraphEdgeId edgeId){
-        EdgeSchema edgeSchema = schemaManager.getEdgeSchema(edgeId.label());
-        Set<QMatch.Q> mainCondition = new HashSet<>();
-        edgeSchema.getProperties().forEach((k,v)->{
-            if(v.isPrimary()){
-                Object value = MapUtils.getObject(edgeId.unique(),v.getLabel());
-                mainCondition.add(QMatch.eq(v.getField(),value));
-            }
-        });
-        return super.toMapping(mainCondition,edgeSchema,0L,1L);
-    }
-
     @SuppressWarnings("unchecked")
-    public ElementMapping toMapping(Set<QMatch.Q> propertyQuerySet, EngineVertex vertex, EdgeSchema edgeSchema, EdgeDirection direction, Long start, Long limit) {
-        Set<QMatch.Q> mainCondition = new HashSet<>();
+    public ElementMapping toMapping(String label,Set<QMatch.Q> propertyQuerySet, EngineVertex vertex, EdgeDirection direction, Long start, Long limit) {
+        final EdgeSchema edgeSchema = schemaManager.getEdgeSchema(label);
+        final PropertyQueryCondition propertyQueryCondtion = createPropertyQueryCondtion(propertyQuerySet, edgeSchema);
         if(vertex != null){
             Map<String,String> fields;
             if(direction == EdgeDirection.In){
@@ -71,22 +56,11 @@ public class EdgeMapper extends AbstractElementMapper {
                 if(null == value){
                     return;
                 }
-                mainCondition.add(QMatch.eq(tableFieldname,value));
+                propertyQueryCondtion.getMainCondition().add(QMatch.eq(tableFieldname,value));
             });
         }
-        mainCondition.addAll(SetUtils.emptyIfNull(propertyQuerySet).stream().
-                filter(propertyQuery->checkQueriable(edgeSchema,propertyQuery)).
-                map((propertyQuery)->{
-            PropertySchema propertySchema = edgeSchema.getProperties().get(propertyQuery.pair().name());
-            if(propertySchema == null){
-                return null;
-            }
-            QMatch.Q clone = propertyQuery.clone();
-            clone.pair().name(propertySchema.getField());
-            return clone;
-        }).collect(Collectors.toSet()));
 
-        return super.toMapping(mainCondition,edgeSchema,start,limit);
+        return super.createScanMapping(propertyQueryCondtion,edgeSchema,start,limit);
     }
 
     GraphVertexId[] getEdgeVertexId(EdgeSchema edgeSchema,RowStore rowStore){

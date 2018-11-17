@@ -1,15 +1,14 @@
 package org.hydrofoil.core.engine.internal;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.IterableUtils;
 import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import org.apache.commons.lang3.ArrayUtils;
 import org.hydrofoil.common.graph.GraphElementId;
 import org.hydrofoil.common.graph.QMatch;
 import org.hydrofoil.common.provider.IDataConnector;
-import org.hydrofoil.common.provider.datasource.RowQueryScan;
 import org.hydrofoil.common.provider.datasource.RowQueryResponse;
+import org.hydrofoil.common.provider.datasource.RowQueryScan;
 import org.hydrofoil.common.provider.datasource.RowStore;
 import org.hydrofoil.common.util.ParameterUtils;
 import org.hydrofoil.core.engine.IGraphQueryRunner;
@@ -36,12 +35,12 @@ public abstract class AbstractGraphQueryRunner <E,T extends IGraphQueryRunner> i
     /**
      * edge mapper
      */
-    protected EdgeMapper edgeMapper;
+    protected final EdgeMapper edgeMapper;
 
     /**
      * vertex mapper
      */
-    protected VertexMapper vertexMapper;
+    protected final VertexMapper vertexMapper;
 
     /**
      * element id
@@ -152,8 +151,8 @@ public abstract class AbstractGraphQueryRunner <E,T extends IGraphQueryRunner> i
         ParameterUtils.mustTrueException(response.isSucceed(),
                 "request datasource failed",
                 response.getException());
-        List<RowStore> rowStores = IterableUtils.toList(response);
-        List<E> elements = new ArrayList<>(rowStores.size());
+        Iterable<RowStore> rowStores = response.getRows();
+        List<E> elements = new ArrayList<>(0);
         rowStores.forEach((row)->{
             elements.add(handleRowToElement(mapping,row));
         });
@@ -177,7 +176,7 @@ public abstract class AbstractGraphQueryRunner <E,T extends IGraphQueryRunner> i
                     datasource.scanRow(rowQueryRequests);
             while(rowQueryResponseIterator.hasNext()){
                 RowQueryResponse next = rowQueryResponseIterator.next();
-                elements.addAll(handleRowRequest(elementMappingMap.get(next.getId()),
+                elements.addAll(handleRowRequest(elementMappingMap.get(next.id()),
                         next));
             }
         });

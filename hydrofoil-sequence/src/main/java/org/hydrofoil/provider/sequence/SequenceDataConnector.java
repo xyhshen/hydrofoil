@@ -5,6 +5,7 @@ import org.hydrofoil.common.provider.IDataConnector;
 import org.hydrofoil.common.provider.datasource.*;
 import org.hydrofoil.common.util.DataUtils;
 
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -32,18 +33,23 @@ public class SequenceDataConnector implements IDataConnector {
     }
 
     @Override
-    public Iterator<RowQueryResponse> scanRow(Collection<RowQueryScan> querySet) {
-        return DataUtils.newIterator(querySet.iterator(),query-> rowStorageer.scanRows(query));
-    }
-
-    @Override
-    public Iterator<RowQueryResponse> getRows(Collection<RowQueryGet> querySet) {
-        return DataUtils.newIterator(querySet.iterator(),query-> rowStorageer.getRows(query));
-    }
-
-    @Override
-    public RowQueryCountResponse countRow(RowQueryCount query) {
-        return null;
+    public Iterator<RowQueryResponse> performance(REQUEST_TYPE requestType, Collection<? extends BaseRowQuery> querySet) {
+        return DataUtils.newIterator(querySet.iterator(),query->{
+            try{
+                switch (requestType){
+                    case GET:
+                        return rowStorageer.getRows((RowQueryGet) query);
+                    case SCAN:
+                        return rowStorageer.scanRows((RowQueryScan) query);
+                    case COUNT:
+                        return rowStorageer.countRow((RowQueryCount) query);
+                    default:break;
+                }
+            }catch(Throwable t){
+                return RowQueryResponse.createFailedResponse(query.getId(),new SQLException(t));
+            }
+            return null;
+        });
     }
 
     @Override

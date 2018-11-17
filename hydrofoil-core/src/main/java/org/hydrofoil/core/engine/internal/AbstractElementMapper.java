@@ -2,20 +2,21 @@ package org.hydrofoil.core.engine.internal;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.collections4.SetUtils;
 import org.hydrofoil.common.graph.GraphElementId;
 import org.hydrofoil.common.graph.GraphProperty;
 import org.hydrofoil.common.graph.GraphVertexId;
 import org.hydrofoil.common.graph.QMatch;
-import org.hydrofoil.common.provider.datasource.RowQueryScan;
-import org.hydrofoil.common.provider.datasource.RowStore;
-import org.hydrofoil.common.schema.AbstractElementSchema;
-import org.hydrofoil.common.schema.LinkSchema;
+import org.hydrofoil.common.provider.datasource.*;
+import org.hydrofoil.common.schema.BaseElementSchema;
 import org.hydrofoil.common.schema.PropertySchema;
 import org.hydrofoil.common.util.DataUtils;
+import org.hydrofoil.common.util.ParameterUtils;
 import org.hydrofoil.common.util.collect.ArrayMap;
 import org.hydrofoil.core.engine.EngineElement;
 import org.hydrofoil.core.engine.management.SchemaManager;
+import org.hydrofoil.core.engine.util.EngineElementUtils;
 
 import java.util.*;
 
@@ -27,12 +28,12 @@ import java.util.*;
  * @author xie_yh
  * @date 2018/7/15 16:59
  */
-public abstract class AbstractElementMapper<E extends EngineElement> implements MapperHelper {
+public abstract class AbstractElementMapper<E extends EngineElement> implements PropertyHeper {
 
-    protected final SchemaManager schemaManager;
+    final SchemaManager schemaManager;
 
 
-    public AbstractElementMapper(final SchemaManager schemaManager){
+    AbstractElementMapper(final SchemaManager schemaManager){
         this.schemaManager = schemaManager;
     }
 
@@ -46,7 +47,7 @@ public abstract class AbstractElementMapper<E extends EngineElement> implements 
      * @param label
      * @return
      */
-    protected abstract AbstractElementSchema getElementSchema(String label);
+    protected abstract BaseElementSchema getElementSchema(String label);
 
     /**
      *
@@ -78,63 +79,72 @@ public abstract class AbstractElementMapper<E extends EngineElement> implements 
         return true;
     }
 
+    protected ElementMapping toGetMapping(String label,Collection<GraphElementId> ids){
+        final BaseElementSchema schema = getSchema(label);
+        return createGetMappings(schema,ids);
+    }
+
+    private ElementMapping createGetMappings(BaseElementSchema elementSchema, Collection<GraphElementId> ids){
+        RowQueryGet rowQueryGet = new RowQueryGet();
+        ids.forEach(id->{
+            Map<String,Object> keyValue = DataUtils.newMapWithMaxSize(0);
+            elementSchema.getProperties().forEach((k,v)->{
+                if(v.isPrimary()){
+                    Object value = MapUtils.getObject(id.unique(),v.getLabel());
+                    keyValue.put(v.getField(),value);
+                }
+            });
+            rowQueryGet.addRowKey(RowKey.of(keyValue));
+        });
+        setRowQueryProperties(rowQueryGet,DataUtils.newMapWithMaxSize(0),elementSchema);
+        return createMappingElement(rowQueryGet,elementSchema);
+    }
+
+    protected Map<String,ElementMapping> toGetMappingHasLabel(Collection<GraphElementId> elementIds){
+        final MultiValuedMap<String, GraphElementId> idsWithLabel = EngineElementUtils.clusterIdsWithLabel(elementIds);
+        Map<String,ElementMapping> mappingMap = DataUtils.newHashMapWithExpectedSize(idsWithLabel.size());
+        idsWithLabel.keySet().forEach(label->{
+            Collection<GraphElementId> ids = idsWithLabel.get(label);
+            final BaseElementSchema schema = getSchema(label);
+            mappingMap.put(label,createGetMappings(schema,ids));
+        });
+        return mappingMap;
+    }
+
     @SuppressWarnings("unchecked")
-    protected ElementMapping toMapping(Set<QMatch.Q> mainCondition, AbstractElementSchema elementSchema,Long start,Long limit){
-        ElementMapping elementMapping = new ElementMapping();
-        elementMapping.setSchemaItem(elementSchema);
+    ElementMapping createScanMapping(PropertyQueryCondition queryCondition, BaseElementSchema elementSchema, Long start, Long limit){
         RowQueryScan rowQueryRequest = new RowQueryScan();
         rowQueryRequest.setName(elementSchema.getTable());
         Map<String,RowQueryScan.AssociateRowQuery> associateRowQueryMap = new TreeMap<>();
 
+        Set<QMatch.Q> mainCondition = queryCondition.getMainCondition();
+        MultiValuedMap<String,BaseRowQuery.AssociateMatch> associateQueryCondition = queryCondition.getAssociateQueryCondition();
         //unique field
         elementSchema.getPrimaryKeys().forEach(v->rowQueryRequest.getUniqueField().add(v));
 
+        //set property
+        setRowQueryProperties(rowQueryRequest,associateRowQueryMap,elementSchema);
+
         //add main query condition
         rowQueryRequest.getMatch().addAll(mainCondition);
-        //set property
-        elementSchema.getProperties().forEach((propertyLabel,propertySchema)->{
-            if(isPropertyInMainTable(propertySchema)) {
-                rowQueryRequest.getColumnInformation().column(elementSchema.getTable(),propertySchema.getField());
-            }else{
-                RowQueryScan.AssociateRowQuery associateRowQuery =
-                        associateRowQueryMap.computeIfAbsent(propertySchema.getLinkTable(),
-                                (v)->new RowQueryScan.AssociateRowQuery().setName(v));
-                if(MapUtils.isEmpty(propertySchema.getChildren())){
-                    rowQueryRequest.getColumnInformation().column(associateRowQuery.getName(),propertySchema.getField());
-                }else{
-                    propertySchema.getChildren().forEach(((name, pairSchema) -> {
-                        rowQueryRequest.getColumnInformation().column(associateRowQuery.getName(),pairSchema.getField());
-                    }));
-                }
-                if(associateRowQuery.getMatch().isEmpty()){
-                    /*
-                        get associate column
-                    */
-                    final LinkSchema linkSchema = elementSchema.getLinks().get(propertySchema.getLinkTable());
-                    linkSchema.getJoinfield().forEach((label,field)->{
-                        associateRowQuery.getMatch().add(new RowQueryScan.
-                                AssociateMatch(
-                                QMatch.eq(field,null),
-                                rowQueryRequest.getName(),
-                                elementSchema.getProperties().get(label).getField()
-                        ));
-                        rowQueryRequest.getColumnInformation().column(associateRowQuery.getName(),field);
-                    });
-                }
-            }
+
+        //set associate query cond
+        associateQueryCondition.keySet().forEach(linkTableName->{
+            final RowQueryScan.AssociateRowQuery associateRowQuery = associateRowQueryMap.get(linkTableName);
+            ParameterUtils.notNull(associateRowQuery);
+            associateRowQuery.getMatch().addAll(associateQueryCondition.get(linkTableName));
         });
+
         rowQueryRequest.setOffset(start);
         rowQueryRequest.setLimit(limit);
         if(start == null && limit != null){
             rowQueryRequest.setOffset(0L);
         }
-        elementMapping.setQueryRequest(rowQueryRequest);
-        elementMapping.setDatasource(getDatasourceName(elementSchema.getTable()));
-        return elementMapping;
+        return createMappingElement(rowQueryRequest,elementSchema);
     }
 
     @SuppressWarnings("unchecked")
-    protected <EID extends GraphElementId> EID rowElementToId(AbstractElementSchema elementSchema, RowStore rowStore, Class<EID> clz){
+    <EID extends GraphElementId> EID rowElementToId(BaseElementSchema elementSchema, RowStore rowStore, Class<EID> clz){
         GraphElementId.GraphElementBuilder builder = GraphElementId.builder(elementSchema.getLabel());
         String tableName = elementSchema.getTable();
 
@@ -146,13 +156,13 @@ public abstract class AbstractElementMapper<E extends EngineElement> implements 
         return clz.isAssignableFrom(GraphVertexId.class)? (EID) builder.buildVertexId() : (EID) builder.buildEdgeId();
     }
 
-    protected abstract AbstractElementSchema getSchema(String label);
+    protected abstract BaseElementSchema getSchema(String label);
 
     public boolean checkQueriable(
                                   Collection<String> labels,
                                   Collection<QMatch.Q> propertyQuerySet){
         for(String label:labels){
-            final AbstractElementSchema schema = getSchema(label);
+            final BaseElementSchema schema = getSchema(label);
             if(propertyQuerySet.stream().
                     filter(query->!checkQueriable(schema,query)).count() > 0){
                 return false;
@@ -161,7 +171,7 @@ public abstract class AbstractElementMapper<E extends EngineElement> implements 
         return true;
     }
 
-    EnginePropertySet rowToProperties(AbstractElementSchema elementSchema,RowStore rowStore){
+    EnginePropertySet rowToProperties(BaseElementSchema elementSchema, RowStore rowStore){
         EnginePropertySet.Builder builder = new EnginePropertySet.Builder();
         elementSchema.getProperties().forEach((propertyLabel, propertySchema) -> {
             if(CollectionUtils.sizeIsEmpty(propertySchema.getChildren())){
@@ -185,7 +195,6 @@ public abstract class AbstractElementMapper<E extends EngineElement> implements 
         });
         return builder.build();
     }
-
-
-
 }
+
+

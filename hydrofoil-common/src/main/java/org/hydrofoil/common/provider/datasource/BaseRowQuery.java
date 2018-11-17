@@ -240,4 +240,11 @@ public abstract class BaseRowQuery {
         return id;
     }
 
+    /**
+     * create a row response
+     * @param o result,RowStore collect or count Long
+     * @return response
+     */
+    public abstract RowQueryResponse createResponse(Object o);
+
 }

@@ -29,7 +29,7 @@ public final class FileTable {
     /**
      * row's
      */
-    private List<String[]> rows;
+    private List<FileRow> rows;
 
     public FileTable(String tableName){
         this(tableName,20);
@@ -63,7 +63,7 @@ public final class FileTable {
      * @param row row
      */
     public void putRow(String[] row){
-        rows.add(row);
+        rows.add(new FileRow(row,header));
     }
 
     /**
@@ -72,14 +72,14 @@ public final class FileTable {
      * @return result
      */
     public FileRow getRow(int line){
-        return new FileRow(DataUtils.lookup(rows,line),header);
+        return DataUtils.lookup(rows,line);
     }
 
     /**
      * get all rows
      * @return rows
      */
-    public List<String[]> getRows(){
+    public List<FileRow> getRows(){
         return rows;
     }
 

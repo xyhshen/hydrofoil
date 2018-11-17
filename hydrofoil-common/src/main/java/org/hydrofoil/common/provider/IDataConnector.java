@@ -19,6 +19,15 @@ import java.util.Iterator;
 public interface IDataConnector extends Closeable{
 
     /**
+     *
+     */
+    enum REQUEST_TYPE{
+        GET,
+        SCAN,
+        COUNT
+    }
+
+    /**
      * scan collect set
      * @param query query cond
      * @return result
@@ -32,7 +41,9 @@ public interface IDataConnector extends Closeable{
      * @param querySet qyery set
      * @return result set
      */
-    Iterator<RowQueryResponse> scanRow(final Collection<RowQueryScan> querySet);
+    default Iterator<RowQueryResponse> scanRow(final Collection<RowQueryScan> querySet){
+        return performance(REQUEST_TYPE.SCAN,querySet);
+    }
 
     /**
      * get row's
@@ -48,13 +59,29 @@ public interface IDataConnector extends Closeable{
      * @param querySet query set
      * @return resule set
      */
-    Iterator<RowQueryResponse> getRows(final Collection<RowQueryGet> querySet);
+    default Iterator<RowQueryResponse> getRows(final Collection<RowQueryGet> querySet){
+        return performance(REQUEST_TYPE.GET,querySet);
+    }
 
     /**
      * statistics by cond
      * @param query query cond
      * @return total
      */
-    RowQueryCountResponse countRow(final RowQueryCount query);
+    default RowQueryResponse countRow(final RowQueryCount query){
+        return DataUtils.iteratorFirst(countRow(Collections.singleton(query)));
+    }
+
+    default Iterator<RowQueryResponse> countRow(final Collection<RowQueryCount> querySet){
+        return performance(REQUEST_TYPE.COUNT,querySet);
+    }
+
+    /**
+     * execute query request
+     * @param requestType type
+     * @param querySet query set
+     * @return response result
+     */
+    Iterator<RowQueryResponse> performance(final REQUEST_TYPE requestType,final Collection<? extends BaseRowQuery> querySet);
 
 }

@@ -10,7 +10,7 @@ import org.dom4j.Element;
  * @author xie_yh
  * @date 2018/7/3 11:29
  */
-public class VertexSchema extends AbstractElementSchema {
+public class VertexSchema extends BaseElementSchema {
 
     public VertexSchema(){}
 
