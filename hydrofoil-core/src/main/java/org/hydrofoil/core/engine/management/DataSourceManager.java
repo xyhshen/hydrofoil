@@ -7,7 +7,7 @@ import org.hydrofoil.common.provider.IDataConnector;
 import org.hydrofoil.common.provider.IDataConnectContext;
 import org.hydrofoil.common.schema.ColumnSchema;
 import org.hydrofoil.common.schema.DataSourceSchema;
-import org.hydrofoil.common.schema.NamespaceSchema;
+import org.hydrofoil.common.schema.PackageSchema;
 import org.hydrofoil.common.schema.TableSchema;
 import org.hydrofoil.common.util.LangUtils;
 import org.hydrofoil.common.util.ParameterUtils;
@@ -126,14 +126,14 @@ class DefaultDatasourceContext implements IDataConnectContext {
     }
 
     @Override
-    public Map<String, NamespaceSchema> getNamespaceSchema(String... namespaces) {
-        final Map<String,NamespaceSchema> map = new TreeMap<>();
-        if(ArrayUtils.isEmpty(namespaces)){
-            final Set<String> datasourceNamespace = schemaManager.
-                    getDatasourceNamespace(dataSourceSchema.getDatasourceName());
-            datasourceNamespace.forEach(name-> map.put(name,schemaManager.getNamespaceSchema(name)));
+    public Map<String, PackageSchema> getPackageSchema(String... packages) {
+        final Map<String,PackageSchema> map = new TreeMap<>();
+        if(ArrayUtils.isEmpty(packages)){
+            final Set<String> datasourcePackage = schemaManager.
+                    getDatasourcePackage(dataSourceSchema.getDatasourceName());
+            datasourcePackage.forEach(name-> map.put(name,schemaManager.getPackageSchema(name)));
         }else{
-            Stream.of(namespaces).forEach(name-> map.put(name,schemaManager.getNamespaceSchema(name)));
+            Stream.of(packages).forEach(name-> map.put(name,schemaManager.getPackageSchema(name)));
         }
         return map;
     }

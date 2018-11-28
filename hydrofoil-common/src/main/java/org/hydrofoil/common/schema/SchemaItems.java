@@ -43,10 +43,14 @@ public final class SchemaItems {
     }
 
     static NodeDefine nodeDefine(final String name){
-        return new NodeDefine(name,Map.class);
+        return nodeDefine(name,Map.class);
     }
     static NodeDefine nodeDefine(final String name,final Class<?> nodeClass){
-        return new NodeDefine(name,nodeClass);
+        return new NodeDefine(null,name,nodeClass);
+    }
+
+    static NodeDefine nodeDefine(final String parent,final String name,final Class<?> nodeClass){
+        return new NodeDefine(parent,name,nodeClass);
     }
 }
 
@@ -144,6 +148,11 @@ class AttributeDefine implements BiConsumer<Element,SchemaItem> {
 class NodeDefine implements BiConsumer<Element,SchemaItem>{
 
     /**
+     * parent node
+     */
+    private final String parent;
+
+    /**
      * node name
      */
     private final String name;
@@ -153,7 +162,8 @@ class NodeDefine implements BiConsumer<Element,SchemaItem>{
      */
     private final Class<?> nodeClass;
 
-    NodeDefine(final String name,final Class<?> nodeClass){
+    NodeDefine(final String parent,final String name,final Class<?> nodeClass){
+        this.parent = parent;
         this.name = name;
         this.nodeClass = nodeClass;
     }
@@ -204,7 +214,10 @@ class NodeDefine implements BiConsumer<Element,SchemaItem>{
      * @param node node
      * @param schemaItem schema
      */
-    private void loadSchema(Element node, SchemaItem schemaItem){
+    private void loadSchema(Element node, final SchemaItem schemaItem){
+        if(StringUtils.isNotBlank(parent)){
+            node = node.element(parent);
+        }
         List<Element> elements = XmlUtils.listElement(node, getName());
         Map<String,SchemaItem> schemaMap = DataUtils.newHashMapWithExpectedSize(elements.size());
         for(Element element:elements){
@@ -214,5 +227,13 @@ class NodeDefine implements BiConsumer<Element,SchemaItem>{
             schemaMap.put(schema.getId(),schema);
         }
         schemaItem.putSchemaItem(getName(),schemaMap);
+    }
+
+    /**
+     * @return String
+     * @see NodeDefine#parent
+     **/
+    public String getParent() {
+        return parent;
     }
 }

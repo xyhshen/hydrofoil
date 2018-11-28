@@ -4,7 +4,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hydrofoil.common.provider.IDataConnectContext;
-import org.hydrofoil.common.schema.NamespaceSchema;
+import org.hydrofoil.common.schema.PackageSchema;
 import org.hydrofoil.common.schema.TableSchema;
 import org.hydrofoil.common.util.DataUtils;
 import org.hydrofoil.common.util.LangUtils;
@@ -15,6 +15,7 @@ import org.hydrofoil.provider.sequence.reader.CsvFileReader;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Loaders
@@ -40,9 +41,9 @@ public final class Loaders {
     private Loaders(){}
 
     /**
-     * load data set,namespace and dataset
+     * load data set,package and dataset
      * @param dataSourceContext datsource
-     * @return namespace and dataset
+     * @return package and dataset
      * @throws Exception
      */
     public static Map<String,Map<String,DataSet>> loadDataSet(IDataConnectContext dataSourceContext) throws Exception {
@@ -50,38 +51,41 @@ public final class Loaders {
                 getDatasourceSchema().getConfigItems();
         //create file loader
         String datasourceType = MapUtils.getString(configItems,SequenceConfiguration.DATASOURCE_TYPE);
+        String directoryPath = MapUtils.getString(configItems,SequenceConfiguration.DATASOURCE_DIRECTORY_PATH);
         Class<? extends IFileLoader> loaderClz = loaderClassMap.get(datasourceType);
         ParameterUtils.notNull(loaderClz);
         IFileLoader loader = LangUtils.newInstance(loaderClz);
         ParameterUtils.notNull(loader);
         loader.create(dataSourceContext.getDatasourceSchema());
         //get file list
-        Map<String,Map<String,DataSet>> namespaceMap = DataUtils.newHashMapWithExpectedSize(10);
-        final Map<String, NamespaceSchema> namespaceSchemaMap = dataSourceContext.getNamespaceSchema();
+        Map<String,Map<String,DataSet>> packageMap = DataUtils.newHashMapWithExpectedSize(10);
+        final Map<String, PackageSchema> packageSchemaMap = dataSourceContext.getPackageSchema();
         final Map<String, TableSchema> tableSchemaMap = dataSourceContext.getTableSchema();
-        for(Map.Entry<String,NamespaceSchema> namespaceSchemaEntry:namespaceSchemaMap.entrySet()){
-            String filePath = MapUtils.getString(namespaceSchemaEntry.getValue().getOptionMap(),SequenceConfiguration.FILE_PATH);
-            String fileType = MapUtils.getString(namespaceSchemaEntry.getValue().getOptionMap(),SequenceConfiguration.FILE_TYPE);
-            InputStream is = loader.load(filePath);
-            List<FileTable> fileTables = null;
+        for(Map.Entry<String,PackageSchema> packageSchemaEntry:packageSchemaMap.entrySet()){
+            String filePath = MapUtils.getString(packageSchemaEntry.getValue().getOptionMap(),SequenceConfiguration.FILE_PATH);
+            String fileType = MapUtils.getString(packageSchemaEntry.getValue().getOptionMap(),SequenceConfiguration.FILE_TYPE);
+            InputStream is = loader.load(directoryPath,filePath);
+            final List<TableSchema> tableSchemas = tableSchemaMap.values().stream().
+                    filter(p->StringUtils.equalsIgnoreCase(packageSchemaEntry.getKey(),p.getPackage())).collect(Collectors.toList());
+            Map<String,FileTable> fileTables;
             try{
                 IFileReader fileReader = readerMap.get(fileType);
                 ParameterUtils.notNull(fileReader);
-                fileTables = fileReader.read(is, namespaceSchemaEntry.getValue().getOptionMap());
+                fileTables = fileReader.read(is, packageSchemaEntry.getValue().getOptionMap(),tableSchemas);
             }finally {
                 IOUtils.closeQuietly(is);
             }
-            Map<String,DataSet> dataSetMap = namespaceMap.computeIfAbsent(namespaceSchemaEntry.getKey(),(k)->DataUtils.newMapWithMaxSize(5));
-            fileTables.forEach(fileTable -> {
+
+            Map<String,DataSet> dataSetMap = packageMap.computeIfAbsent(packageSchemaEntry.getKey(),(k)->DataUtils.newMapWithMaxSize(5));
+            fileTables.forEach((tableName,fileTable) -> {
+                TableSchema tableSchema = (TableSchema) DataUtils.getOptional(tableSchemas.stream().
+                        filter(p->StringUtils.equalsIgnoreCase(tableName,p.getRealName())).findFirst());
                 DataSet dataSet = new DataSet(fileTable);
                 //init table by schema
-                TableSchema tableSchema = (TableSchema) DataUtils.getOptional(tableSchemaMap.values().stream().
-                        filter(p->StringUtils.equalsIgnoreCase(namespaceSchemaEntry.getKey(),p.getNamespace())).
-                        filter(p->StringUtils.equalsIgnoreCase(fileTable.getTableName(),p.getRealName())).findFirst());
                 dataSet.init(tableSchema);
                 dataSetMap.put(fileTable.getTableName(),dataSet);
             });
         }
-        return namespaceMap;
+        return packageMap;
     }
 }

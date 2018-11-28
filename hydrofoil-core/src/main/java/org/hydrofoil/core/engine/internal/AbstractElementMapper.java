@@ -10,6 +10,7 @@ import org.hydrofoil.common.graph.GraphVertexId;
 import org.hydrofoil.common.graph.QMatch;
 import org.hydrofoil.common.provider.datasource.*;
 import org.hydrofoil.common.schema.BaseElementSchema;
+import org.hydrofoil.common.schema.LinkSchema;
 import org.hydrofoil.common.schema.PropertySchema;
 import org.hydrofoil.common.util.DataUtils;
 import org.hydrofoil.common.util.ParameterUtils;
@@ -19,6 +20,7 @@ import org.hydrofoil.core.engine.management.SchemaManager;
 import org.hydrofoil.core.engine.util.EngineElementUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * ElementMapper
@@ -79,7 +81,7 @@ public abstract class AbstractElementMapper<E extends EngineElement> implements 
         return true;
     }
 
-    protected ElementMapping toGetMapping(String label,Collection<GraphElementId> ids){
+    public ElementMapping toGetMapping(String label,Collection<GraphElementId> ids){
         final BaseElementSchema schema = getSchema(label);
         return createGetMappings(schema,ids);
     }
@@ -100,7 +102,7 @@ public abstract class AbstractElementMapper<E extends EngineElement> implements 
         return createMappingElement(rowQueryGet,elementSchema);
     }
 
-    protected Map<String,ElementMapping> toGetMappingHasLabel(Collection<GraphElementId> elementIds){
+    public Map<String,ElementMapping> toGetMappingHasLabel(Collection<GraphElementId> elementIds){
         final MultiValuedMap<String, GraphElementId> idsWithLabel = EngineElementUtils.clusterIdsWithLabel(elementIds);
         Map<String,ElementMapping> mappingMap = DataUtils.newHashMapWithExpectedSize(idsWithLabel.size());
         idsWithLabel.keySet().forEach(label->{
@@ -124,7 +126,7 @@ public abstract class AbstractElementMapper<E extends EngineElement> implements 
 
         //set property
         setRowQueryProperties(rowQueryRequest,associateRowQueryMap,elementSchema);
-
+        rowQueryRequest.getAssociateQuery().addAll(associateRowQueryMap.values());
         //add main query condition
         rowQueryRequest.getMatch().addAll(mainCondition);
 
@@ -171,28 +173,59 @@ public abstract class AbstractElementMapper<E extends EngineElement> implements 
         return true;
     }
 
+    private Object rowToProperty(BaseElementSchema elementSchema,LinkSchema linkSchema,PropertySchema propertySchema, RowStore rowStore){
+        if(!propertySchema.hasChildren()){
+            //simple property
+            Object value = getPropertyValue(elementSchema,linkSchema,null,propertySchema,rowStore);
+            return new GraphProperty(propertySchema.getLabel(),value);
+        }else{
+            //complex property
+            final Map<String, PropertySchema> childrenMap = propertySchema.getChildren();
+            Map<String,GraphProperty> subPropertyMap = DataUtils.newMapWithMaxSize(childrenMap.size());
+            childrenMap.forEach((propertyName,pairSchema)->{
+                Object value = getPropertyValue(elementSchema,linkSchema,propertySchema,pairSchema,rowStore);
+                GraphProperty subProperty =
+                        new GraphProperty(pairSchema.getName(),value);
+                subPropertyMap.put(propertyName,subProperty);
+            });
+            return new ArrayMap<>(subPropertyMap);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
     EnginePropertySet rowToProperties(BaseElementSchema elementSchema, RowStore rowStore){
         EnginePropertySet.Builder builder = new EnginePropertySet.Builder();
         elementSchema.getProperties().forEach((propertyLabel, propertySchema) -> {
-            if(CollectionUtils.sizeIsEmpty(propertySchema.getChildren())){
-                //simple property
-                Object value = getPropertyValue(elementSchema,propertySchema,rowStore);
-                GraphProperty graphProperty =
-                        new GraphProperty(propertySchema.getLabel(),value);
-                builder.put(propertyLabel,graphProperty);
+            final LinkSchema linkSchema = elementSchema.getLinks().get(propertySchema.getLinkTable());
+            if(linkSchema != null &&
+                    linkSchema.isOnlyQuery()){
+                return;
+            }
+            if(linkSchema != null && linkSchema.isOneToMany()){
+                //put multi property
+                final Collection<RowStore> rows = rowStore.rows(linkSchema.getTable());
+                if(propertySchema.hasChildren()){
+                    final List<Map<String,GraphProperty>> pl = CollectionUtils.emptyIfNull(rows).stream().map(row ->
+                            (Map<String,GraphProperty>) rowToProperty(elementSchema,linkSchema, propertySchema, row)).
+                            collect(Collectors.toList());
+                    builder.putMaps(propertyLabel,pl);
+                }else{
+                    final List<GraphProperty> pl = CollectionUtils.emptyIfNull(rows).stream().map(row ->
+                            (GraphProperty) rowToProperty(elementSchema,linkSchema, propertySchema, row)).
+                            collect(Collectors.toList());
+                    builder.puts(propertyLabel,pl);
+                }
             }else{
-                //complex property
-                final Map<String, PropertySchema> childrenMap = propertySchema.getChildren();
-                Map<String,GraphProperty> subPropertyMap = DataUtils.newMapWithMaxSize(childrenMap.size());
-                childrenMap.forEach((propertyName,pairSchema)->{
-                    Object value = getPropertyValue(elementSchema,pairSchema,rowStore);
-                    GraphProperty subProperty =
-                            new GraphProperty(propertySchema.getName(),value);
-                    subPropertyMap.put(propertyName,subProperty);
-                });
-                builder.put(propertyLabel, new ArrayMap<>(subPropertyMap));
+                //put single property
+                Object propertyChunk = rowToProperty(elementSchema,linkSchema,propertySchema,rowStore);
+                if(propertyChunk instanceof Map){
+                    builder.put(propertyLabel, (Map)propertyChunk);
+                }else{
+                    builder.put(propertyLabel, (GraphProperty) propertyChunk);
+                }
             }
         });
+        //create property set
         return builder.build();
     }
 }

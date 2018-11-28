@@ -21,13 +21,14 @@ public abstract class BaseElementSchema extends SchemaItem {
     private static final String ATTR_ELEMENT_LABEL =            "label";
     private static final String ATTR_ELEMENT_TABLE =            "table";
     private static final String NODE_ELEMENT_LINK =            "link";
+    private static final String NODE_ELEMENT_LINKS =            "links";
     private static final String NODE_ELEMENT_PROPERTIES =      "properties";
     private static final String NODE_ELEMENT_PROPERTY =         "property";
 
     private static final List<BiConsumer<Element,SchemaItem>> DEFINES = Arrays.asList(
             SchemaItems.attributeDefine(ATTR_ELEMENT_LABEL,true),
             SchemaItems.attributeDefine(ATTR_ELEMENT_TABLE,true),
-            SchemaItems.nodeDefine(NODE_ELEMENT_LINK,LinkSchema.class)
+            SchemaItems.nodeDefine(NODE_ELEMENT_LINKS,NODE_ELEMENT_LINK,LinkSchema.class)
     );
 
     private List<String> primaryKeys;

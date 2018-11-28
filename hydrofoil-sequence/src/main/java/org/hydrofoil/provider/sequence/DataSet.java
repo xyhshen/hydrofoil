@@ -60,6 +60,7 @@ public final class DataSet {
             for(int i = 0;i < fileTable.getRows().size();i++){
                 index.add(fileTable.getRows().get(i).values()[columnSeq],i);
             }
+            index.sorting();
             indexMap.put(columnName,index);
         });
 
@@ -108,7 +109,7 @@ public final class DataSet {
                 collect(Collectors.toList());
     }
 
-    private String makeRowKey(Map<String,String> primaryKey){
+    private String makeRowKey(Map<String,Object> primaryKey){
         List<String> pl = new ArrayList<>(primaryKey.keySet());
         Collections.sort(pl);
         return pl.stream().map(p->MapUtils.getString(primaryKey,p)).reduce((r1,r2)-> r1 + r2).orElse(null);

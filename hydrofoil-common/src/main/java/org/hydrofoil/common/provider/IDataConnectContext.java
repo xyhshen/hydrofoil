@@ -2,7 +2,7 @@ package org.hydrofoil.common.provider;
 
 import org.hydrofoil.common.schema.ColumnSchema;
 import org.hydrofoil.common.schema.DataSourceSchema;
-import org.hydrofoil.common.schema.NamespaceSchema;
+import org.hydrofoil.common.schema.PackageSchema;
 import org.hydrofoil.common.schema.TableSchema;
 
 import java.util.Map;
@@ -33,11 +33,11 @@ public interface IDataConnectContext {
     Map<String,TableSchema> getTableSchema(final String ...tableNames);
 
     /**
-     * get namespace by name's
-     * @param namespaces name's
+     * get package by name's
+     * @param packages name's
      * @return namespace schema'name and schema
      */
-    Map<String,NamespaceSchema> getNamespaceSchema(final String ...namespaces);
+    Map<String,PackageSchema> getPackageSchema(final String ...packages);
 
     /**
      * get current data source schema;

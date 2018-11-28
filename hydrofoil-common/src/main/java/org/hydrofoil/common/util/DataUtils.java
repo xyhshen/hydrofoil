@@ -231,4 +231,17 @@ public final class DataUtils {
             }
         };
     }
+
+    public static <A,B extends A> Collection<B> castCollectType(final Collection<A> c){
+        return c.stream().map(v->(B)v).collect(Collectors.toList());
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <E> E[] toArray(Collection<E> c){
+        if(CollectionUtils.isEmpty(c)){
+            return null;
+        }
+        Object[] o = new Object[c.size()];
+        return c.toArray((E[]) o);
+    }
 }

@@ -119,7 +119,8 @@ public final class HasContainerHelper {
                 fieldQuerys.add(q);
             }
         }
-        graphQueryRunner.fields(fieldQuerys.toArray(new QMatch.Q[1]));
+
+        graphQueryRunner.fields(DataUtils.toArray(fieldQuerys));
     }
 
 

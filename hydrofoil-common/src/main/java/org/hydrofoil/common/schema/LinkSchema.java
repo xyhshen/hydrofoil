@@ -2,6 +2,9 @@ package org.hydrofoil.common.schema;
 
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Element;
+import org.hydrofoil.common.util.FieldUtils;
+import org.hydrofoil.common.util.ParameterUtils;
+import org.hydrofoil.common.util.XmlUtils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -28,7 +31,6 @@ public final class LinkSchema extends SchemaItem{
 
     private static final List<BiConsumer<Element,SchemaItem>> DEFINES = Arrays.asList(
             SchemaItems.attributeDefine(ATTR_LINK_TABLE,true),
-            SchemaItems.attributeDefine(ATTR_LINK_JOIN_FIELD,true),
             SchemaItems.attributeDefine(ATTR_LINK_ONE_TO_MANY,false,null,"false"),
             SchemaItems.attributeDefine(ATTR_LINK_ONLY_QUERY,false,null,"false")
     );
@@ -39,6 +41,10 @@ public final class LinkSchema extends SchemaItem{
     void parse(Element node){
         //load schema
         loadSchema(node,DEFINES);
+
+        String fields = XmlUtils.attributeStringValue(node,ATTR_LINK_JOIN_FIELD);
+        ParameterUtils.notBlank(fields);
+        putItem(ATTR_LINK_JOIN_FIELD, FieldUtils.toMap(fields));
     }
 
     public String getTable(){

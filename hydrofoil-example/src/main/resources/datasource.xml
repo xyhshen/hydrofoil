@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <datasources>
-    <datasource name="movie" provider="mysql">
-        <url>jdbc:mysql://10.110.13.139:3306/testgraph?useUnicode=true&amp;characterEncoding=utf-8&amp;useOldAliasMetadataBehavior=true&amp;allowMultiQueries=true</url>
-        <username>root</username>
-        <password>123456</password>
+    <datasource name="sports" provider="sequence">
+        <configitem>
+            <type>local</type>
+            <path>resource:data/sports</path>
+        </configitem>
     </datasource>
 </datasources>

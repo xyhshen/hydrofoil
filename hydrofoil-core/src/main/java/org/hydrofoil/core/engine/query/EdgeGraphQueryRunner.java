@@ -2,7 +2,6 @@ package org.hydrofoil.core.engine.query;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.hydrofoil.common.graph.EdgeDirection;
-import org.hydrofoil.common.graph.GraphEdgeId;
 import org.hydrofoil.common.provider.datasource.RowStore;
 import org.hydrofoil.common.schema.EdgeSchema;
 import org.hydrofoil.common.util.ParameterUtils;
@@ -12,9 +11,7 @@ import org.hydrofoil.core.engine.internal.AbstractGraphQueryRunner;
 import org.hydrofoil.core.engine.internal.ElementMapping;
 import org.hydrofoil.core.engine.management.Management;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.*;
 
 /**
  * EdgeGraphQueryRunner
@@ -41,16 +38,18 @@ public class EdgeGraphQueryRunner extends AbstractGraphQueryRunner<EngineEdge,Ed
         this.direction = EdgeDirection.InAndOut;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     protected Collection<ElementMapping> makeQueryRequest() {
-        Collection<ElementMapping> elementRequests = new ArrayList<>(1);
+        List<ElementMapping> elementRequests = new ArrayList<>(1);
 
         if(CollectionUtils.isNotEmpty(elementIds)){
             /*
             query edge by id style
              */
             ParameterUtils.mustTrue(edgeMapper.checkElementIds(elementIds),"check edge id");
-            elementIds.forEach((elementId->elementRequests.add(edgeMapper.toMapping((GraphEdgeId) elementId))));
+            final Map<String,ElementMapping> map = edgeMapper.toGetMappingHasLabel(elementIds);
+            elementRequests.addAll(map.values());
         }else{
             EdgeSchema[] inEdgeSchema = null;
             EdgeSchema[] outEdgeSchema = null;
@@ -78,12 +77,12 @@ public class EdgeGraphQueryRunner extends AbstractGraphQueryRunner<EngineEdge,Ed
 
             if(inEdgeSchema != null){
                 for(EdgeSchema schema:inEdgeSchema){
-                    elementRequests.add(edgeMapper.toMapping(propertyQuerySet,vertex,schema,EdgeDirection.In,start,limit));
+                    elementRequests.add(edgeMapper.toMapping(schema.getLabel(),propertyQuerySet,vertex,EdgeDirection.In,start,limit));
                 }
             }
             if(outEdgeSchema != null){
                 for(EdgeSchema schema:outEdgeSchema){
-                    elementRequests.add(edgeMapper.toMapping(propertyQuerySet,vertex,schema,EdgeDirection.Out,null,null));
+                    elementRequests.add(edgeMapper.toMapping(schema.getLabel(),propertyQuerySet,vertex,EdgeDirection.Out,null,null));
                 }
             }
         }

@@ -32,7 +32,7 @@ public final class SchemaManager {
 
     private static final String ELEMENT_DATASOURCE = "datasource";
     private static final String ELEMENT_DATASET_TABLE = "table";
-    private static final String ELEMENT_DATASET_NAMESPACE = "namespace";
+    private static final String ELEMENT_DATASET_PACKAGE = "package";
     private static final String ELEMENT_VERTICES = "vertices";
     private static final String ELEMENT_VERTEX = "vertex";
     private static final String ELEMENT_EDGES = "edges";
@@ -49,9 +49,9 @@ public final class SchemaManager {
     private final Map<String,TableSchema> tableSchemaMap;
 
     /**
-     * namespace schema map
+     * package schema map
      */
-    private final Map<String,NamespaceSchema> namespaceSchemaMap;
+    private final Map<String,PackageSchema> packageSchemaMap;
 
     /**
      * datasource and table map
@@ -59,9 +59,9 @@ public final class SchemaManager {
     private final SetValuedMap<String, String> dataSourceTableMap;
 
     /**
-     * namespace and datasource map
+     * package and datasource map
      */
-    private final SetValuedMap<String, String> dataSourceNamespaceMap;
+    private final SetValuedMap<String, String> dataSourcePackageMap;
 
     /**
      * vertex schema
@@ -82,12 +82,12 @@ public final class SchemaManager {
     SchemaManager(){
         dataSourceSchemaMap = DataUtils.newHashMapWithExpectedSize(10);
         tableSchemaMap = DataUtils.newHashMapWithExpectedSize(50);
-        namespaceSchemaMap = DataUtils.newHashMapWithExpectedSize(50);
+        packageSchemaMap = DataUtils.newHashMapWithExpectedSize(50);
         vertexSchemaMap = DataUtils.newHashMapWithExpectedSize(50);
         edgeSchemaMap = DataUtils.newHashMapWithExpectedSize(50);
         vertexEdgeSchemaMap = DataUtils.newHashMapWithExpectedSize(50);
         dataSourceTableMap = MultiMapUtils.newSetValuedHashMap();
-        dataSourceNamespaceMap = MultiMapUtils.newSetValuedHashMap();
+        dataSourcePackageMap = MultiMapUtils.newSetValuedHashMap();
     }
 
     /**
@@ -113,13 +113,14 @@ public final class SchemaManager {
 
     private void loadDataSet(final InputStream is) throws Exception {
         Element root = XmlUtils.getRoot(is);
-        //load namespace
+        //load package
         {
-            List<Element> elements = XmlUtils.listElement(root, ELEMENT_DATASET_NAMESPACE);
+            List<Element> elements = XmlUtils.listElement(root, ELEMENT_DATASET_PACKAGE);
             for(Element element:elements){
-                NamespaceSchema namespaceSchema = new NamespaceSchema();
-                namespaceSchema.read(element);
-                namespaceSchemaMap.put(namespaceSchema.getName(),namespaceSchema);
+                PackageSchema packageSchema = new PackageSchema();
+                packageSchema.read(element);
+                packageSchemaMap.put(packageSchema.getName(), packageSchema);
+                dataSourcePackageMap.put(packageSchema.getDatasourceName(),packageSchema.getName());
             }
         }
         //load table
@@ -129,13 +130,13 @@ public final class SchemaManager {
                 TableSchema tableSchema = new TableSchema();
                 tableSchema.read(element);
                 tableSchemaMap.put(tableSchema.getName(),tableSchema);
-                ParameterUtils.mustTrue(StringUtils.isNoneBlank(tableSchema.getDatasourceName(), tableSchema.getNamespace()));
+                ParameterUtils.mustTrue(!StringUtils.isAllBlank(tableSchema.getDatasourceName(), tableSchema.getPackage()));
                 if(StringUtils.isNotBlank(tableSchema.getDatasourceName())){
                     dataSourceTableMap.put(tableSchema.getDatasourceName(),tableSchema.getName());
                 }else{
-                    NamespaceSchema namespaceSchema = namespaceSchemaMap.get(tableSchema.getNamespace());
-                    ParameterUtils.notNull(namespaceSchema);
-                    dataSourceTableMap.put(namespaceSchema.getDatasourceName(),tableSchema.getName());
+                    PackageSchema packageSchema = packageSchemaMap.get(tableSchema.getPackage());
+                    ParameterUtils.notNull(packageSchema);
+                    dataSourceTableMap.put(packageSchema.getDatasourceName(),tableSchema.getName());
                 }
             }
         }
@@ -268,12 +269,12 @@ public final class SchemaManager {
     }
 
     /**
-     * get namespace
+     * get package
      * @param name name
-     * @return namespace schema
+     * @return package schema
      */
-    public NamespaceSchema getNamespaceSchema(final String name){
-        return namespaceSchemaMap.get(name);
+    public PackageSchema getPackageSchema(final String name){
+        return packageSchemaMap.get(name);
     }
 
     /**
@@ -285,8 +286,8 @@ public final class SchemaManager {
         return dataSourceTableMap.get(datasourceName);
     }
 
-    public Set<String> getDatasourceNamespace(final String datasourceName){
-        return dataSourceNamespaceMap.get(datasourceName);
+    public Set<String> getDatasourcePackage(final String datasourceName){
+        return dataSourcePackageMap.get(datasourceName);
     }
 
     public ColumnSchema getColumnSchema(final String tableName,final String columnName){

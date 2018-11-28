@@ -23,7 +23,7 @@ public class TableSchema extends SchemaItem{
 
     private static final String ATTR_TABLE_NAME = "name";
     private static final String ATTR_TABLE_DATASOURCE = "datasource";
-    private static final String ATTR_TABLE_NAMESPACE = "namespace";
+    private static final String ATTR_TABLE_PACKAGE = "package";
     private static final String ATTR_TABLE_REALNAME = "realname";
 
     private static final String NODE_TABLE_COLUMN = "column";
@@ -33,9 +33,9 @@ public class TableSchema extends SchemaItem{
 
     private static final List<BiConsumer<Element,SchemaItem>> DEFINES = Arrays.asList(
             SchemaItems.attributeDefine(ATTR_TABLE_NAME,true),
-            SchemaItems.attributeDefine(ATTR_TABLE_DATASOURCE,true),
+            SchemaItems.attributeDefine(ATTR_TABLE_DATASOURCE),
             SchemaItems.attributeDefine(ATTR_TABLE_REALNAME),
-            SchemaItems.attributeDefine(ATTR_TABLE_NAMESPACE),
+            SchemaItems.attributeDefine(ATTR_TABLE_PACKAGE),
             SchemaItems.nodeDefine(NODE_TABLE_COLUMN,ColumnSchema.class)
     );
 
@@ -103,11 +103,11 @@ public class TableSchema extends SchemaItem{
     }
 
     /**
-     * get table namespace,or path
-     * @return namespace
+     * get table package,or path
+     * @return package
      */
-    public String getNamespace(){
-        return getItem(ATTR_TABLE_NAMESPACE);
+    public String getPackage(){
+        return getItem(ATTR_TABLE_PACKAGE);
     }
 
     /**

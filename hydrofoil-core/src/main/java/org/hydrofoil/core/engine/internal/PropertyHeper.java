@@ -64,21 +64,21 @@ import java.util.Set;
                     propertySchema.getChildren().forEach(((name, pairSchema) -> rowQueryRequest.getColumnInformation().
                             column(associateRowQuery.getName(),pairSchema.getField())));
                 }
-                if(associateRowQuery.getMatch().isEmpty()){
-                    /*
+                /*
                         get associate column
                     */
-                    final LinkSchema linkSchema = elementSchema.getLinks().get(propertySchema.getLinkTable());
-                    linkSchema.getJoinfield().forEach((label,field)->{
-                        associateRowQuery.getMatch().add(new BaseRowQuery.
-                                AssociateMatch(
-                                QMatch.eq(field,null),
-                                rowQueryRequest.getName(),
-                                elementSchema.getProperties().get(label).getField()
-                        ));
-                        rowQueryRequest.getColumnInformation().column(associateRowQuery.getName(),field);
-                    });
-                }
+                final LinkSchema linkSchema = elementSchema.getLinks().get(propertySchema.getLinkTable());
+                associateRowQuery.setOneToMany(linkSchema.isOneToMany());
+                associateRowQuery.setOnlyQueries(linkSchema.isOnlyQuery());
+                linkSchema.getJoinfield().forEach((field1,field2)->{
+                    associateRowQuery.getMatch().add(new BaseRowQuery.
+                            AssociateMatch(
+                            QMatch.eq(field2,null),
+                            rowQueryRequest.getName(),
+                            field1
+                    ));
+                    rowQueryRequest.getColumnInformation().column(associateRowQuery.getName(),field2);
+                });
             }
         });
     }

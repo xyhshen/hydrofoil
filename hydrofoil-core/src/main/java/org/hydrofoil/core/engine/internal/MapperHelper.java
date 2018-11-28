@@ -8,8 +8,6 @@ import org.hydrofoil.common.schema.*;
 import org.hydrofoil.common.util.ParameterUtils;
 import org.hydrofoil.core.engine.management.SchemaManager;
 
-import java.util.Map;
-
 /**
  * GraphConditionUtils
  * <p>
@@ -29,11 +27,11 @@ interface MapperHelper {
         if(!StringUtils.isBlank(datasourceName)){
             return datasourceName;
         }
-        //by namespace get datasource
-        ParameterUtils.notBlank(tableSchema.getNamespace());
-        NamespaceSchema namespaceSchema = schemaManager().getNamespaceSchema(tableSchema.getNamespace());
-        ParameterUtils.notNull(namespaceSchema);
-        return namespaceSchema.getDatasourceName();
+        //by package get datasource
+        ParameterUtils.notBlank(tableSchema.getPackage());
+        PackageSchema packageSchema = schemaManager().getPackageSchema(tableSchema.getPackage());
+        ParameterUtils.notNull(packageSchema);
+        return packageSchema.getDatasourceName();
     }
 
     /**
@@ -78,17 +76,22 @@ interface MapperHelper {
         return true;
     }
 
-    default Object getPropertyValue(BaseElementSchema elementSchema, PropertySchema propertySchema, RowStore rowStore){
-        Object value;
-        if(isPropertyInMainTable(propertySchema)){
-            value = rowStore.value(elementSchema.getTable(),propertySchema.getField());
+    default Object getPropertyValue(BaseElementSchema elementSchema, LinkSchema linkSchema,PropertySchema parentSchema,PropertySchema propertySchema, RowStore rowStore){
+        String tableName;
+        String fieleName;
+        if(parentSchema == null){
+            tableName = linkSchema!=null?linkSchema.getTable():elementSchema.getTable();
+            fieleName = propertySchema.getField();
         }else{
-            final Map<String, LinkSchema> linkSchemaMap = elementSchema.getLinks();
-            final LinkSchema linkSchema = linkSchemaMap.get(propertySchema.getLinkTable());
-            value = rowStore.value(linkSchema.getTable(),propertySchema.getField());
+            tableName = linkSchema.getTable();
+            fieleName = propertySchema.getField();
         }
-
-        return value;
+        if(rowStore.isSmallRow()){
+            return rowStore.value(null,propertySchema.getField());
+        }
+        else{
+            return rowStore.value(tableName,fieleName);
+        }
     }
 
     default ElementMapping createMappingElement(BaseRowQuery rowQuery,BaseElementSchema elementSchema){

@@ -25,6 +25,6 @@ public final class SequenceConfiguration {
     //encoding
     public static final String FILE_ENCODE = "encode";
     //column split character
-    public static final String FILE_CSV_SPLIT_CHARACTER = "split.character";
+    public static final String FILE_CSV_DELIMITER = "delimiter";
 
 }

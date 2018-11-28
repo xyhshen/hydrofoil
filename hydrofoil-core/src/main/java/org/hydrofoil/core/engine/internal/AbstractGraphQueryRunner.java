@@ -6,9 +6,7 @@ import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import org.apache.commons.lang3.ArrayUtils;
 import org.hydrofoil.common.graph.GraphElementId;
 import org.hydrofoil.common.graph.QMatch;
-import org.hydrofoil.common.provider.IDataConnector;
 import org.hydrofoil.common.provider.datasource.RowQueryResponse;
-import org.hydrofoil.common.provider.datasource.RowQueryScan;
 import org.hydrofoil.common.provider.datasource.RowStore;
 import org.hydrofoil.common.util.ParameterUtils;
 import org.hydrofoil.core.engine.IGraphQueryRunner;
@@ -114,8 +112,9 @@ public abstract class AbstractGraphQueryRunner <E,T extends IGraphQueryRunner> i
 
     @Override
     public T fields(final QMatch.Q ...query){
-        ParameterUtils.mustTrue(ArrayUtils.isNotEmpty(query),"property query");
-        this.propertyQuerySet.addAll(Arrays.asList(query));
+        if(ArrayUtils.isNotEmpty(query)){
+            this.propertyQuerySet.addAll(Arrays.asList(query));
+        }
         return (T) this;
     }
 
@@ -161,26 +160,10 @@ public abstract class AbstractGraphQueryRunner <E,T extends IGraphQueryRunner> i
 
     @Override
     public Iterator<E> take() {
-        List<E> elements = new ArrayList<>(100);
         MultiValuedMap<String,ElementMapping> maps = getQueryRequest();
-        Map<Long,ElementMapping> elementMappingMap = new HashMap<>();
-        maps.asMap().forEach((dataSourceName,requests)->{
-            IDataConnector datasource = management.getDataSourceManager().
-                    getDatasource(dataSourceName);
-            List<RowQueryScan> rowQueryRequests = new ArrayList<>(requests.size());
-            requests.forEach((request)->{
-                elementMappingMap.put(request.getQueryRequest().getId(),request);
-                rowQueryRequests.add(request.getQueryRequest());
-            });
-            Iterator<RowQueryResponse> rowQueryResponseIterator =
-                    datasource.scanRow(rowQueryRequests);
-            while(rowQueryResponseIterator.hasNext()){
-                RowQueryResponse next = rowQueryResponseIterator.next();
-                elements.addAll(handleRowRequest(elementMappingMap.get(next.id()),
-                        next));
-            }
-        });
-        return elements.iterator();
+        ConnectRunner<E> connectRunner = new ConnectRunner(management,(mapping,response)-> handleRowRequest((ElementMapping)mapping,(RowQueryResponse) response));
+        ParameterUtils.mustTrueMessage(connectRunner.list(maps),"take failed");
+        return connectRunner.toIterator();
     }
 
     @Override
@@ -210,6 +193,4 @@ public abstract class AbstractGraphQueryRunner <E,T extends IGraphQueryRunner> i
         }
         return false;
     }
-
-
 }

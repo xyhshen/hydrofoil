@@ -2,6 +2,8 @@ package org.hydrofoil.provider.sequence.loader;
 
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hydrofoil.common.schema.DataSourceSchema;
 import org.hydrofoil.common.util.ParameterUtils;
 import org.hydrofoil.provider.sequence.IFileLoader;
@@ -23,6 +25,8 @@ public class LocalFileLoader implements IFileLoader {
 
     private String directoryPath;
 
+    public static final String RESOURCE_PATH_PREFIX = "resource:";
+
     @Override
     public void create(DataSourceSchema dataSourceSchema) throws Exception {
         directoryPath = MapUtils.getString(dataSourceSchema.getConfigItems(),
@@ -31,8 +35,13 @@ public class LocalFileLoader implements IFileLoader {
     }
 
     @Override
-    public InputStream load(String path) throws IOException {
-        return FileUtils.openInputStream(new File(path));
+    public InputStream load(final String directoryPath,final String path) throws IOException {
+        String fullPath = FilenameUtils.concat(directoryPath,path);
+        if(StringUtils.startsWith(fullPath,RESOURCE_PATH_PREFIX)){
+            String resourcePath = StringUtils.removeStart(fullPath,RESOURCE_PATH_PREFIX);
+            return Thread.currentThread().getContextClassLoader().getResourceAsStream(resourcePath);
+        }
+        return FileUtils.openInputStream(new File(fullPath));
     }
 
     @Override

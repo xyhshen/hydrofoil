@@ -3,6 +3,8 @@ package org.hydrofoil.provider.sequence.reader;
 import com.csvreader.CsvReader;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.hydrofoil.common.schema.TableSchema;
+import org.hydrofoil.common.util.DataUtils;
 import org.hydrofoil.common.util.ParameterUtils;
 import org.hydrofoil.provider.sequence.FileTable;
 import org.hydrofoil.provider.sequence.IFileReader;
@@ -25,15 +27,19 @@ import java.util.Map;
 public class CsvFileReader implements IFileReader {
 
     @Override
-    public List<FileTable> read(InputStream is, Map<String, String> optionMap) throws Exception {
+    public Map<String,FileTable> read(InputStream is, Map<String, String> optionMap,List<TableSchema> tableSchemas) throws Exception {
         String encode = MapUtils.getString(optionMap, SequenceConfiguration.FILE_ENCODE,"UTF-8");
-        String splitChar= MapUtils.getString(optionMap,SequenceConfiguration.FILE_CSV_SPLIT_CHARACTER,",");
-        CsvReader reader = new CsvReader(is,splitChar.charAt(0), Charset.forName(encode));
+        String delimiter= MapUtils.getString(optionMap,SequenceConfiguration.FILE_CSV_DELIMITER,",");
+        CsvReader reader = new CsvReader(is,delimiter.charAt(0), Charset.forName(encode));
+
+        ParameterUtils.notEmpty(tableSchemas);
+
         //read header
         reader.readRecord();
         String[] columns = reader.getValues();
         ParameterUtils.mustTrue(ArrayUtils.isNotEmpty(columns));
-        FileTable fileTable = new FileTable("");
+        String tableName = DataUtils.lookup(tableSchemas,0).getRealName();
+        FileTable fileTable = new FileTable(tableName);
         for(int i = 0;i < columns.length;i++){
             fileTable.getHeader().put(columns[i],i);
         }
@@ -44,6 +50,6 @@ public class CsvFileReader implements IFileReader {
             fileTable.putRow(values);
         }
         reader.close();
-        return Collections.singletonList(fileTable);
+        return Collections.singletonMap(tableName,fileTable);
     }
 }

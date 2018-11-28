@@ -1,25 +1,41 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <mapper>
     <vertices>
-        <vertex label="movie" table="movie">
+        <vertex label="team" table="team">
             <properties>
-                <property primary="true" label="movieid" field="movieid" />
-                <property label="name" field="moviename" />
-                <property label="income" field="income" />
-                <property label="boxoffice" field="boxoffice" />
-                <property label="company" link-table="company" field="company" />
-                <property label="type" link-table="type" field="type" multiple="true" />
-                <property label="director" link-table="director" field="director_name" />
-                <property label="publish" link-table="publish" multiple="true" >
-                    <pair name="area" field="area" />
-                    <pair name="time" field="time" />
+                <property primary="true" label="team.id" field="team_id" />
+                <property label="name" field="team_name" />
+                <property label="league" field="team_league" />
+                <property label="site" field="official_site" />
+                <property label="created.date" field="created_date" />
+
+                <property label="city" field="city" link-table="team_place"/>
+                <property label="home" field="home" link-table="team_place"/>
+                <property label="home.capacity" field="home_capacity" link-table="team_place"/>
+                <property label="training.field" field="training_field" link-table="team_place"/>
+
+                <property label="coaches" link-table="team_coach">
+                    <pair name="chief.coach" field="chief_coach" />
+                    <pair name="assistant.coach" field="assistant_coach" />
+                    <pair name="fitness.coach" field="fitness_coach" />
+                    <pair name="goalkeeper.coach" field="goalkeeper_coach" />
                 </property>
+                <property label="owner" link-table="team_owner">
+                    <pair name="name" field="owner_name" />
+                    <pair name="capital" field="capital" />
+                </property>
+                <property label="honours" link-table="team_honour">
+                    <pair name="name" field="name" />
+                    <pair name="count" field="count" />
+                </property>
+                <property label="star" link-table="team_star" field="name"/>
             </properties>
             <links>
-                <link table="company" join-field="movieid=movieid" />
-                <link table="type" join-field="movieid=movieid" />
-                <link table="publish" join-field="movieid=movieid" />
-                <link table="director" join-field="movieid=movieid" />
+                <link table="team_coach" join-field="team_id=team_id" />
+                <link table="team_place" join-field="team_id=team_id" />
+                <link table="team_owner" join-field="team_id=team_id" />
+                <link table="team_star" join-field="team_id=team_id" one-to-many="true" />
+                <link table="team_honour" join-field="team_id=team_id" one-to-many="true" />
             </links>
         </vertex>
     </vertices>

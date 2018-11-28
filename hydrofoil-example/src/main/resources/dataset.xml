@@ -1,19 +1,75 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <dataSets>
-    <table name="movie" datasource="movie" realname="movie">
-        <column name="moviename" index-type="normal" />
+    <package name="team" datasource="sports">
+        <options>
+            <path>team.csv</path>
+            <file-type>csv</file-type>
+            <encode>utf-8</encode>
+            <delimiter>,</delimiter>
+        </options>
+    </package>
+    <package name="team_coach" datasource="sports">
+        <options>
+            <path>team_coach.csv</path>
+            <file-type>csv</file-type>
+            <encode>utf-8</encode>
+            <delimiter>,</delimiter>
+        </options>
+    </package>
+    <package name="team_owner" datasource="sports">
+        <options>
+            <path>team_owner.csv</path>
+            <file-type>csv</file-type>
+            <encode>utf-8</encode>
+            <delimiter>,</delimiter>
+        </options>
+    </package>
+    <package name="team_place" datasource="sports">
+        <options>
+            <path>team_place.csv</path>
+            <file-type>csv</file-type>
+            <encode>utf-8</encode>
+            <delimiter>,</delimiter>
+        </options>
+    </package>
+    <package name="team_star" datasource="sports">
+        <options>
+            <path>team_star.csv</path>
+            <file-type>csv</file-type>
+            <encode>utf-8</encode>
+            <delimiter>,</delimiter>
+        </options>
+    </package>
+    <package name="team_honour" datasource="sports">
+        <options>
+            <path>team_honour.csv</path>
+            <file-type>csv</file-type>
+            <encode>utf-8</encode>
+            <delimiter>,</delimiter>
+        </options>
+    </package>
+    <table name="team" package="team">
+        <column name="team_id" index-type="primary" />
+        <column name="team_name" index-type="normal" />
     </table>
-    <table name="company" datasource="movie" >
-        <column name="company" index-type="normal" />
+    <table name="team_coach" package="team_coach">
+        <column name="uuid" index-type="primary" />
+        <column name="team_id" index-type="normal" />
     </table>
-    <table name="publish" datasource="movie" >
-        <column name="area" index-type="normal" />
-        <column name="time" accpet-type="date" raw-format="yyyy年MM月dd日" index-type="normal" />
+    <table name="team_owner" package="team_owner">
+        <column name="uuid" index-type="primary" />
+        <column name="team_id" index-type="normal" />
     </table>
-    <table name="type" datasource="movie">
-        <column name="type" index-type="normal" />
+    <table name="team_place" package="team_place">
+        <column name="uuid" index-type="primary" />
+        <column name="team_id" index-type="normal" />
     </table>
-    <table name="director" datasource="movie">
-        <column name="director_name" index-type="normal" />
+    <table name="team_star" package="team_star">
+        <column name="uuid" index-type="primary" />
+        <column name="team_id" index-type="normal" />
+    </table>
+    <table name="team_honour" package="team_honour">
+        <column name="uuid" index-type="primary" />
+        <column name="team_id" index-type="normal" />
     </table>
 </dataSets>

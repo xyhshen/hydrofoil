@@ -1,7 +1,6 @@
 package org.hydrofoil.core.engine.query;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.hydrofoil.common.graph.GraphVertexId;
 import org.hydrofoil.common.provider.datasource.RowStore;
 import org.hydrofoil.common.schema.VertexSchema;
 import org.hydrofoil.common.util.ParameterUtils;
@@ -12,6 +11,8 @@ import org.hydrofoil.core.engine.management.Management;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -30,14 +31,15 @@ public final class VertexGraphQueryRunner extends AbstractGraphQueryRunner<Engin
 
     @Override
     protected Collection<ElementMapping> makeQueryRequest() {
-        Collection<ElementMapping> elementRequests = new ArrayList<>(1);
+        List<ElementMapping> elementRequests = new ArrayList<>(1);
 
         if(CollectionUtils.isNotEmpty(elementIds)){
             /*
             query vertex by id style
              */
             ParameterUtils.mustTrue(vertexMapper.checkElementIds(elementIds),"check vertex id");
-            elementIds.forEach((elementId -> elementRequests.add(vertexMapper.toMapping((GraphVertexId) elementId))));
+            final Map<String,ElementMapping> map = vertexMapper.toGetMappingHasLabel(elementIds);
+            elementRequests.addAll(map.values());
         }else{
             /*
             query vertex by label or other complex style

@@ -29,9 +29,14 @@
             <artifactId>hydrofoil-core</artifactId>
             <version>${hydrofoil.version}</version>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>org.hydrofoil</groupId>
             <artifactId>hydrofoil-mysql</artifactId>
+            <version>${hydrofoil.version}</version>
+        </dependency>-->
+        <dependency>
+            <groupId>org.hydrofoil</groupId>
+            <artifactId>hydrofoil-sequence</artifactId>
             <version>${hydrofoil.version}</version>
         </dependency>
     </dependencies>

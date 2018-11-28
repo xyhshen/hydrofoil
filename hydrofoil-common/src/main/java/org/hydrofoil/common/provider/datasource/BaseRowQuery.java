@@ -15,12 +15,12 @@ import java.util.*;
  * @author xie_yh
  * @date 2018/11/8 18:53
  */
-public abstract class BaseRowQuery {
+public abstract class BaseRowQuery{
 
     /**
      * Associate match
      */
-    public static final class AssociateMatch{
+    public static final class AssociateMatch implements Comparable{
 
         /**
          * query match
@@ -81,6 +81,11 @@ public abstract class BaseRowQuery {
         @Override
         public int hashCode(){
             return Objects.hash(match,name, joinField);
+        }
+
+        @Override
+        public int compareTo(Object o) {
+            return Integer.compare(hashCode(),o.hashCode());
         }
     }
 

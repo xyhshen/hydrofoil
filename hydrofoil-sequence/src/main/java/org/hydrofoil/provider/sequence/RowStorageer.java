@@ -25,22 +25,22 @@ public final class RowStorageer {
 
     private final IDataConnectContext dataSourceContext;
 
-    private Map<String,Map<String,DataSet>> namespaceDataSetMap;
+    private Map<String,Map<String,DataSet>> packageDataSetMap;
 
     RowStorageer(IDataConnectContext dataSourceContext){
         this.dataSourceContext = dataSourceContext;
     }
 
     void load() throws Exception {
-        namespaceDataSetMap = Loaders.loadDataSet(dataSourceContext);
+        packageDataSetMap = Loaders.loadDataSet(dataSourceContext);
     }
 
     private DataSet getDataSet(String tableName){
         final Map<String, TableSchema> tableSchemaMap = dataSourceContext.getTableSchema(tableName);
         final TableSchema tableSchema = tableSchemaMap.get(tableName);
         ParameterUtils.notNull(tableSchema);
-        final Map<String, DataSet> dataSetMap = namespaceDataSetMap.
-                get(tableSchema.getNamespace());
+        final Map<String, DataSet> dataSetMap = packageDataSetMap.
+                get(tableSchema.getPackage());
         return dataSetMap.get(tableSchema.getRealName());
     }
 
@@ -102,20 +102,24 @@ public final class RowStorageer {
             if(associateRowQuery.isOneToMany()){
                 //write all row
                 fileRows.forEach(fileRow -> {
-                    writeRowStore(information,associateRowQuery.getName(),rowStore,fileRow);
+                    writeRowStore(information,associateRowQuery.getName(),rowStore.createRow(associateRowQuery.getName()),fileRow,true);
                 });
             }else{
                 final FileRow fileRow = DataUtils.collectFirst(fileRows);
                 //write a single row
-                writeRowStore(information,associateRowQuery.getName(),rowStore,fileRow);
+                writeRowStore(information,associateRowQuery.getName(),rowStore,fileRow,false);
             }
         });
         return rowStore;
     }
 
-    private void writeRowStore(RowColumnInformation information,String name,RowStore rowStore,FileRow fileRow){
+    private void writeRowStore(RowColumnInformation information,String name,RowStore rowStore,FileRow fileRow,boolean small){
         information.columns(name).forEach(fieldName->{
-            rowStore.put(name,fieldName,fileRow.value(fieldName));
+            if(small){
+                rowStore.put(fieldName,fileRow.value(fieldName));
+            }else{
+                rowStore.put(name,fieldName,fileRow.value(fieldName));
+            }
         });
     }
 
