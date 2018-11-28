@@ -41,6 +41,9 @@ public final class HydrofoilVertexProperty<V> implements VertexProperty<V>{
     @SuppressWarnings("unchecked")
     @Override
     public V value() throws NoSuchElementException {
+        if(engineProperty.isComplex()){
+            return (V) engineProperty.asValueMap();
+        }
         return (V) engineProperty.property().content();
     }
 

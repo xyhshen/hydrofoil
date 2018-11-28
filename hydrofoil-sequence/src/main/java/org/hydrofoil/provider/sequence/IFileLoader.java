@@ -29,6 +29,6 @@ public interface IFileLoader extends Closeable{
      * @return result
      * @throws IOException
      */
-    InputStream load(String path) throws IOException;
+    InputStream load(String directoryPath,String path) throws IOException;
 
 }

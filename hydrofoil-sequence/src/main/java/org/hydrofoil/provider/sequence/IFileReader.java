@@ -1,5 +1,7 @@
 package org.hydrofoil.provider.sequence;
 
+import org.hydrofoil.common.schema.TableSchema;
+
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +21,6 @@ public interface IFileReader {
      * @param is file input stream
      * @return table's
      */
-    List<FileTable> read(InputStream is,Map<String,String> optionMap) throws Exception;
+    Map<String,FileTable> read(InputStream is, Map<String,String> optionMap,List<TableSchema> tableSchemas) throws Exception;
 
 }

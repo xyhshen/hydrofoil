@@ -1,5 +1,6 @@
 package org.hydrofoil.common.schema;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.dom4j.Element;
 import org.hydrofoil.common.util.DataUtils;
@@ -115,6 +116,10 @@ public final class PropertySchema extends SchemaItem{
             return getName();
         }
         return getLabel();
+    }
+
+    public boolean hasChildren(){
+        return MapUtils.isNotEmpty(getChildren());
     }
 
 }

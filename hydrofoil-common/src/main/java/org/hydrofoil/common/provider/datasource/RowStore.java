@@ -1,6 +1,7 @@
 package org.hydrofoil.common.provider.datasource;
 
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hydrofoil.common.util.ParameterUtils;
 import org.hydrofoil.common.util.bean.FieldPair;
 
@@ -61,7 +62,7 @@ public final class RowStore {
         ParameterUtils.mustTrue(ObjectUtils.allNotNull(collectIndex,fieldIndex));
         Object o = rowFull[collectIndex];
         if(o == null || o instanceof Collection){
-            rowFull[collectIndex] = new Object[information.size(pair.name())];
+            rowFull[collectIndex] = new Object[information.size(name)];
             o = rowFull[collectIndex];
         }
         Object[] cells = (Object[]) o;
@@ -107,17 +108,22 @@ public final class RowStore {
      * @return field pair
      */
     public FieldPair field(final String name,final String fieldname){
-        Integer collectIndex = information.index(name);
-        Integer fieldIndex =  information.index(name,fieldname);
-        if(!ObjectUtils.allNotNull(collectIndex,fieldIndex)){
-            return null;
+        if(StringUtils.isNotBlank(collectSetName)){
+            Integer fieldIndex =  information.index(collectSetName,fieldname);
+            return new FieldPair(fieldname,rowFull[fieldIndex]);
+        }else{
+            Integer collectIndex = information.index(name);
+            Integer fieldIndex =  information.index(name,fieldname);
+            if(!ObjectUtils.allNotNull(collectIndex,fieldIndex)){
+                return null;
+            }
+            Object o = rowFull[collectIndex];
+            if(o == null || o instanceof Collection){
+                return null;
+            }
+            Object[] cells = (Object[]) o;
+            return new FieldPair(fieldname,cells[fieldIndex]);
         }
-        Object o = rowFull[collectIndex];
-        if(o == null || o instanceof Collection){
-            return null;
-        }
-        Object[] cells = (Object[]) o;
-        return new FieldPair(fieldname,cells[fieldIndex]);
     }
 
     /**
@@ -145,6 +151,10 @@ public final class RowStore {
             return null;
         }
         return (Collection<RowStore>) o;
+    }
+
+    public boolean isSmallRow(){
+        return StringUtils.isNotBlank(collectSetName);
     }
 
 }
