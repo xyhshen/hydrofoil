@@ -38,7 +38,46 @@
                 <link table="team_honour" join-field="team_id=team_id" one-to-many="true" />
             </links>
         </vertex>
+        <vertex label="sportsman" table="sportsman">
+            <properties>
+                <property primary="true" label="sportsman.id" field="sportsman_id" />
+                <property label="name" field="name" />
+                <property label="nationality" field="nationality" />
+                <property label="height" field="height" />
+                <property label="weight" field="weight" />
+                <property label="birthday" field="birthday" />
+                <property label="position" link-table="sportsman_position" >
+                    <pair name="name" field="position" />
+                    <pair name="detail" field="detail" />
+                </property>
+                <property label="features" link-table="sportsman_feature" >
+                    <pair name="name" field="name" />
+                    <pair name="score" field="score" />
+                </property>
+                <property label="employs" link-table="sportsman_employ" >
+                    <pair name="team.name" field="team_name" />
+                    <pair name="start" field="start_date" />
+                    <pair name="end" field="end_date" />
+                </property>
+            </properties>
+            <links>
+                <link table="sportsman_employ" join-field="sportsman_id=sportsman_id" />
+                <link table="sportsman_feature" join-field="sportsman_id=sportsman_id" one-to-many="true" />
+                <link table="sportsman_position" join-field="sportsman_id=sportsman_id" one-to-many="true" />
+            </links>
+        </vertex>
     </vertices>
     <edges>
+        <edge label="employ" table="sportsman_employ">
+            <source label="sportsman" field="sportsman.id=sportsman_id" />
+            <target label="team" field="team.id=team_id" />
+            <properties>
+                <property primary="true" label="uuid" field="uuid" />
+                <property label="team.id" field="team_id" />
+                <property label="sportsman.id" field="sportsman_id" />
+                <property label="start" field="start_date" />
+                <property label="end" field="end_date" />
+            </properties>
+        </edge>
     </edges>
 </mapper>

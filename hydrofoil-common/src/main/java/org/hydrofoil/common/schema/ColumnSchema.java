@@ -33,11 +33,16 @@ public class ColumnSchema extends SchemaItem{
     public static final String COLUMN_INDEX_TYPE_TEXT = "text";
     public static final String COLUMN_INDEX_TYPE_PRIMARY = "primary";
 
+    /**
+     * index type mask
+     */
+    public static final int INDEX_TYPE_MASK_NORMAL = 0x1;
+    public static final int INDEX_TYPE_MASK_TEXT = 0x2;
+    public static final int INDEX_TYPE_MASK_PRIMARY = 0x4;
+
     private static final List<BiConsumer<Element,SchemaItem>> DEFINES = Arrays.asList(
             SchemaItems.attributeDefine(ATTR_COLUMN_NAME,true),
-            SchemaItems.attributeDefine(ATTR_COLUMN_INDEX_TYPE,false,
-                    p->StringUtils.equalsAnyIgnoreCase(Objects.toString(p),
-                            COLUMN_INDEX_TYPE_NORMAL,COLUMN_INDEX_TYPE_TEXT,COLUMN_INDEX_TYPE_PRIMARY)),
+            SchemaItems.attributeDefine(ATTR_COLUMN_INDEX_TYPE,false),
             SchemaItems.attributeDefine(ATTR_COLUMN_ACCEPT_TYPE,false,
                     p->StringUtils.equalsAnyIgnoreCase(Objects.toString(p),
                             GraphProperty.PropertyType.names()),
@@ -52,12 +57,25 @@ public class ColumnSchema extends SchemaItem{
      */
     private GraphProperty.PropertyType acceptType;
 
+    private int indexType = 0;
+
     public ColumnSchema(){}
 
     @Override
     void parse(final Element node){
         //load schema
         loadSchema(node,DEFINES);
+
+        String indexTypeText = getItem(ATTR_COLUMN_INDEX_TYPE);
+        if(StringUtils.contains(indexTypeText,COLUMN_INDEX_TYPE_PRIMARY)){
+            indexType |= INDEX_TYPE_MASK_PRIMARY;
+        }
+        if(StringUtils.contains(indexTypeText,COLUMN_INDEX_TYPE_NORMAL)){
+            indexType |= INDEX_TYPE_MASK_NORMAL;
+        }
+        if(StringUtils.contains(indexTypeText,COLUMN_INDEX_TYPE_TEXT)){
+            indexType |= INDEX_TYPE_MASK_TEXT;
+        }
         //set accept type
         this.acceptType = GraphProperty.PropertyType.ofTypeName(getItem(ATTR_COLUMN_ACCEPT_TYPE));
     }
@@ -74,23 +92,20 @@ public class ColumnSchema extends SchemaItem{
      * get index type
      * @return index type
      */
-    public String getIndexType(){
-        return getItem(ATTR_COLUMN_INDEX_TYPE);
+    public int getIndexType(){
+        return indexType;
     }
 
     public boolean isSupportedNormalIndex(){
-        return StringUtils.equalsIgnoreCase(getIndexType(),
-                COLUMN_INDEX_TYPE_NORMAL);
+        return (indexType & INDEX_TYPE_MASK_NORMAL) != 0;
     }
 
     public boolean isSupportedTextIndex(){
-        return StringUtils.equalsIgnoreCase(getIndexType(),
-                COLUMN_INDEX_TYPE_TEXT);
+        return (indexType & INDEX_TYPE_MASK_TEXT) != 0;
     }
 
     public boolean isSupportedPrimaryIndex(){
-        return StringUtils.equalsIgnoreCase(getIndexType(),
-                COLUMN_INDEX_TYPE_PRIMARY);
+        return (indexType & INDEX_TYPE_MASK_PRIMARY) != 0;
     }
 
     public GraphProperty.PropertyType getAcceptType(){

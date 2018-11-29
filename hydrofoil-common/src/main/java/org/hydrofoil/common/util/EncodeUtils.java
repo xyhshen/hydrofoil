@@ -7,6 +7,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.util.Date;
+import java.util.Set;
 
 /**
  * EncodeUtils
@@ -65,6 +66,18 @@ public final class EncodeUtils {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public static Set<String> splitText(final String s){
+        final String bs = StringUtils.normalizeSpace(s);
+        final String[] strs = bs.split("[,._\\*\\/\\s]+");
+        Set<String> set = DataUtils.newSetMapWithExpectedSize(0);
+        for(String ss:strs){
+            if(StringUtils.isNotBlank(ss)){
+                set.add(ss);
+            }
+        }
+        return set;
     }
 
 }

@@ -111,7 +111,8 @@ public class ArrayMap<K extends Comparable<? super K>,V> implements Map<K,V>, Cl
         if(isEmpty() || key == null){
             return -1;
         }
-        return Arrays.binarySearch(storager,new ArrayMapEntry<>(key,null));
+        int pos = Arrays.binarySearch(storager,new ArrayMapEntry<>(key,null));
+        return pos >= 0 && pos < storager.length?pos:-1;
     }
 
     @SuppressWarnings("unchecked")

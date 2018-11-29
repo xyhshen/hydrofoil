@@ -2,8 +2,6 @@ package org.hydrofoil.common.util;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.Arrays;
-
 /**
  * Algorithms
  * <p>
@@ -45,7 +43,7 @@ public final class Algorithms {
         int fromIndex = similarSearch(a,start);
         int toIndex = a.length - 1;
         if(end != null){
-            toIndex = Arrays.binarySearch(a,end);
+            toIndex = similarSearch(a,end);
             if(toIndex < 0){
                 return null;
             }

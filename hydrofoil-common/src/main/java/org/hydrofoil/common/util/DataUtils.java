@@ -13,6 +13,7 @@ import org.hydrofoil.common.util.collect.ArraySet;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -237,11 +238,11 @@ public final class DataUtils {
     }
 
     @SuppressWarnings("unchecked")
-    public static <E> E[] toArray(Collection<E> c){
+    public static <E> E[] toArray(Collection<E> c,Class<E> clz){
         if(CollectionUtils.isEmpty(c)){
             return null;
         }
-        Object[] o = new Object[c.size()];
-        return c.toArray((E[]) o);
+        E[] o = (E[]) Array.newInstance(clz,c.size());
+        return c.toArray(o);
     }
 }

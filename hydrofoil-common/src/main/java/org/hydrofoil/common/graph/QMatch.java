@@ -1,5 +1,6 @@
 package org.hydrofoil.common.graph;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.hydrofoil.common.util.bean.FieldPair;
 import org.hydrofoil.common.util.bean.FieldTriple;
 
@@ -14,7 +15,7 @@ import java.util.Objects;
  * @author xie_yh
  * @date 2018/7/3 9:41
  */
-public class QMatch {
+public class QMatch{
 
     public enum QType{
         /**
@@ -59,7 +60,7 @@ public class QMatch {
         and
     }
 
-    public static class Q implements Cloneable{
+    public static class Q implements Cloneable,Comparable<Q>{
 
         /**
          * query type
@@ -121,6 +122,11 @@ public class QMatch {
             Q query = new Q(this.type);
             query.pair = pair.clone();
             return query;
+        }
+
+        @Override
+        public int compareTo(Q o) {
+            return ObjectUtils.compare(hashCode(),o.hashCode());
         }
     }
 

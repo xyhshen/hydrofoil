@@ -1,14 +1,12 @@
 package org.hydrofoil.example;
 
-import org.apache.commons.collections4.IteratorUtils;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
-import org.apache.tinkerpop.gremlin.structure.VertexProperty;
 import org.hydrofoil.common.configuration.HydrofoilConfiguration;
 import org.hydrofoil.core.HydrofoilFactory;
 import org.hydrofoil.core.tinkerpop.structure.HydrofoilTinkerpopGraph;
+import org.hydrofoil.tinkerpop.EP;
 
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -28,18 +26,9 @@ public final class TinkerpopExample {
         configuration.put("hydrofoil.schema.mapper.resource","mapper.xml");
         try(HydrofoilTinkerpopGraph graph = HydrofoilFactory.open(configuration)){
             final GraphTraversalSource g = graph.traversal();
-            final List<Vertex> vertices = g.V().hasLabel("team").limit(10).toList();
-            vertices.forEach(v->{
-                final VertexProperty<Object> coaches = v.property("coaches");
-                final Iterator<VertexProperty<Object>> stars = v.properties("star");
-                IteratorUtils.toList(stars).forEach(star->{
-                    System.out.println("star:" + star.value());
-                });
-                System.out.println(coaches.value());
-                System.out.println(coaches.value("chief.coach").toString());
-                System.out.println(coaches.value("assistant.coach").toString());
-                System.out.println(coaches.value("fitness.coach").toString());
-                System.out.println(coaches.value("goalkeeper.coach").toString());
+            final List<Vertex> vertices = g.V().hasLabel("team").has( "name", EP.like("China")).has("star", EP.like("Liu")).toList();
+            vertices.forEach(vertex -> {
+                System.out.println(vertex);
             });
         }
     }

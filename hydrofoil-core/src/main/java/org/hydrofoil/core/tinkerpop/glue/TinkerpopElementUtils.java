@@ -85,6 +85,9 @@ public final class TinkerpopElementUtils {
             Collection<?> values = (Collection<?>) predicate.getValue();
             return QMatch.in(key,values.toArray());
         }
+        if(predicate.getBiPredicate() == ElementPredicate.prefix){
+            return QMatch.prefix(key,predicate.getValue());
+        }
         if(predicate.getBiPredicate() == ElementPredicate.like){
             return QMatch.like(key,predicate.getValue());
         }

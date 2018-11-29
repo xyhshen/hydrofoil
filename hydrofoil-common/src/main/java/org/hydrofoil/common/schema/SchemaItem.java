@@ -5,10 +5,7 @@ import org.dom4j.Element;
 import org.hydrofoil.common.util.XmlUtils;
 
 import java.io.InputStream;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiConsumer;
 
 /**
@@ -174,7 +171,7 @@ public class SchemaItem {
      */
     public Map<String,String> getItemMap(final String name){
         Object o = schemaMap.get(name);
-        return o != null?(Map<String,String>)o:null;
+        return o != null?(Map<String,String>)o:Collections.EMPTY_MAP;
     }
 
     /**
@@ -184,7 +181,7 @@ public class SchemaItem {
      */
     public <C extends SchemaItem> Map<String,C> getSchemaMap(final String name){
         Object o = schemaMap.get(name);
-        return o != null?(Map<String,C>)o:null;
+        return o != null?(Map<String,C>)o: Collections.EMPTY_MAP;
     }
 
     /**

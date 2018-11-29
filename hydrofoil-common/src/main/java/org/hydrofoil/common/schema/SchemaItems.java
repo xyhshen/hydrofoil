@@ -218,6 +218,9 @@ class NodeDefine implements BiConsumer<Element,SchemaItem>{
         if(StringUtils.isNotBlank(parent)){
             node = node.element(parent);
         }
+        if(node == null){
+            return;
+        }
         List<Element> elements = XmlUtils.listElement(node, getName());
         Map<String,SchemaItem> schemaMap = DataUtils.newHashMapWithExpectedSize(elements.size());
         for(Element element:elements){

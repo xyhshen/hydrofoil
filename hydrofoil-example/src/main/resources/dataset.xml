@@ -50,11 +50,12 @@
     </package>
     <table name="team" package="team">
         <column name="team_id" index-type="primary" />
-        <column name="team_name" index-type="normal" />
+        <column name="team_name" index-type="normal|text" />
     </table>
     <table name="team_coach" package="team_coach">
         <column name="uuid" index-type="primary" />
         <column name="team_id" index-type="normal" />
+        <column name="chief_coach" index-type="normal|text" />
     </table>
     <table name="team_owner" package="team_owner">
         <column name="uuid" index-type="primary" />
@@ -63,13 +64,66 @@
     <table name="team_place" package="team_place">
         <column name="uuid" index-type="primary" />
         <column name="team_id" index-type="normal" />
+        <column name="city" index-type="normal|text" />
     </table>
     <table name="team_star" package="team_star">
         <column name="uuid" index-type="primary" />
         <column name="team_id" index-type="normal" />
+        <column name="name" index-type="normal|text" />
     </table>
     <table name="team_honour" package="team_honour">
         <column name="uuid" index-type="primary" />
         <column name="team_id" index-type="normal" />
     </table>
+
+    <package name="sportsman" datasource="sports">
+        <options>
+            <path>sportsman.csv</path>
+            <file-type>csv</file-type>
+            <encode>utf-8</encode>
+            <delimiter>,</delimiter>
+        </options>
+    </package>
+    <package name="sportsman_employ" datasource="sports">
+        <options>
+            <path>sportsman_employ.csv</path>
+            <file-type>csv</file-type>
+            <encode>utf-8</encode>
+            <delimiter>,</delimiter>
+        </options>
+    </package>
+    <package name="sportsman_feature" datasource="sports">
+        <options>
+            <path>sportsman_feature.csv</path>
+            <file-type>csv</file-type>
+            <encode>utf-8</encode>
+            <delimiter>,</delimiter>
+        </options>
+    </package>
+    <package name="sportsman_position" datasource="sports">
+        <options>
+            <path>sportsman_position.csv</path>
+            <file-type>csv</file-type>
+            <encode>utf-8</encode>
+            <delimiter>,</delimiter>
+        </options>
+    </package>
+    <table name="sportsman" package="sportsman">
+        <column name="sportsman_id" index-type="primary" />
+        <column name="name" index-type="normal" />
+    </table>
+    <table name="sportsman_employ" package="sportsman_employ">
+        <column name="uuid" index-type="primary" />
+        <column name="sportsman_id" index-type="normal" />
+        <column name="team_id" index-type="normal" />
+    </table>
+    <table name="sportsman_feature" package="sportsman_feature">
+        <column name="uuid" index-type="primary" />
+        <column name="sportsman_id" index-type="normal" />
+    </table>
+    <table name="sportsman_position" package="sportsman_position">
+        <column name="uuid" index-type="primary" />
+        <column name="sportsman_id" index-type="normal" />
+    </table>
+
 </dataSets>

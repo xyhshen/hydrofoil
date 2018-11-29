@@ -2,9 +2,9 @@ package org.hydrofoil.core.engine.management;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
-import org.hydrofoil.common.provider.IDataProvider;
-import org.hydrofoil.common.provider.IDataConnector;
 import org.hydrofoil.common.provider.IDataConnectContext;
+import org.hydrofoil.common.provider.IDataConnector;
+import org.hydrofoil.common.provider.IDataProvider;
 import org.hydrofoil.common.schema.ColumnSchema;
 import org.hydrofoil.common.schema.DataSourceSchema;
 import org.hydrofoil.common.schema.PackageSchema;

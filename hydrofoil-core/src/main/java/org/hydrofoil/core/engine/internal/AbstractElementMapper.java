@@ -88,6 +88,7 @@ public abstract class AbstractElementMapper<E extends EngineElement> implements 
 
     private ElementMapping createGetMappings(BaseElementSchema elementSchema, Collection<GraphElementId> ids){
         RowQueryGet rowQueryGet = new RowQueryGet();
+        rowQueryGet.setName(elementSchema.getTable());
         ids.forEach(id->{
             Map<String,Object> keyValue = DataUtils.newMapWithMaxSize(0);
             elementSchema.getProperties().forEach((k,v)->{
@@ -126,7 +127,7 @@ public abstract class AbstractElementMapper<E extends EngineElement> implements 
 
         //set property
         setRowQueryProperties(rowQueryRequest,associateRowQueryMap,elementSchema);
-        rowQueryRequest.getAssociateQuery().addAll(associateRowQueryMap.values());
+        //rowQueryRequest.getAssociateQuery().addAll(associateRowQueryMap.values());
         //add main query condition
         rowQueryRequest.getMatch().addAll(mainCondition);
 

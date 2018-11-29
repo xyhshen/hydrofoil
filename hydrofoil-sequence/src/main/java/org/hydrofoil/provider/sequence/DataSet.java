@@ -3,12 +3,15 @@ package org.hydrofoil.provider.sequence;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.collections4.SetValuedMap;
+import org.apache.commons.collections4.multimap.HashSetValuedHashMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hydrofoil.common.graph.QMatch;
 import org.hydrofoil.common.provider.datasource.RowKey;
 import org.hydrofoil.common.schema.TableSchema;
 import org.hydrofoil.common.util.DataUtils;
+import org.hydrofoil.common.util.EncodeUtils;
 import org.hydrofoil.common.util.ParameterUtils;
 import org.hydrofoil.common.util.bean.FieldTriple;
 import org.hydrofoil.common.util.collect.SearchArrayList;
@@ -36,11 +39,14 @@ public final class DataSet {
      */
     private final Map<String,SearchArrayList<String,Integer>> indexMap;
 
+    private final Map<String,SetValuedMap<String,Integer>> textIndexMap;
+
     private final Map<String,Integer> rowKeyMap;
 
     DataSet(final FileTable fileTable){
         this.fileTable = fileTable;
         this.indexMap = DataUtils.newMapWithMaxSize(5);
+        this.textIndexMap = DataUtils.newMapWithMaxSize(5);
         this.rowKeyMap = DataUtils.newHashMapWithExpectedSize(100);
     }
 
@@ -52,16 +58,32 @@ public final class DataSet {
                 primaryKeys.add(columnName);
                 return;
             }
-            if(!columnSchema.isSupportedNormalIndex()){
+            if(!columnSchema.isSupportedNormalIndex() &&
+                    !columnSchema.isSupportedTextIndex()){
                 return;
             }
-            SearchArrayList<String,Integer> index = new SearchArrayList<>();
-            int columnSeq = fileTable.getHeader().get(columnName);
-            for(int i = 0;i < fileTable.getRows().size();i++){
-                index.add(fileTable.getRows().get(i).values()[columnSeq],i);
+            if(columnSchema.isSupportedNormalIndex()){
+                SearchArrayList<String,Integer> index = new SearchArrayList<>();
+                int columnSeq = fileTable.getHeader().get(columnName);
+                for(int i = 0;i < fileTable.getRows().size();i++){
+                    index.add(fileTable.getRows().get(i).values()[columnSeq],i);
+                }
+                index.sorting();
+                indexMap.put(columnName,index);
             }
-            index.sorting();
-            indexMap.put(columnName,index);
+            if(columnSchema.isSupportedTextIndex()){
+                int columnSeq = fileTable.getHeader().get(columnName);
+                SetValuedMap<String,Integer> index = new HashSetValuedHashMap<>(100);
+                for(int i = 0;i < fileTable.getRows().size();i++){
+                    String value = fileTable.getRows().get(i).values()[columnSeq];
+                    final Set<String> wordSet = EncodeUtils.splitText(value);
+                    final int indexId = i;
+                    wordSet.forEach(word->{
+                        index.put(word,indexId);
+                    });
+                }
+                textIndexMap.put(columnName,index);
+            }
         });
 
         ParameterUtils.notEmpty(primaryKeys);
@@ -89,16 +111,22 @@ public final class DataSet {
         for(Pair<QMatch.Q,String> match:matches){
             QMatch.Q q = match.getLeft();
             SearchArrayList<String, Integer> index = indexMap.get(q.pair().name());
-            ParameterUtils.mustTrue(index != null);
+            final SetValuedMap<String, Integer> textIndex = textIndexMap.get(q.pair().name());
             List<Integer> rowNumbers = new ArrayList<>();
             String firstValue = StringUtils.isNotBlank(match.getRight())?match.getRight():Objects.toString(q.pair().first(), null);
-            if(q.type() == QMatch.QType.eq){
-                rowNumbers.addAll(index.find(firstValue));
-            }else if(q.type() == QMatch.QType.prefix){
-                rowNumbers.addAll(index.getRange(firstValue));
-            }else if(q.type() == QMatch.QType.between){
-                String end = Objects.toString(((FieldTriple)q.pair()).last(), null);
-                rowNumbers.addAll(index.getRange(firstValue,end));
+            if(q.type() != QMatch.QType.like){
+                ParameterUtils.mustTrue(index != null);
+                if(q.type() == QMatch.QType.eq){
+                    rowNumbers.addAll(index.find(firstValue));
+                }else if(q.type() == QMatch.QType.prefix){
+                    rowNumbers.addAll(CollectionUtils.emptyIfNull(index.getRange(firstValue,firstValue + Character.toString((char) 255))));
+                }else if(q.type() == QMatch.QType.between){
+                    String end = Objects.toString(((FieldTriple)q.pair()).last(), null);
+                    rowNumbers.addAll(CollectionUtils.emptyIfNull(index.getRange(firstValue,end)));
+                }
+            }else{
+                ParameterUtils.mustTrue(textIndex != null);
+                rowNumbers.addAll(CollectionUtils.emptyIfNull(textIndex.get(firstValue)));
             }
             if(rowNumbers.isEmpty()){
                 break;

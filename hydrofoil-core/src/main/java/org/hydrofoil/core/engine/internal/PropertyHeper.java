@@ -39,7 +39,7 @@ import java.util.Set;
                     }
                     QMatch.Q clone = propertyQuery.clone();
                     clone.pair().name(propertySchema.getField());
-                    if (StringUtils.isBlank(propertySchema.getLinkTable())) {
+                    if (StringUtils.isNotBlank(propertySchema.getLinkTable())) {
                         LinkSchema linkSchema = elementSchema.getLinks().get(propertySchema.getLinkTable());
                         ParameterUtils.notNull(linkSchema);
                         associateQueryCondition.put(linkSchema.getTable(), new BaseRowQuery.AssociateMatch(clone, linkSchema.getTable(), null));
@@ -81,6 +81,7 @@ import java.util.Set;
                 });
             }
         });
+        rowQueryRequest.getAssociateQuery().addAll(associateRowQueryMap.values());
     }
 }
 
