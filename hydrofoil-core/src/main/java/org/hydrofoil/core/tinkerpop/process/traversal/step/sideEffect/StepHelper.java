@@ -1,12 +1,14 @@
 package org.hydrofoil.core.tinkerpop.process.traversal.step.sideEffect;
 
 import org.apache.commons.collections.IteratorUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.tinkerpop.gremlin.process.traversal.Step;
 import org.apache.tinkerpop.gremlin.process.traversal.Traversal;
 import org.apache.tinkerpop.gremlin.process.traversal.step.HasContainerHolder;
 import org.apache.tinkerpop.gremlin.process.traversal.step.filter.HasStep;
 import org.apache.tinkerpop.gremlin.process.traversal.step.filter.RangeGlobalStep;
+import org.apache.tinkerpop.gremlin.process.traversal.step.map.CountGlobalStep;
 import org.apache.tinkerpop.gremlin.process.traversal.step.map.GraphStep;
 import org.apache.tinkerpop.gremlin.process.traversal.step.map.NoOpBarrierStep;
 import org.apache.tinkerpop.gremlin.process.traversal.step.sideEffect.IdentityStep;
@@ -72,6 +74,26 @@ public final class StepHelper {
     }
 
     @SuppressWarnings("unchecked")
+    static void processCountStep(
+            Traversal.Admin<?, ?> traversal,
+            HydrofoilGraphStep<?,?> graphStep){
+        Step<?, ?> step = getNextExecutableStep(graphStep);
+        //find count step,only global
+        if(!(step instanceof CountGlobalStep) ||
+                CollectionUtils.isNotEmpty(graphStep.getLabels())){
+            //must filter flow of has label
+            return;
+        }
+        //set placeholder flag
+        graphStep.setPlaceholder(true);
+        //get global count step
+        CountGlobalStep countGlobalStep = (CountGlobalStep) step;
+        //remove current step
+        Step countStep = new HydrofoilCountStep<>(traversal,graphStep.getGraphQueryRunner());
+        TraversalHelper.replaceStep(countGlobalStep,countStep,traversal);
+    }
+
+    @SuppressWarnings("unchecked")
     public static void processGraphStep(Traversal.Admin<?, ?> traversal,final GraphStep originalStep){
         //not by id way query
         HydrofoilGraphStep<?,?> newGraphStep = new HydrofoilGraphStep<>(originalStep);
@@ -94,7 +116,10 @@ public final class StepHelper {
             IGraphQueryRunner graphQueryRunner = HasContainerHelper.
                     buildQueryRunner(traversal, newGraphStep);
             newGraphStep.setGraphQueryRunner(graphQueryRunner);
+            //set paging
             assignPagingStep(traversal,newGraphStep);
+            //set count
+            processCountStep(traversal,newGraphStep);
         }
     }
 }

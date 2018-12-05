@@ -1,6 +1,7 @@
 package org.hydrofoil.common.util;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 
@@ -78,6 +79,24 @@ public final class EncodeUtils {
             }
         }
         return set;
+    }
+
+    public static String wrapString(final String raw,final String wrapChars,final char ...checkChars){
+        if(ArrayUtils.isNotEmpty(checkChars)){
+            if(!StringUtils.containsAny(raw,checkChars)){
+                return raw;
+            }
+        }
+        return StringUtils.wrap(raw,wrapChars);
+    }
+
+    public static String unWrapString(final String raw,final String wrapChars){
+        if(!StringUtils.startsWith(raw,wrapChars) ||
+                !StringUtils.endsWith(raw,wrapChars)){
+            return raw;
+        }
+
+        return StringUtils.unwrap(raw,wrapChars);
     }
 
 }

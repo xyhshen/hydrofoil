@@ -204,12 +204,21 @@ public final class DataUtils {
         return new ArrayList<V>();
     }
 
+    public static <E> Iterator<E> newCountIterator(final int count,final E empty){
+        return new CountIterator<>(count,empty);
+    }
+
     public static String[] toStringArray(final Collection<String> v){
-        if(CollectionUtils.isEmpty(v)){
+        return toArray(v,String.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <E> E[] toArray(Collection<E> c,Class<E> clz){
+        if(CollectionUtils.isEmpty(c)){
             return null;
         }
-        String[] s = new String[v.size()];
-        return v.toArray(s);
+        E[] o = (E[]) Array.newInstance(clz,c.size());
+        return c.toArray(o);
     }
 
     public static <V extends Comparable<? super V>> Set<V> newArraySet(V ...a){
@@ -237,12 +246,30 @@ public final class DataUtils {
         return c.stream().map(v->(B)v).collect(Collectors.toList());
     }
 
-    @SuppressWarnings("unchecked")
-    public static <E> E[] toArray(Collection<E> c,Class<E> clz){
-        if(CollectionUtils.isEmpty(c)){
-            return null;
-        }
-        E[] o = (E[]) Array.newInstance(clz,c.size());
-        return c.toArray(o);
+}
+
+class CountIterator<E> implements Iterator<E>{
+
+    private final long total;
+
+    private long current;
+
+    private final E empty;
+
+    CountIterator(final long count,final E empty){
+        this.total = count;
+        this.empty = empty;
+        this.current = 0;
+    }
+
+    @Override
+    public boolean hasNext() {
+        return current < total;
+    }
+
+    @Override
+    public E next() {
+        current++;
+        return empty;
     }
 }

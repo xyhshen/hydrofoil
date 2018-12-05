@@ -12,6 +12,7 @@ import org.hydrofoil.core.engine.internal.ElementMapping;
 import org.hydrofoil.core.engine.management.Management;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * EdgeGraphQueryRunner
@@ -70,8 +71,13 @@ public class EdgeGraphQueryRunner extends AbstractGraphQueryRunner<EngineEdge,Ed
                 /*
                     query vertex by label or other complex style
                 */
-                ParameterUtils.mustTrue(!labels.isEmpty(),"edge label");
-                inEdgeSchema = (EdgeSchema[]) labels.stream().map(management.
+                Collection<String> finallyLabels;
+                if(CollectionUtils.isEmpty(labels)){
+                    finallyLabels = management.getSchemaManager().getVertexSchemaMap().keySet();
+                }else{
+                    finallyLabels = labels;
+                }
+                inEdgeSchema = (EdgeSchema[]) finallyLabels.stream().map(management.
                         getSchemaManager()::getEdgeSchema).toArray();
             }
 
@@ -85,6 +91,7 @@ public class EdgeGraphQueryRunner extends AbstractGraphQueryRunner<EngineEdge,Ed
                     elementRequests.add(edgeMapper.toMapping(schema.getLabel(),propertyQuerySet,vertex,EdgeDirection.Out,null,null));
                 }
             }
+            elementRequests = elementRequests.stream().filter(Objects::nonNull).collect(Collectors.toList());
         }
         return elementRequests;
     }

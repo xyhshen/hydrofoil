@@ -96,15 +96,15 @@ public class ColumnSchema extends SchemaItem{
         return indexType;
     }
 
-    public boolean isSupportedNormalIndex(){
+    public boolean canNormalQuery(){
         return (indexType & INDEX_TYPE_MASK_NORMAL) != 0;
     }
 
-    public boolean isSupportedTextIndex(){
+    public boolean canFullTextQuery(){
         return (indexType & INDEX_TYPE_MASK_TEXT) != 0;
     }
 
-    public boolean isSupportedPrimaryIndex(){
+    public boolean canPrimaryQuery(){
         return (indexType & INDEX_TYPE_MASK_PRIMARY) != 0;
     }
 

@@ -12,6 +12,7 @@ import org.hydrofoil.common.util.ParameterUtils;
 import org.hydrofoil.core.engine.IGraphQueryRunner;
 import org.hydrofoil.core.engine.query.EdgeGraphQueryRunner;
 import org.hydrofoil.core.engine.query.VertexGraphQueryRunner;
+import org.hydrofoil.core.tinkerpop.glue.TinkerpopElementUtils;
 import org.hydrofoil.core.tinkerpop.glue.TinkerpopGraphTransit;
 import org.hydrofoil.core.tinkerpop.structure.HydrofoilTinkerpopGraph;
 
@@ -38,13 +39,23 @@ public final class HydrofoilGraphStep<S, E extends Element> extends GraphStep<S,
 
     private IGraphQueryRunner graphQueryRunner = null;
 
+    /**
+     * is place holder
+     */
+    private boolean placeholder;
+
     HydrofoilGraphStep(final GraphStep<S, E> originalStep) {
         super(originalStep.getTraversal(), originalStep.getReturnClass(), originalStep.isStartStep(), originalStep.getIds());
         this.setIteratorSupplier(this::handler);
+        this.placeholder = false;
     }
 
+    @SuppressWarnings("unchecked")
     private Iterator<E> handler(){
         Iterator<E> iterator;
+        if(placeholder){
+            return DataUtils.newCountIterator(1, (E) TinkerpopElementUtils.emptyElement());
+        }
         if(ArrayUtils.isNotEmpty(this.getIds())){
             iterator = listElements();
         }else{
@@ -107,5 +118,21 @@ public final class HydrofoilGraphStep<S, E extends Element> extends GraphStep<S,
 
     IGraphQueryRunner getGraphQueryRunner(){
         return graphQueryRunner;
+    }
+
+    /**
+     * @return $field.TypeName
+     * @see HydrofoilGraphStep#placeholder
+     **/
+    public boolean isPlaceholder() {
+        return placeholder;
+    }
+
+    /**
+     * @param placeholder $field.typeName
+     * @see HydrofoilGraphStep#placeholder
+     **/
+    public void setPlaceholder(boolean placeholder) {
+        this.placeholder = placeholder;
     }
 }

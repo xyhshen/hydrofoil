@@ -125,5 +125,57 @@
         <column name="uuid" index-type="primary" />
         <column name="sportsman_id" index-type="normal" />
     </table>
+    <package name="sport_event" datasource="sports">
+        <options>
+            <path>sport_event.csv</path>
+            <file-type>csv</file-type>
+            <encode>utf-8</encode>
+            <delimiter>,</delimiter>
+        </options>
+    </package>
+    <table name="sport_event" package="sport_event">
+        <column name="sport_event_id" index-type="primary" />
+    </table>
+    <package name="match" datasource="sports">
+        <options>
+            <path>match.csv</path>
+            <file-type>csv</file-type>
+            <encode>utf-8</encode>
+            <delimiter>,</delimiter>
+        </options>
+    </package>
+    <package name="match_result" datasource="sports">
+        <options>
+            <path>match_result.csv</path>
+            <file-type>csv</file-type>
+            <encode>utf-8</encode>
+            <delimiter>,</delimiter>
+        </options>
+    </package>
+    <!--<package name="in_match_team" datasource="sports">
+        <options>
+            <path>in_match_team.csv</path>
+            <file-type>csv</file-type>
+            <encode>utf-8</encode>
+            <delimiter>,</delimiter>
+        </options>
+    </package>-->
+    <table name="match" package="match">
+        <column name="sport_event_id" index-type="primary|normal" />
+        <column name="match_id" index-type="primary" />
+        <column name="home_team_id" index-type="normal" />
+        <column name="client_team_id" index-type="normal" />
+        <column name="match_number" index-type="normal" />
+    </table>
+    <table name="match_result" package="match_result">
+        <column name="uuid" index-type="primary" />
+        <column name="sport_event_id" index-type="normal" />
+        <column name="match_id" index-type="normal" />
+    </table>
+    <!--<table name="in_match_team" package="in_match_team">
+        <column name="sportsman_id" index-type="primary|normal" />
+        <column name="sport_event_id" index-type="primary|normal" />
+        <column name="match_id" index-type="primary|normal" />
+    </table>-->
 
 </dataSets>

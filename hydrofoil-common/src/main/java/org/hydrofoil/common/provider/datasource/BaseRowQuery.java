@@ -3,6 +3,7 @@ package org.hydrofoil.common.provider.datasource;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hydrofoil.common.graph.QMatch;
+import org.hydrofoil.common.provider.datasource.response.RowCountResponse;
 import org.hydrofoil.common.util.DataUtils;
 
 import java.util.*;
@@ -247,9 +248,27 @@ public abstract class BaseRowQuery{
 
     /**
      * create a row response
-     * @param o result,RowStore collect or count Long
+     * @param o result,RowStore collect
      * @return response
      */
-    public abstract RowQueryResponse createResponse(Object o);
+    public abstract RowQueryResponse createResponse(final Object o);
+
+    /**
+     * create count request
+     * @param count total
+     * @return count response
+     */
+    public RowCountResponse createCountResponse(final Long count){
+        return new RowCountResponse(getId(),count);
+    }
+
+    /**
+     * create count request by group
+     * @param countMap group count
+     * @return result
+     */
+    public RowCountResponse createCountResponse(final Map<String,Long> countMap){
+        return new RowCountResponse(getId(),countMap);
+    }
 
 }

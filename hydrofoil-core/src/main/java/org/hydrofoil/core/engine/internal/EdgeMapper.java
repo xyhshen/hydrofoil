@@ -44,6 +44,9 @@ public class EdgeMapper extends AbstractElementMapper {
     public ElementMapping toMapping(String label,Set<QMatch.Q> propertyQuerySet, EngineVertex vertex, EdgeDirection direction, Long start, Long limit) {
         final EdgeSchema edgeSchema = schemaManager.getEdgeSchema(label);
         final PropertyQueryCondition propertyQueryCondtion = createPropertyQueryCondtion(propertyQuerySet, edgeSchema);
+        if(propertyQueryCondtion == null){
+            return null;
+        }
         if(vertex != null){
             Map<String,String> fields;
             if(direction == EdgeDirection.In){

@@ -9,10 +9,7 @@ import org.hydrofoil.core.engine.internal.AbstractGraphQueryRunner;
 import org.hydrofoil.core.engine.internal.ElementMapping;
 import org.hydrofoil.core.engine.management.Management;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -44,9 +41,15 @@ public final class VertexGraphQueryRunner extends AbstractGraphQueryRunner<Engin
             /*
             query vertex by label or other complex style
              */
-            ParameterUtils.mustTrue(!labels.isEmpty(),"vertex label");
-            elementRequests.addAll(labels.stream().map((label)-> vertexMapper.
-                    toMapping(label,propertyQuerySet,offset,length)).
+            Collection<String> finallyLabels;
+            if(CollectionUtils.isEmpty(labels)){
+                finallyLabels = management.getSchemaManager().getVertexSchemaMap().keySet();
+            }else{
+                finallyLabels = labels;
+            }
+
+            elementRequests.addAll(finallyLabels.stream().map((label)-> vertexMapper.
+                    toMapping(label,propertyQuerySet,offset,length)).filter(Objects::nonNull).
                     collect(Collectors.toList()));
         }
         return elementRequests;

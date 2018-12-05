@@ -26,8 +26,16 @@ import java.util.Set;
  */
  interface PropertyHeper extends MapperHelper{
 
-    default PropertyQueryCondition createPropertyQueryCondtion(Set<QMatch.Q> propertyQuerySet, BaseElementSchema elementSchema){
+    default boolean invalidProperties(final Set<QMatch.Q> propertyQuerySet,final BaseElementSchema elementSchema){
+        final Set<String> labels = elementSchema.getProperties().keySet();
+        return propertyQuerySet.stream().filter(labels::contains).count() == 0;
+    }
+
+    default PropertyQueryCondition createPropertyQueryCondtion(final Set<QMatch.Q> propertyQuerySet, final BaseElementSchema elementSchema){
         PropertyQueryCondition queryCondition = new PropertyQueryCondition();
+        if(invalidProperties(propertyQuerySet,elementSchema)){
+            return null;
+        }
         Set<QMatch.Q> mainCondition = queryCondition.getMainCondition();
         MultiValuedMap<String, BaseRowQuery.AssociateMatch> associateQueryCondition = queryCondition.getAssociateQueryCondition();
         SetUtils.emptyIfNull(propertyQuerySet).stream().
@@ -50,7 +58,7 @@ import java.util.Set;
         return queryCondition;
     }
 
-    default void setRowQueryProperties(BaseRowQuery rowQueryRequest, Map<String,BaseRowQuery.AssociateRowQuery> associateRowQueryMap,BaseElementSchema elementSchema){
+    default void setRowQueryProperties(final BaseRowQuery rowQueryRequest, final Map<String,BaseRowQuery.AssociateRowQuery> associateRowQueryMap,final BaseElementSchema elementSchema){
         elementSchema.getProperties().forEach((propertyLabel,propertySchema)->{
             if(isPropertyInMainTable(propertySchema)) {
                 rowQueryRequest.getColumnInformation().column(elementSchema.getTable(),propertySchema.getField());

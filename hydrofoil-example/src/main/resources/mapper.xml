@@ -66,6 +66,38 @@
                 <link table="sportsman_position" join-field="sportsman_id=sportsman_id" one-to-many="true" />
             </links>
         </vertex>
+        <vertex label="event" table="sport_event">
+            <properties>
+                <property primary="true" label="event.id" field="sport_event_id" />
+                <property label="name" field="sport_event_name" />
+                <property label="type" field="type" />
+                <property label="season" field="Season" />
+            </properties>
+        </vertex>
+        <vertex label="match" table="match">
+            <properties>
+                <property primary="true" label="match.id" field="match_id" />
+                <property primary="true" label="event.id" field="sport_event_id" />
+                <property label="event.name" field="sport_event_name" />
+                <property label="number" field="match_number" />
+                <property label="time" field="begin_time" />
+                <property label="match.place" field="match_place" />
+                <property label="viewer.count" field="viewer_count" />
+                <property label="ticket.income" field="ticket_income" />
+                <property label="home.team.id" field="home_team_id" />
+                <property label="home.team.name" field="home_team_name" />
+                <property label="client.team.id" field="client_team_id" />
+                <property label="client.team.name" field="client_team_name" />
+                <property label="result" link-table="match_result">
+                    <pair name="home.score" field="home_score" />
+                    <pair name="client.score" field="client_score" />
+                    <pair name="result" field="result" />
+                </property>
+            </properties>
+            <links>
+                <link table="match_result" join-field="match_id=match_id;sport_event_id=sport_event_id" />
+            </links>
+        </vertex>
     </vertices>
     <edges>
         <edge label="employ" table="sportsman_employ">
@@ -77,6 +109,24 @@
                 <property label="sportsman.id" field="sportsman_id" />
                 <property label="start" field="start_date" />
                 <property label="end" field="end_date" />
+            </properties>
+        </edge>
+        <edge label="home.matching" table="match">
+            <source label="team" field="home.team.id=team_id" />
+            <target label="match" field="match.id=match_id;event.id=sport_event_id" />
+            <properties>
+                <property primary="true" label="match.id" field="match_id" />
+                <property primary="true" label="event.id" field="sport_event_id" />
+                <property label="home.team.id" field="home_team_id" />
+            </properties>
+        </edge>
+        <edge label="client.matching" table="match">
+            <source label="team" field="client.team.id=team_id" />
+            <target label="match" field="match.id=match_id;event.id=sport_event_id" />
+            <properties>
+                <property primary="true" label="match.id" field="match_id" />
+                <property primary="true" label="event.id" field="sport_event_id" />
+                <property label="client.team.id" field="client_team_id" />
             </properties>
         </edge>
     </edges>

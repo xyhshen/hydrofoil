@@ -47,7 +47,8 @@ public class ArraySet<E extends Comparable<? super E>> implements Set<E>, Clonea
         if(isEmpty() || key == null){
             return -1;
         }
-        return Arrays.binarySearch(keyStorager,key);
+        int pos = Arrays.binarySearch(keyStorager,key);
+        return pos >= 0 && pos < keyStorager.length?pos:-1;
     }
 
     @SuppressWarnings("unchecked")

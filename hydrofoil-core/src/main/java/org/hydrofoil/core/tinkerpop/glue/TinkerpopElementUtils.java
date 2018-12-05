@@ -5,13 +5,13 @@ import org.apache.tinkerpop.gremlin.process.traversal.Compare;
 import org.apache.tinkerpop.gremlin.process.traversal.Contains;
 import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.util.AndP;
-import org.apache.tinkerpop.gremlin.structure.Direction;
-import org.apache.tinkerpop.gremlin.structure.T;
+import org.apache.tinkerpop.gremlin.structure.*;
 import org.hydrofoil.common.graph.EdgeDirection;
 import org.hydrofoil.common.graph.QMatch;
 import org.hydrofoil.common.graph.expand.ElementPredicate;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.function.BiPredicate;
 
 /**
@@ -23,6 +23,8 @@ import java.util.function.BiPredicate;
  * @date 2018/7/31 14:15
  */
 public final class TinkerpopElementUtils {
+
+    private static EmptyElement EMPTY_ELEMENT = new EmptyElement();
 
     public static EdgeDirection toStdDirection(Direction direction){
         if(direction == Direction.IN){
@@ -98,4 +100,40 @@ public final class TinkerpopElementUtils {
         return null;
     }
 
+    public static Element emptyElement(){
+        return EMPTY_ELEMENT;
+    }
+}
+
+final class EmptyElement implements Element{
+
+    @Override
+    public Object id() {
+        return null;
+    }
+
+    @Override
+    public String label() {
+        return null;
+    }
+
+    @Override
+    public Graph graph() {
+        return null;
+    }
+
+    @Override
+    public <V> Property<V> property(String key, V value) {
+        return null;
+    }
+
+    @Override
+    public void remove() {
+
+    }
+
+    @Override
+    public <V> Iterator<? extends Property<V>> properties(String... propertyKeys) {
+        return null;
+    }
 }

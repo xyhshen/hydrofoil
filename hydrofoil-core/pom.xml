@@ -11,6 +11,9 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>hydrofoil-core</artifactId>
     <packaging>jar</packaging>
+    <properties>
+        <json.version>20180813</json.version>
+    </properties>
     <dependencies>
         <dependency>
             <groupId>org.hydrofoil</groupId>
@@ -26,7 +29,7 @@
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20180813</version>
+            <version>${json.version}</version>
         </dependency>
     </dependencies>
     <build>

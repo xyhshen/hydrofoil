@@ -1,12 +1,16 @@
 package org.hydrofoil.common.provider;
 
-import org.hydrofoil.common.provider.datasource.*;
+import org.hydrofoil.common.provider.datasource.BaseRowQuery;
+import org.hydrofoil.common.provider.datasource.RowQueryGet;
+import org.hydrofoil.common.provider.datasource.RowQueryResponse;
+import org.hydrofoil.common.provider.datasource.RowQueryScan;
 import org.hydrofoil.common.util.DataUtils;
 
 import java.io.Closeable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.Map;
 
 /**
  * IDataSource
@@ -27,6 +31,8 @@ public interface IDataConnector extends Closeable{
         COUNT
     }
 
+    String PARAMETER_GROUP_FIELD_NAME = "group";
+
     /**
      * scan collect set
      * @param query query cond
@@ -42,7 +48,7 @@ public interface IDataConnector extends Closeable{
      * @return result set
      */
     default Iterator<RowQueryResponse> scanRow(final Collection<RowQueryScan> querySet){
-        return performance(REQUEST_TYPE.SCAN,querySet);
+        return performance(REQUEST_TYPE.SCAN,querySet,Collections.emptyMap());
     }
 
     /**
@@ -60,7 +66,7 @@ public interface IDataConnector extends Closeable{
      * @return resule set
      */
     default Iterator<RowQueryResponse> getRows(final Collection<RowQueryGet> querySet){
-        return performance(REQUEST_TYPE.GET,querySet);
+        return performance(REQUEST_TYPE.GET,querySet,Collections.emptyMap());
     }
 
     /**
@@ -68,20 +74,21 @@ public interface IDataConnector extends Closeable{
      * @param query query cond
      * @return total
      */
-    default RowQueryResponse countRow(final RowQueryCount query){
-        return DataUtils.iteratorFirst(countRow(Collections.singleton(query)));
+    default RowQueryResponse countRow(final BaseRowQuery query,String groupFieldName){
+        return DataUtils.iteratorFirst(countRow(Collections.singleton(query),groupFieldName));
     }
 
-    default Iterator<RowQueryResponse> countRow(final Collection<RowQueryCount> querySet){
-        return performance(REQUEST_TYPE.COUNT,querySet);
+    default Iterator<RowQueryResponse> countRow(final Collection<BaseRowQuery> querySet,String groupFieldName){
+        return performance(REQUEST_TYPE.COUNT,querySet,Collections.singletonMap(PARAMETER_GROUP_FIELD_NAME,groupFieldName));
     }
 
     /**
      * execute query request
      * @param requestType type
      * @param querySet query set
+     * @param parameters parameter's
      * @return response result
      */
-    Iterator<RowQueryResponse> performance(final REQUEST_TYPE requestType,final Collection<? extends BaseRowQuery> querySet);
+    Iterator<RowQueryResponse> performance(final REQUEST_TYPE requestType,final Collection<? extends BaseRowQuery> querySet,final Map<String,Object> parameters);
 
 }

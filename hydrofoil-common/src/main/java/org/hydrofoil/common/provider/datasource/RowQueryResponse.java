@@ -1,8 +1,10 @@
 package org.hydrofoil.common.provider.datasource;
 
+import org.apache.commons.collections4.KeyValue;
 import org.hydrofoil.common.provider.datasource.response.FailedRowQueryResponse;
 
 import java.sql.SQLException;
+import java.util.Collection;
 
 /**
  * RowQueryResponse
@@ -43,6 +45,12 @@ public interface RowQueryResponse extends AutoCloseable {
      * @return total
      */
     Long count();
+
+    /**
+     * return total by group
+     * @return group field and count
+     */
+    Collection<KeyValue<?,Long>> counts();
 
     static RowQueryResponse createFailedResponse(Long id,SQLException exception){
         return new FailedRowQueryResponse(id,exception);

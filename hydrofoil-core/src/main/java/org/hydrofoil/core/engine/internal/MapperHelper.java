@@ -63,13 +63,13 @@ interface MapperHelper {
             if(propertySchema.isPrimary()){
                 return true;
             }
-            if(columnSchema == null || !columnSchema.isSupportedNormalIndex()){
+            if(columnSchema == null || !columnSchema.canNormalQuery()){
                 return false;
             }
         }else{
             if(columnSchema == null ||
-                    !(columnSchema.isSupportedTextIndex() ||
-                    columnSchema.isSupportedNormalIndex())){
+                    !(columnSchema.canFullTextQuery() ||
+                    columnSchema.canNormalQuery())){
                 return false;
             }
         }

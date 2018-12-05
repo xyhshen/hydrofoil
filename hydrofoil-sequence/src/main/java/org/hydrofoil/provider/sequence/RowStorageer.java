@@ -70,18 +70,27 @@ public final class RowStorageer {
         return rowQueryGet.createResponse(rowStores);
     }
 
-    RowQueryResponse countRow(final RowQueryCount rowQueryCount){
-        final DataSet dataSet = getDataSet(rowQueryCount.getName());
-        final List<FileRow> crossRows = dataSet.selectWhere(rowQueryCount.getMatch().stream().map((q) ->
-                Pair.of(q, "")).collect(Collectors.toList()));
-        Integer count = crossRows.stream().map(crossRow -> {
-            final Map<String, Collection<FileRow>> joinRowMap = joinOnAll(crossRow, rowQueryCount,true);
-            if(joinRowMap == null){
-                return 0;
-            }
-            return 1;
-        }).reduce((v1,v2)->v1+v2).orElse(0);
-        return rowQueryCount.createResponse(count);
+    RowQueryResponse countRow(final BaseRowQuery baseRowQuery,String groupField){
+        final DataSet dataSet = getDataSet(baseRowQuery.getName());
+        Long count = 0L;
+        if(baseRowQuery instanceof RowQueryGet){
+            RowQueryGet rowQueryGet = (RowQueryGet) baseRowQuery;
+            final Collection<RowKey> rowKeys = rowQueryGet.getRowKeys();
+            final List<FileRow> crossRows = dataSet.selectIn(rowKeys);
+            count = (long)crossRows.size();
+        }else{
+            RowQueryScan rowQueryScan = (RowQueryScan) baseRowQuery;
+            final List<FileRow> crossRows = dataSet.selectWhere(rowQueryScan.getMatch().stream().map((q) ->
+                    Pair.of(q, "")).collect(Collectors.toList()));
+            count = crossRows.stream().map(crossRow -> {
+                final Map<String, Collection<FileRow>> joinRowMap = joinOnAll(crossRow, rowQueryScan,true);
+                if(joinRowMap == null){
+                    return 0L;
+                }
+                return 1L;
+            }).reduce((v1,v2)->v1+v2).orElse(0L);
+        }
+        return baseRowQuery.createCountResponse(count);
     }
 
     private RowStore combineRowKeyValue(FileRow crossRow,Map<String,Collection<FileRow>> joinRowMap,BaseRowQuery baseRowQuery){

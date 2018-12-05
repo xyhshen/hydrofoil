@@ -54,15 +54,14 @@ public final class DataSet {
         List<String> primaryKeys = new ArrayList<>();
         //init index
         tableSchema.getColumns().forEach((columnName, columnSchema) -> {
-            if(columnSchema.isSupportedPrimaryIndex()){
+            if(columnSchema.canPrimaryQuery()){
                 primaryKeys.add(columnName);
+            }
+            if(!columnSchema.canNormalQuery() &&
+                    !columnSchema.canFullTextQuery()){
                 return;
             }
-            if(!columnSchema.isSupportedNormalIndex() &&
-                    !columnSchema.isSupportedTextIndex()){
-                return;
-            }
-            if(columnSchema.isSupportedNormalIndex()){
+            if(columnSchema.canNormalQuery()){
                 SearchArrayList<String,Integer> index = new SearchArrayList<>();
                 int columnSeq = fileTable.getHeader().get(columnName);
                 for(int i = 0;i < fileTable.getRows().size();i++){
@@ -71,7 +70,7 @@ public final class DataSet {
                 index.sorting();
                 indexMap.put(columnName,index);
             }
-            if(columnSchema.isSupportedTextIndex()){
+            if(columnSchema.canFullTextQuery()){
                 int columnSeq = fileTable.getHeader().get(columnName);
                 SetValuedMap<String,Integer> index = new HashSetValuedHashMap<>(100);
                 for(int i = 0;i < fileTable.getRows().size();i++){

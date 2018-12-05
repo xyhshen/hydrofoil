@@ -67,14 +67,8 @@ public abstract class AbstractElementMapper<E extends EngineElement> implements 
             if(!checkElementIdType(elementId) || MapUtils.isEmpty(elementId.unique())){
                 return false;
             }
-            Set<String> unique = new HashSet<>();
-            Map<String, PropertySchema> properties = getElementSchema(elementId.label()).getProperties();
-            properties.values().forEach((v)->{
-                if(v.isPrimary()){
-                    unique.add(v.getLabel());
-                }
-            });
-            if(!SetUtils.isEqualSet(elementId.unique().keySet(),unique)){
+            Collection<String> primaryKeys = getElementSchema(elementId.label()).getPrimaryKeys();
+            if(!SetUtils.isEqualSet(elementId.unique().keySet(),primaryKeys)){
                 return false;
             }
         }

@@ -1,6 +1,7 @@
 package org.hydrofoil.core.engine.internal;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.KeyValue;
 import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import org.apache.commons.lang3.ArrayUtils;
@@ -160,15 +161,18 @@ public abstract class AbstractGraphQueryRunner <E,T extends IGraphQueryRunner> i
 
     @Override
     public Iterator<E> take() {
-        MultiValuedMap<String,ElementMapping> maps = getQueryRequest();
-        ConnectRunner<E> connectRunner = new ConnectRunner(management,(mapping,response)-> handleRowRequest((ElementMapping)mapping,(RowQueryResponse) response));
-        ParameterUtils.mustTrueMessage(connectRunner.list(maps),"take failed");
+        final MultiValuedMap<String,ElementMapping> maps = getQueryRequest();
+        final ConnectRunner<E> connectRunner = new ConnectRunner(management,(mapping,response)-> handleRowRequest((ElementMapping)mapping,(RowQueryResponse) response));
+        ParameterUtils.mustTrueMessage(connectRunner.select(maps),"take failed");
         return connectRunner.toIterator();
     }
 
     @Override
     public Long count() {
-        return null;
+        MultiValuedMap<String,ElementMapping> maps = getQueryRequest();
+        final ConnectRunner<KeyValue<?,Long>> connectRunner = new ConnectRunner(management,"");
+        ParameterUtils.mustTrueMessage(connectRunner.select(maps),"count failed");
+        return connectRunner.toLong();
     }
 
     @Override

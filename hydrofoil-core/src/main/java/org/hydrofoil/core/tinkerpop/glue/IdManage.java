@@ -1,18 +1,23 @@
 package org.hydrofoil.core.tinkerpop.glue;
 
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hydrofoil.common.graph.GraphEdgeId;
 import org.hydrofoil.common.graph.GraphElementId;
+import org.hydrofoil.common.graph.GraphElementType;
 import org.hydrofoil.common.graph.GraphVertexId;
 import org.hydrofoil.common.schema.BaseElementSchema;
 import org.hydrofoil.common.util.DataUtils;
+import org.hydrofoil.common.util.EncodeUtils;
+import org.hydrofoil.common.util.ParameterUtils;
 import org.hydrofoil.core.engine.management.SchemaManager;
+import org.json.JSONObject;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Stream;
 
 /**
  * IdManage
@@ -24,13 +29,17 @@ import java.util.stream.Stream;
  */
 public final class IdManage {
 
-    private static final String ID_PREFIX_VERTEX = "vertex";
+    private static final String ID_LABEL_NAME = "label";
 
-    private static final String ID_PREFIX_EDGE = "edge";
-
-    private static final char ID_RAW_SPLIT = '-';
+    private static final String ID_KEY_NAME = "keys";
 
     private static final char ID_FIELD_SPLIT = ':';
+
+    private static final String ID_FIELD_WRAP = "\"";
+
+    private static final char[] SPECIAL_CHARACTER = {'\"','\'',':'};
+
+    private static final String JSON_FIRST = "{";
 
     /**
      * schema manager
@@ -46,25 +55,22 @@ public final class IdManage {
         if(elementId == null) {
             return null;
         }
-
-        String type = "";
-        if(elementId instanceof GraphVertexId){
-            type = ID_PREFIX_VERTEX;
-        }
-        if(elementId instanceof GraphEdgeId){
-            type = ID_PREFIX_EDGE;
-        }
         //format:type,order,
         StringBuilder idstring = new StringBuilder();
-        idstring.append(type).append(ID_RAW_SPLIT).append(elementId.label()).append(ID_RAW_SPLIT);
         if(elementId.unique().size() == 1){
-            idstring.append(Objects.toString(DataUtils.collectFirst(elementId.unique().values()),null));
+            idstring.append(elementId.label()).append(ID_FIELD_SPLIT);
+            idstring.append(EncodeUtils.wrapString(Objects.toString(DataUtils.collectFirst(elementId.unique().values()),null),
+                    ID_FIELD_WRAP,SPECIAL_CHARACTER));
         }else{
+            //by json
+            JSONObject fulljson = new JSONObject();
+            fulljson.put(ID_LABEL_NAME,elementId.label());
+            JSONObject keyjson = new JSONObject();
             elementId.unique().forEach((k,v)->{
-                idstring.append(k).append(ID_FIELD_SPLIT);
-                idstring.append(Objects.toString(v,null)).append(ID_RAW_SPLIT);
+                keyjson.put(k,Objects.toString(v,null));
             });
-            idstring.deleteCharAt(idstring.length() - 1);
+            fulljson.put(ID_KEY_NAME,keyjson);
+            idstring.append(fulljson.toString());
         }
 
         return idstring.toString();
@@ -82,63 +88,47 @@ public final class IdManage {
     }
 
     @SuppressWarnings("unchecked")
-    public <E extends GraphElementId> E elementId(final Object id){
+    <E extends GraphElementId> E elementId(final Object id,GraphElementType type){
         if(id instanceof GraphElementId){
             return (E)ObjectUtils.clone((GraphElementId) id);
         }
-        String idstring = Objects.toString(id,null);
+        String idstring = StringUtils.trimToEmpty(Objects.toString(id,null));
         if(StringUtils.isBlank(idstring)){
             return null;
         }
-
-        int typeOf = StringUtils.indexOf(idstring,ID_RAW_SPLIT);
-        if(typeOf == -1){
-            return null;
+        String label;
+        String uniqueKey = null;
+        Map<String,Object> uniqueMap = null;
+        if(StringUtils.startsWith(idstring,JSON_FIRST)){
+            JSONObject fulljson = new JSONObject(idstring);
+            label = fulljson.getString(ID_LABEL_NAME);
+            final JSONObject keyjson = fulljson.getJSONObject(ID_KEY_NAME);
+            uniqueMap = keyjson.toMap();
+        }else{
+            int index = StringUtils.indexOf(idstring,ID_FIELD_SPLIT);
+            label = StringUtils.substring(idstring,0,index);
+            uniqueKey = EncodeUtils.unWrapString(StringUtils.substring(idstring,index + 1,idstring.length()),ID_FIELD_WRAP);
         }
-        String type = StringUtils.substring(idstring,0,typeOf);
-        int labelOf = StringUtils.indexOf(idstring,typeOf + 1,ID_RAW_SPLIT);
-        if(labelOf == -1){
-            return null;
-        }
-        String label = StringUtils.substring(idstring,typeOf + 1,labelOf);
-        BaseElementSchema elementSchema = null;
-        if(StringUtils.equalsIgnoreCase(type,ID_PREFIX_VERTEX)){
+        BaseElementSchema elementSchema;
+        if(type == GraphElementType.vertex){
             elementSchema = schemaManager.getVertexSchema(label);
-        }
-        if(StringUtils.equalsIgnoreCase(type,ID_PREFIX_EDGE)){
+        }else{
             elementSchema = schemaManager.getEdgeSchema(label);
         }
-        if(elementSchema == null){
-            return null;
+        ParameterUtils.notNull(elementSchema,"label");
+        if(uniqueMap == null){
+            final String key = DataUtils.collectFirst(elementSchema.getPrimaryKeys());
+            uniqueMap = Collections.singletonMap(key,uniqueKey);
         }
-        GraphElementId.GraphElementBuilder builder =
-                GraphElementId.builder(elementSchema.getLabel());
-        String fieldstring = idstring.substring(labelOf + 1,idstring.length());
-        final String[] fieldChunks = StringUtils.split(fieldstring, ID_RAW_SPLIT);
-        if(fieldChunks.length <= 0){
-            return null;
+        final GraphElementId.GraphElementBuilder builder = GraphVertexId.builder(label);
+        for(String key:elementSchema.getPrimaryKeys()){
+            builder.unique(key, MapUtils.getObject(uniqueMap,key));
         }
-        if(elementSchema.getPrimaryKeys().size() == 1 &&
-                fieldChunks[0].indexOf(ID_FIELD_SPLIT) == -1){
-            builder.unique(DataUtils.collectFirst(elementSchema.getPrimaryKeys()),fieldChunks[0]);
+        if(type == GraphElementType.vertex){
+            return (E) builder.buildVertexId();
         }else{
-            Map<String,String> fields = DataUtils.newHashMapWithExpectedSize(elementSchema.getPrimaryKeys().size());
-            Stream.of(fieldChunks).forEach(s->{
-                String[] fs = StringUtils.split(s,ID_FIELD_SPLIT);
-                if(fs.length < 2){
-                    return;
-                }
-                fields.put(fs[0],fs[1]);
-            });
-            for(String primaryKey:elementSchema.getPrimaryKeys()){
-                if(fields.containsKey(primaryKey)){
-                    return null;
-                }
-                builder.unique(primaryKey,fields.get(primaryKey));
-            }
+            return (E) builder.buildEdgeId();
         }
-        return StringUtils.equalsIgnoreCase(type,ID_PREFIX_VERTEX)?
-                (E) builder.buildVertexId() : (E) builder.buildEdgeId();
     }
 
     public GraphVertexId[] vertexIds(Object ...ids){
@@ -147,7 +137,7 @@ public final class IdManage {
         }
         GraphVertexId[] elementIds = new GraphVertexId[ids.length];
         for(int i = 0;i < elementIds.length;i++){
-            elementIds[i] = elementId(ids[i]);
+            elementIds[i] = elementId(ids[i],GraphElementType.vertex);
         }
         return elementIds;
     }
@@ -158,7 +148,7 @@ public final class IdManage {
         }
         GraphEdgeId[] elementIds = new GraphEdgeId[ids.length];
         for(int i = 0;i < elementIds.length;i++){
-            ids[i] = elementId(ids[i]);
+            ids[i] = elementId(ids[i],GraphElementType.edge);
         }
         return elementIds;
     }

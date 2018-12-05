@@ -1,12 +1,17 @@
 package org.hydrofoil.core.engine.internal;
 
+import org.apache.commons.collections4.keyvalue.DefaultKeyValue;
+import org.apache.commons.collections4.KeyValue;
 import org.apache.commons.collections4.MultiValuedMap;
+import org.apache.commons.lang3.StringUtils;
 import org.hydrofoil.common.provider.IDataConnector;
 import org.hydrofoil.common.provider.datasource.BaseRowQuery;
 import org.hydrofoil.common.provider.datasource.RowQueryResponse;
 import org.hydrofoil.common.provider.datasource.RowQueryScan;
+import org.hydrofoil.common.provider.datasource.response.RowCountResponse;
 import org.hydrofoil.common.util.DataUtils;
 import org.hydrofoil.common.util.LogUtils;
+import org.hydrofoil.common.util.ParameterUtils;
 import org.hydrofoil.core.engine.management.Management;
 import org.slf4j.Logger;
 
@@ -23,25 +28,51 @@ import java.util.function.BiFunction;
  */
 public final class ConnectRunner<E> {
 
+    private static final Logger logger = LogUtils.getLogger(ConnectRunner.class);
+
     private final Management management;
 
-    private List<E> elements;
+    private List<E> elements = new ArrayList<>(100);
+
+    private String groupFieldName;
+
+    private final boolean returnCount;
 
     private BiFunction<ElementMapping,RowQueryResponse,Collection<E>> handleFunction;
 
-    private static final Logger logger = LogUtils.getLogger(ConnectRunner.class);
-
     ConnectRunner(final Management management,final BiFunction<ElementMapping,RowQueryResponse,Collection<E>> handleFunction){
         this.management = management;
-        this.elements = new ArrayList<>(100);
         this.handleFunction = handleFunction;
+        this.returnCount = false;
+    }
+
+    ConnectRunner(final Management management,final String groupFieldName){
+        this.management = management;
+        this.returnCount = true;
+        this.groupFieldName = groupFieldName;
+        this.handleFunction = this::doHandelCountRequest;
     }
 
     private static boolean isGet(final Collection<BaseRowQuery> queries){
         return queries.stream().filter(p->p instanceof RowQueryScan).count() == 0;
     }
 
-    boolean list(MultiValuedMap<String,ElementMapping> maps){
+    @SuppressWarnings("unchecked")
+    private Collection<E> doHandelCountRequest(final ElementMapping elementMapping,
+                                               final RowQueryResponse rowQueryResponse){
+        ParameterUtils.mustTrue(rowQueryResponse instanceof RowCountResponse);
+        RowCountResponse countResponse = (RowCountResponse) rowQueryResponse;
+        ParameterUtils.mustTrueException(countResponse.isSucceed(),"count failed",countResponse.getException());
+        Collection<KeyValue<?,Long>> counts;
+        if(StringUtils.isNotBlank(groupFieldName)){
+            counts = new ArrayList<>(rowQueryResponse.counts());
+        }else{
+            counts = Collections.singleton((KeyValue<?, Long>) new DefaultKeyValue("",countResponse.count()));
+        }
+        return (Collection<E>) counts;
+    }
+
+    boolean select(final MultiValuedMap<String, ElementMapping> maps){
         try{
             for(String datasourceName:maps.keySet()){
                 final Collection<ElementMapping> elementMappings = maps.get(datasourceName);
@@ -55,12 +86,15 @@ public final class ConnectRunner<E> {
                 });
                 boolean getQuery = isGet(rowQueryRequests);
                 Iterator<RowQueryResponse> rowQueryResponseIterator;
-                if(getQuery){
-                    rowQueryResponseIterator = datasource.getRows(DataUtils.castCollectType(rowQueryRequests));
+                if(returnCount){
+                    rowQueryResponseIterator = datasource.countRow(rowQueryRequests,groupFieldName);
                 }else{
-                    rowQueryResponseIterator = datasource.scanRow(DataUtils.castCollectType(rowQueryRequests));
+                    if(getQuery){
+                        rowQueryResponseIterator = datasource.getRows(DataUtils.castCollectType(rowQueryRequests));
+                    }else{
+                        rowQueryResponseIterator = datasource.scanRow(DataUtils.castCollectType(rowQueryRequests));
+                    }
                 }
-
                 while(rowQueryResponseIterator.hasNext()){
                     RowQueryResponse next = rowQueryResponseIterator.next();
                     elements.addAll(handleFunction.apply(elementMappingMap.get(next.id()),
@@ -68,7 +102,7 @@ public final class ConnectRunner<E> {
                 }
             }
         }catch (Throwable t){
-            logger.error("execute list exception",t);
+            logger.error("execute select exception",t);
             return false;
         }
         return true;
@@ -76,6 +110,15 @@ public final class ConnectRunner<E> {
 
     Iterator<E> toIterator(){
         return elements.iterator();
+    }
+
+    @SuppressWarnings("unchecked")
+    long toLong(){
+        long l =  elements.stream().map((kv)->{
+            KeyValue<?,Long> count = (KeyValue<?, Long>) kv;
+            return count.getValue();
+        }).reduce((c1,c2)-> c1 + c2).orElse(0L);
+        return l;
     }
 
 }

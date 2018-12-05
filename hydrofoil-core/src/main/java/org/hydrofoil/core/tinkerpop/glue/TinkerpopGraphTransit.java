@@ -109,14 +109,19 @@ public final class TinkerpopGraphTransit {
         edgeIterator.forEachRemaining((e)->{
             HydrofoilEdge edge = (HydrofoilEdge) e;
             EngineEdge engineEdge = (EngineEdge) edge.standard();
-            vertexIds.add(engineEdge.sourceId());
-            vertexIds.add(engineEdge.targetId());
+            if(direction == Direction.IN || direction == Direction.BOTH){
+                vertexIds.add(engineEdge.sourceId());
+            }
+            if(direction == Direction.OUT|| direction == Direction.BOTH){
+                vertexIds.add(engineEdge.targetId());
+            }
         });
         vertexIds.remove(vertex.standard().elementId());
         if(vertexIds.isEmpty()){
             return IteratorUtils.emptyIterator();
         }
-        return listVerticesByIds(graph,vertexIds.toArray(new GraphVertexId[vertexIds.size()]));
+
+        return listVerticesByIds(graph,DataUtils.toArray(vertexIds,GraphVertexId.class));
     }
 
     public static <V> Iterator<VertexProperty<V>> listVertexProperties(HydrofoilVertex vertex,String ...propertyLabels){

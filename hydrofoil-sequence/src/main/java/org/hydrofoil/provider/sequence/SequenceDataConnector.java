@@ -1,5 +1,6 @@
 package org.hydrofoil.provider.sequence;
 
+import org.apache.commons.collections4.MapUtils;
 import org.hydrofoil.common.provider.IDataConnectContext;
 import org.hydrofoil.common.provider.IDataConnector;
 import org.hydrofoil.common.provider.datasource.*;
@@ -8,6 +9,7 @@ import org.hydrofoil.common.util.DataUtils;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Map;
 
 /**
  * SequenceDataSource
@@ -33,7 +35,8 @@ public class SequenceDataConnector implements IDataConnector {
     }
 
     @Override
-    public Iterator<RowQueryResponse> performance(REQUEST_TYPE requestType, Collection<? extends BaseRowQuery> querySet) {
+    public Iterator<RowQueryResponse> performance(REQUEST_TYPE requestType, Collection<? extends BaseRowQuery> querySet,final Map<String,Object> parameters) {
+        final String groupField = MapUtils.getString(parameters,PARAMETER_GROUP_FIELD_NAME);
         return DataUtils.newIterator(querySet.iterator(),query->{
             try{
                 switch (requestType){
@@ -42,7 +45,7 @@ public class SequenceDataConnector implements IDataConnector {
                     case SCAN:
                         return rowStorageer.scanRows((RowQueryScan) query);
                     case COUNT:
-                        return rowStorageer.countRow((RowQueryCount) query);
+                        return rowStorageer.countRow(query, groupField);
                     default:break;
                 }
             }catch(Throwable t){

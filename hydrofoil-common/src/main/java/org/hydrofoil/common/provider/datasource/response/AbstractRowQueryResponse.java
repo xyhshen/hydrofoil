@@ -1,8 +1,10 @@
 package org.hydrofoil.common.provider.datasource.response;
 
+import org.apache.commons.collections4.KeyValue;
 import org.hydrofoil.common.provider.datasource.RowQueryResponse;
 
 import java.sql.SQLException;
+import java.util.Collection;
 
 /**
  * RowQueryResponse
@@ -70,5 +72,10 @@ public abstract class AbstractRowQueryResponse implements RowQueryResponse {
     @Override
     public Long id() {
         return id;
+    }
+
+    @Override
+    public Collection<KeyValue<?,Long>> counts(){
+        return null;
     }
 }

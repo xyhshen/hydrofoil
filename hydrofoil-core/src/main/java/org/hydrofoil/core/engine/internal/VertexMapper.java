@@ -43,8 +43,11 @@ public final class VertexMapper extends AbstractElementMapper{
     public ElementMapping toMapping(String label, Set<QMatch.Q> propertyQuerySet,Long start,Long limit){
         VertexSchema vertexSchema = schemaManager.getVertexSchema(label);
         //create property query cond
-        final PropertyQueryCondition queryCondition = createPropertyQueryCondtion(propertyQuerySet, vertexSchema);
-        return createScanMapping(queryCondition,vertexSchema,start,limit);
+        final PropertyQueryCondition propertyQueryCondtion = createPropertyQueryCondtion(propertyQuerySet, vertexSchema);
+        if(propertyQueryCondtion == null){
+            return null;
+        }
+        return createScanMapping(propertyQueryCondtion,vertexSchema,start,limit);
     }
 
     public EngineVertex rowStoreToVertex(VertexSchema vertexSchema, RowStore rowStore){

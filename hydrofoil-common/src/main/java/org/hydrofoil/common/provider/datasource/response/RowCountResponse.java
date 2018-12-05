@@ -1,6 +1,15 @@
 package org.hydrofoil.common.provider.datasource.response;
 
+import org.apache.commons.collections4.KeyValue;
+import org.apache.commons.collections4.keyvalue.DefaultKeyValue;
+import org.apache.commons.lang3.RandomUtils;
 import org.hydrofoil.common.provider.datasource.RowStore;
+import org.hydrofoil.common.util.DataUtils;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * RowCountResponse
@@ -12,11 +21,16 @@ import org.hydrofoil.common.provider.datasource.RowStore;
  */
 public class RowCountResponse extends AbstractRowQueryResponse {
 
-    private Long count;
+    private Map<String,Long> countMap;
 
     public RowCountResponse(Long id,Long count) {
         super(id,true);
-        this.count = count;
+        this.countMap = Collections.singletonMap(RandomUtils.nextLong() + "***key",count);
+    }
+
+    public RowCountResponse(Long id,Map<?,Long> count) {
+        super(id,true);
+        this.countMap = DataUtils.newMapWithMaxSize(10);
     }
 
     @Override
@@ -26,6 +40,15 @@ public class RowCountResponse extends AbstractRowQueryResponse {
 
     @Override
     public Long count() {
-        return count;
+        if(countMap.isEmpty()){
+            return null;
+        }
+        return DataUtils.collectFirst(countMap.values());
+    }
+
+    @Override
+    public Collection<KeyValue<?,Long>> counts(){
+        return countMap.entrySet().stream().map(e-> new DefaultKeyValue<String,Long>(e.getKey(),e.getValue())).
+                collect(Collectors.toList());
     }
 }
