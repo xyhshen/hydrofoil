@@ -31,7 +31,7 @@
         </dependency>
         <!--<dependency>
             <groupId>org.hydrofoil</groupId>
-            <artifactId>hydrofoil-mysql</artifactId>
+            <artifactId>hydrofoil-jdbc</artifactId>
             <version>${hydrofoil.version}</version>
         </dependency>-->
         <dependency>

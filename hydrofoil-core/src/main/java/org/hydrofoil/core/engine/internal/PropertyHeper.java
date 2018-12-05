@@ -28,7 +28,8 @@ import java.util.Set;
 
     default boolean invalidProperties(final Set<QMatch.Q> propertyQuerySet,final BaseElementSchema elementSchema){
         final Set<String> labels = elementSchema.getProperties().keySet();
-        return propertyQuerySet.stream().filter(labels::contains).count() == 0;
+        return propertyQuerySet.stream().
+                filter(p-> labels.contains(p.pair().name())).count() == 0;
     }
 
     default PropertyQueryCondition createPropertyQueryCondtion(final Set<QMatch.Q> propertyQuerySet, final BaseElementSchema elementSchema){

@@ -1,4 +1,4 @@
-package org.hydrofoil.provider.mysql.internal;
+package org.hydrofoil.provider.jdbc.internal;
 
 import org.apache.commons.collections4.MultiMapUtils;
 import org.apache.commons.dbcp2.BasicDataSource;
@@ -19,7 +19,7 @@ import java.util.Objects;
 /**
  * MysqlDbQueryService
  * <p>
- * package org.hydrofoil.provider.mysql.internal
+ * package org.hydrofoil.provider.jdbc.internal
  *
  * @author xie_yh
  * @date 2018/7/6 10:24

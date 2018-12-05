@@ -68,8 +68,7 @@ interface MapperHelper {
             }
         }else{
             if(columnSchema == null ||
-                    !(columnSchema.canFullTextQuery() ||
-                    columnSchema.canNormalQuery())){
+                    !columnSchema.canFullTextQuery()){
                 return false;
             }
         }

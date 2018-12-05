@@ -10,7 +10,7 @@
     <modules>
         <module>hydrofoil-common</module>
         <module>hydrofoil-core</module>
-        <module>hydrofoil-mysql</module>
+        <module>hydrofoil-jdbc</module>
         <module>hydrofoil-example</module>
         <module>hydrofoil-tinkerpop</module>
         <module>hydrofoil-sequence</module>

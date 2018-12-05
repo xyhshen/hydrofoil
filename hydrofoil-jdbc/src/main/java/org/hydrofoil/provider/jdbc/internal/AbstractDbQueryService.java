@@ -1,4 +1,4 @@
-package org.hydrofoil.provider.mysql.internal;
+package org.hydrofoil.provider.jdbc.internal;
 
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.collections4.MultiMapUtils;
@@ -24,7 +24,7 @@ import java.util.*;
 /**
  * DbQueryService
  * <p>
- * package org.hydrofoil.provider.mysql.internal
+ * package org.hydrofoil.provider.jdbc.internal
  *
  * @author xie_yh
  * @date 2018/7/5 11:46

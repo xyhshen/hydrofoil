@@ -1,4 +1,4 @@
-package org.hydrofoil.provider.mysql;
+package org.hydrofoil.provider.jdbc;
 
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
@@ -11,17 +11,17 @@ import java.util.Map;
 /**
  * MysqlConfiguration
  * <p>
- * package org.hydrofoil.provider.mysql
+ * package org.hydrofoil.provider.jdbc
  *
  * @author xie_yh
  * @date 2018/7/4 13:45
  */
-public final class MysqlDatasourceSchema {
+public final class JdbcDatasourceSchema {
 
     /**
-     * mysql jdbc
+     * jdbc jdbc
      */
-    public final static String MYSQL_DRIVER_NAME = "com.mysql.jdbc.Driver";
+    public final static String MYSQL_DRIVER_NAME = "com.jdbc.jdbc.Driver";
 
     public enum DatasourceItem{
 

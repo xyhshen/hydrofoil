@@ -1,4 +1,4 @@
-package org.hydrofoil.provider.mysql;
+package org.hydrofoil.provider.jdbc;
 
 import org.hydrofoil.common.graph.QMatch;
 import org.hydrofoil.common.provider.IDataConnector;
@@ -13,12 +13,12 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.hydrofoil.provider.mysql.MysqlDatasourceSchema.DatasourceItem.*;
+import static org.hydrofoil.provider.jdbc.JdbcDatasourceSchema.DatasourceItem.*;
 
 /**
  * DataProviderTest
  * <p>
- * package org.hydrofoil.provider.mysql
+ * package org.hydrofoil.provider.jdbc
  *
  * @author xie_yh
  * @date 2018/7/6 11:38
@@ -31,7 +31,7 @@ public final class DataProviderTest {
     public void init(){
         DataSourceSchema dataSourceSchema = new DataSourceSchema();
         Map<String,String> map = new HashMap<>();
-        map.put(ConnectUrl.getName(),"jdbc:mysql://10.110.18.53:3306/gongan?useUnicode=true&characterEncoding=utf-8&useOldAliasMetadataBehavior=true&allowMultiQueries=true");
+        map.put(ConnectUrl.getName(),"jdbc:jdbc://10.110.18.53:3306/gongan?useUnicode=true&characterEncoding=utf-8&useOldAliasMetadataBehavior=true&allowMultiQueries=true");
         map.put(Username.getName(),"root");
         map.put(Password.getName(),"123456a?");
         dataSourceSchema.putItem("configitem",map);
