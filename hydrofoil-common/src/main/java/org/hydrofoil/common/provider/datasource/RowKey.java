@@ -1,6 +1,5 @@
 package org.hydrofoil.common.provider.datasource;
 
-import org.hydrofoil.common.util.DataUtils;
 import org.hydrofoil.common.util.collect.ArrayMap;
 
 import java.util.Map;
@@ -19,11 +18,6 @@ public final class RowKey {
 
     private RowKey(final Map<String,Object> keyValueMap){
         this.keyValueMap = keyValueMap;
-    }
-
-    public static RowKey of(final String ...keyvalues){
-        final Map<String, Object> rawMap = DataUtils.toMap(keyvalues);
-        return new RowKey(new ArrayMap<>(rawMap));
     }
 
     public static RowKey of(final Map<String,Object> keyValueMap){

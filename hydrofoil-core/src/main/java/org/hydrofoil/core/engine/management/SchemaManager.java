@@ -219,7 +219,7 @@ public final class SchemaManager {
      */
     public EdgeSchema[] getEdgeSchemaOfVertex(final String vertexLabel,
                                                     final EdgeDirection direction,
-                                                    final Set<String> labelSet){
+                                                    final Collection<String> labelSet){
         Pair<Collection<String>, Collection<String>> vertexEdgePair = vertexEdgeSchemaMap.get(vertexLabel);
         if(vertexEdgePair == null){
             return null;
@@ -240,7 +240,7 @@ public final class SchemaManager {
         if(CollectionUtils.isEmpty(l)){
             return null;
         }
-        return l.toArray(new EdgeSchema[schemas.size()]);
+        return DataUtils.toArray(l,EdgeSchema.class);
     }
 
     /**

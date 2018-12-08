@@ -21,7 +21,7 @@ public abstract class BaseRowQuery{
     /**
      * Associate match
      */
-    public static final class AssociateMatch implements Comparable{
+    public static final class AssociateMatch{
 
         /**
          * query match
@@ -83,11 +83,6 @@ public abstract class BaseRowQuery{
         public int hashCode(){
             return Objects.hash(match,name, joinField);
         }
-
-        @Override
-        public int compareTo(Object o) {
-            return Integer.compare(hashCode(),o.hashCode());
-        }
     }
 
     public static final class AssociateRowQuery{
@@ -112,7 +107,7 @@ public abstract class BaseRowQuery{
         private boolean onlyQueries;
 
         public AssociateRowQuery(){
-            this.match = DataUtils.newSetWithMaxSize(0);
+            this.match = DataUtils.newHashSetWithExpectedSize(0);
         }
 
         /**

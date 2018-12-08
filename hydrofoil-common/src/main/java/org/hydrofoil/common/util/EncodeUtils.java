@@ -72,7 +72,7 @@ public final class EncodeUtils {
     public static Set<String> splitText(final String s){
         final String bs = StringUtils.normalizeSpace(s);
         final String[] strs = bs.split("[,._\\*\\/\\s]+");
-        Set<String> set = DataUtils.newSetMapWithExpectedSize(0);
+        Set<String> set = DataUtils.newHashSetWithExpectedSize(0);
         for(String ss:strs){
             if(StringUtils.isNotBlank(ss)){
                 set.add(ss);

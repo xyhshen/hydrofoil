@@ -5,6 +5,8 @@ import org.hydrofoil.common.util.bean.FieldPair;
 import org.hydrofoil.common.util.bean.FieldTriple;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -54,6 +56,12 @@ public class QMatch{
          * in(a,b,c,d.....)
          */
         in,
+
+        /**
+         * key(a,b,c,d....),every item like(x:value,y:value) and need priority as a query condition
+         */
+        key,
+
         /**
          * Q1 and Q2
          */
@@ -207,6 +215,15 @@ public class QMatch{
      */
     public static Q in(String name,Object ...values){
         return new Q(QType.in).pair(new FieldPair(name, Arrays.asList(values)));
+    }
+
+    /**
+     *
+     * @param values
+     * @return
+     */
+    public static Q key(final Collection<Map<String,Object>> values){
+        return new Q(QType.key).pair(new FieldPair("key", values));
     }
 
     /**

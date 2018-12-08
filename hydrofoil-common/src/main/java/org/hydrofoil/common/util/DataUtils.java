@@ -36,7 +36,7 @@ public final class DataUtils {
     private DataUtils(){}
 
     @SuppressWarnings("unchecked")
-    public static <V> V collectFirst(Collection<V> c){
+    public static <V> V collectFirst(final Collection<V> c){
         return CollectionUtils.isNotEmpty(c)?
                 (V) getOptional(c.stream().findFirst()) :null;
     }
@@ -46,12 +46,20 @@ public final class DataUtils {
      * @param iterator iterator
      * @return value
      */
-    public static <V> V iteratorFirst(Iterator<V> iterator){
+    public static <V> V iteratorFirst(final Iterator<V> iterator){
         try{
             return IteratorUtils.get(iterator,0);
         }catch (IndexOutOfBoundsException t){
             return null;
         }
+    }
+
+    public static <K,V> V mapFirst(final Map<K,V> map){
+        final Map.Entry<K, V> entry = CollectionUtils.get(map, 0);
+        if(entry == null){
+            return null;
+        }
+        return entry.getValue();
     }
 
     /**
@@ -136,7 +144,7 @@ public final class DataUtils {
         return new HashMap<K, V>(hashMapCapacity(expectedSize));
     }
 
-    public static <K> HashSet<K> newSetMapWithExpectedSize(final int expectedSize) {
+    public static <K> HashSet<K> newHashSetWithExpectedSize(final int expectedSize) {
         if(expectedSize == 0){
             return new HashSet<K>();
         }
@@ -154,7 +162,7 @@ public final class DataUtils {
         if(maxSize <= USE_HASH_MAP_MAX_SIZE){
             return new TreeSet<K>();
         }
-        return newSetMapWithExpectedSize(maxSize);
+        return newHashSetWithExpectedSize(maxSize);
     }
 
     public static <K,V> MultiValuedMap<K,V> newMultiMapWithMaxSize(final int expectedSize){

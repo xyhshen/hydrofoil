@@ -93,18 +93,24 @@ public final class TinkerpopGraphTransit {
                 length(length));
     }
 
-    public static Iterator<Edge> listEdgesByVertex(HydrofoilTinkerpopGraph graph, HydrofoilVertex vertex,
-                                                   Direction direction, String ...labels){
+    private static EngineVertex[] toVertexArray(final Collection<HydrofoilVertex> vertices){
+        return CollectionUtils.emptyIfNull(vertices).stream().
+                map(vertex -> (EngineVertex)vertex.standard()).toArray(EngineVertex[]::new);
+    }
+
+    public static Iterator<Edge> listEdgesByVertices(HydrofoilTinkerpopGraph graph, Collection<HydrofoilVertex> vertices,
+                                                     Direction direction, String ...labels){
         return executeQuery(graph,graph.getConnector().edges().
-                vertex((EngineVertex) vertex.standard()).
+                vertices(toVertexArray(vertices)).
                 labels(labels).direction(TinkerpopElementUtils.toStdDirection(direction)));
     }
 
-    public static Iterator<Vertex> listEdgeVerticesByVertex(HydrofoilTinkerpopGraph graph, HydrofoilVertex vertex,
-                                                            Direction direction, String ...labels){
+    public static Iterator<Vertex> listEdgeVerticesByVertices(HydrofoilTinkerpopGraph graph, Collection<HydrofoilVertex> vertices,
+                                                              Direction direction, String ...labels){
         Set<GraphVertexId> vertexIds = new HashSet<>();
+        final EngineVertex[] engineVertices = toVertexArray(vertices);
         Iterator<Edge> edgeIterator = executeQuery(graph, graph.getConnector().edges().
-                vertex((EngineVertex) vertex.standard()).
+                vertices(engineVertices).
                 labels(labels).direction(TinkerpopElementUtils.toStdDirection(direction)));
         edgeIterator.forEachRemaining((e)->{
             HydrofoilEdge edge = (HydrofoilEdge) e;
@@ -116,7 +122,9 @@ public final class TinkerpopGraphTransit {
                 vertexIds.add(engineEdge.targetId());
             }
         });
-        vertexIds.remove(vertex.standard().elementId());
+        for(EngineVertex vertex:engineVertices){
+            vertexIds.remove(vertex.elementId());
+        }
         if(vertexIds.isEmpty()){
             return IteratorUtils.emptyIterator();
         }

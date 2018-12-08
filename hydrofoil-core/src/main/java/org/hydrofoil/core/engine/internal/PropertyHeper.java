@@ -1,10 +1,8 @@
 package org.hydrofoil.core.engine.internal;
 
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.collections4.MultiMapUtils;
-import org.apache.commons.collections4.MultiValuedMap;
-import org.apache.commons.collections4.SetUtils;
+import org.apache.commons.collections4.*;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.hydrofoil.common.graph.QMatch;
 import org.hydrofoil.common.provider.datasource.BaseRowQuery;
 import org.hydrofoil.common.schema.BaseElementSchema;
@@ -28,6 +26,9 @@ import java.util.Set;
 
     default boolean invalidProperties(final Set<QMatch.Q> propertyQuerySet,final BaseElementSchema elementSchema){
         final Set<String> labels = elementSchema.getProperties().keySet();
+        if(CollectionUtils.isEmpty(propertyQuerySet)){
+            return false;
+        }
         return propertyQuerySet.stream().
                 filter(p-> labels.contains(p.pair().name())).count() == 0;
     }
@@ -91,6 +92,15 @@ import java.util.Set;
             }
         });
         rowQueryRequest.getAssociateQuery().addAll(associateRowQueryMap.values());
+    }
+
+    default Map<String,Pair<String,String>> getPropertyToFieldMapOfElement(final BaseElementSchema elementSchema){
+        final Map<String, PropertySchema> properties = elementSchema.getProperties();
+        Map<String,Pair<String,String>> property2Field = DataUtils.newHashMapWithExpectedSize(properties.size());
+        properties.forEach((label,propertySchema)->{
+            property2Field.put(label,Pair.of(propertySchema.getLinkTable(),propertySchema.getField()));
+        });
+        return property2Field;
     }
 }
 

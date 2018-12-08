@@ -4,6 +4,7 @@ import org.hydrofoil.common.graph.GraphElementId;
 import org.hydrofoil.core.engine.internal.EnginePropertySet;
 
 import java.util.Collection;
+import java.util.Objects;
 
 /**
  * StandardElement
@@ -69,5 +70,19 @@ public class EngineElement {
      */
     public Collection<EngineProperty> properties(String ...labels){
         return propertySet.gets(labels);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(!(obj instanceof EngineElement)){
+            return false;
+        }
+        EngineElement right = (EngineElement) obj;
+        return Objects.equals(right.elementId,this.elementId);
+    }
+
+    @Override
+    public int hashCode() {
+        return elementId.hashCode();
     }
 }
