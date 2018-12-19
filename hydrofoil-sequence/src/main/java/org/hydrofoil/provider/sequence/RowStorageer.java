@@ -9,6 +9,7 @@ import org.hydrofoil.common.provider.datasource.*;
 import org.hydrofoil.common.schema.TableSchema;
 import org.hydrofoil.common.util.DataUtils;
 import org.hydrofoil.common.util.ParameterUtils;
+import org.hydrofoil.common.util.bean.KeyValueEntity;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -60,7 +61,7 @@ public final class RowStorageer {
     }
 
     RowQueryResponse getRows(final RowQueryGet rowQueryGet){
-        final Collection<RowKey> rowKeys = rowQueryGet.getRowKeys();
+        final Collection<KeyValueEntity> rowKeys = rowQueryGet.getRowKeys();
         final DataSet dataSet = getDataSet(rowQueryGet.getName());
         final List<FileRow> crossRows = dataSet.selectIn(rowKeys);
         final List<RowStore> rowStores = crossRows.stream().map(crossRow -> {
@@ -75,7 +76,7 @@ public final class RowStorageer {
         Long count = 0L;
         if(baseRowQuery instanceof RowQueryGet){
             RowQueryGet rowQueryGet = (RowQueryGet) baseRowQuery;
-            final Collection<RowKey> rowKeys = rowQueryGet.getRowKeys();
+            final Collection<KeyValueEntity> rowKeys = rowQueryGet.getRowKeys();
             final List<FileRow> crossRows = dataSet.selectIn(rowKeys);
             count = (long)crossRows.size();
         }else{

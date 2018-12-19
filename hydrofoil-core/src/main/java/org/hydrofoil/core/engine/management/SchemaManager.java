@@ -210,6 +210,27 @@ public final class SchemaManager {
         return edgeSchemaMap.get(label);
     }
 
+    public Collection<Pair<PropertySchema,PropertySchema>> getEdgeVertexProperties(final String label,final boolean source){
+        final EdgeSchema edgeSchema = edgeSchemaMap.get(label);
+        final Map<String, String> edgeVertexProperties;
+        final String vertexLabel;
+        if(source){
+            edgeVertexProperties = edgeSchema.getSourceProperties();
+            vertexLabel = edgeSchema.getSourceLabel();
+        }else{
+            edgeVertexProperties = edgeSchema.getTargetProperties();
+            vertexLabel = edgeSchema.getTargetLabel();
+        }
+
+        final Map<String, PropertySchema> vertexProperties = vertexSchemaMap.get(vertexLabel).getProperties();
+        final Map<String, PropertySchema> edgeProperties = edgeSchemaMap.get(label).getProperties();
+        List<Pair<PropertySchema,PropertySchema>> properties = new ArrayList<>(edgeVertexProperties.size());
+        for(Map.Entry<String,String> entry:edgeVertexProperties.entrySet()){
+            properties.add(Pair.of(vertexProperties.get(entry.getKey()),edgeProperties.get(entry.getValue())));
+        }
+        return properties;
+    }
+
     /**
      * get edge schema of vertex
      * @param vertexLabel vertex label

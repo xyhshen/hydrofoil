@@ -1,12 +1,11 @@
 package org.hydrofoil.common.graph;
 
-import org.apache.commons.lang3.ObjectUtils;
 import org.hydrofoil.common.util.bean.FieldPair;
 import org.hydrofoil.common.util.bean.FieldTriple;
+import org.hydrofoil.common.util.bean.KeyValueEntity;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -68,7 +67,7 @@ public class QMatch{
         and
     }
 
-    public static class Q implements Cloneable,Comparable<Q>{
+    public static class Q implements Cloneable{
 
         /**
          * query type
@@ -130,11 +129,6 @@ public class QMatch{
             Q query = new Q(this.type);
             query.pair = pair.clone();
             return query;
-        }
-
-        @Override
-        public int compareTo(Q o) {
-            return ObjectUtils.compare(hashCode(),o.hashCode());
         }
     }
 
@@ -222,7 +216,7 @@ public class QMatch{
      * @param values
      * @return
      */
-    public static Q key(final Collection<Map<String,Object>> values){
+    public static Q key(final Collection<KeyValueEntity> values){
         return new Q(QType.key).pair(new FieldPair("key", values));
     }
 

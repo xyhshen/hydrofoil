@@ -1,7 +1,11 @@
 package org.hydrofoil.core.engine.internal;
 
 import org.hydrofoil.common.provider.datasource.BaseRowQuery;
+import org.hydrofoil.common.provider.datasource.RowQueryResponse;
 import org.hydrofoil.common.schema.SchemaItem;
+
+import java.util.Collection;
+import java.util.function.BiFunction;
 
 /**
  * ElementMapping
@@ -20,6 +24,12 @@ public final class ElementMapping{
     private BaseRowQuery queryRequest;
 
     private Object context;
+
+    private BiFunction<ElementMapping,RowQueryResponse,Collection<ElementMapping>> deriveFunction;
+
+    private BiFunction<ElementMapping,RowQueryResponse,Collection<?>> deriveHandleFunction;
+
+    private ElementMapping baseMapping;
 
     /**
      * @return String
@@ -83,5 +93,53 @@ public final class ElementMapping{
      **/
     public void setContext(Object context) {
         this.context = context;
+    }
+
+    /**
+     * @return ElementMapping>
+     * @see ElementMapping#deriveFunction
+     **/
+    public BiFunction<ElementMapping, RowQueryResponse, Collection<ElementMapping>> getDeriveFunction() {
+        return deriveFunction;
+    }
+
+    /**
+     * @param deriveFunction ElementMapping>
+     * @see ElementMapping#deriveFunction
+     **/
+    public void setDeriveFunction(BiFunction<ElementMapping, RowQueryResponse, Collection<ElementMapping>> deriveFunction) {
+        this.deriveFunction = deriveFunction;
+    }
+
+    /**
+     * @return Collection<?>>
+     * @see ElementMapping#deriveHandleFunction
+     **/
+    public BiFunction<ElementMapping, RowQueryResponse, Collection<?>> getDeriveHandleFunction() {
+        return deriveHandleFunction;
+    }
+
+    /**
+     * @param deriveHandleFunction Collection<?>>
+     * @see ElementMapping#deriveHandleFunction
+     **/
+    public void setDeriveHandleFunction(BiFunction<ElementMapping, RowQueryResponse, Collection<?>> deriveHandleFunction) {
+        this.deriveHandleFunction = deriveHandleFunction;
+    }
+
+    /**
+     * @return ElementMapping
+     * @see ElementMapping#baseMapping
+     **/
+    public ElementMapping getBaseMapping() {
+        return baseMapping;
+    }
+
+    /**
+     * @param baseMapping ElementMapping
+     * @see ElementMapping#baseMapping
+     **/
+    public void setBaseMapping(ElementMapping baseMapping) {
+        this.baseMapping = baseMapping;
     }
 }

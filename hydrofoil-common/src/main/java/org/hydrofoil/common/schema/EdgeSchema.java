@@ -21,7 +21,7 @@ public final class EdgeSchema extends BaseElementSchema {
     private static final String NODE_EDGE_TARGET_ELEMENT = "target";
 
     private static final String ATTR_EDGE_VERTEX_LABEL = "label";
-    private static final String ATTR_EDGE_VERTEX_FIELD = "field";
+    private static final String ATTR_EDGE_VERTEX_PROPERTY = "property";
 
     public EdgeSchema(){}
 
@@ -36,19 +36,19 @@ public final class EdgeSchema extends BaseElementSchema {
         ParameterUtils.notNull(target);
 
         String sourceLabel = XmlUtils.attributeStringValue(source,ATTR_EDGE_VERTEX_LABEL);
-        Map<String, String> sourceField = FieldUtils.toMap(XmlUtils.attributeStringValue(source,ATTR_EDGE_VERTEX_FIELD));
+        Map<String, String> sourceProperty = FieldUtils.toMap(XmlUtils.attributeStringValue(source,ATTR_EDGE_VERTEX_PROPERTY));
         String targetLabel = XmlUtils.attributeStringValue(target,ATTR_EDGE_VERTEX_LABEL);
-        Map<String, String> targetField = FieldUtils.toMap(XmlUtils.attributeStringValue(target,ATTR_EDGE_VERTEX_FIELD));
+        Map<String, String> targetProperty = FieldUtils.toMap(XmlUtils.attributeStringValue(target,ATTR_EDGE_VERTEX_PROPERTY));
 
         ParameterUtils.notBlank(sourceLabel);
-        ParameterUtils.mustTrue(!sourceField.isEmpty());
+        ParameterUtils.mustTrue(!sourceProperty.isEmpty());
         ParameterUtils.notBlank(targetLabel);
-        ParameterUtils.mustTrue(!targetField.isEmpty());
+        ParameterUtils.mustTrue(!targetProperty.isEmpty());
 
         putItem("source-" + ATTR_EDGE_VERTEX_LABEL,sourceLabel);
-        putItem("source-" + ATTR_EDGE_VERTEX_FIELD,sourceField);
+        putItem("source-" + ATTR_EDGE_VERTEX_PROPERTY,sourceProperty);
         putItem("target-" + ATTR_EDGE_VERTEX_LABEL,targetLabel);
-        putItem("target-" + ATTR_EDGE_VERTEX_FIELD,targetField);
+        putItem("target-" + ATTR_EDGE_VERTEX_PROPERTY,targetProperty);
     }
 
     /**
@@ -63,8 +63,8 @@ public final class EdgeSchema extends BaseElementSchema {
      * get source vertex field
      * @return k,v->(vertex property label,table field name)
      */
-    public Map<String,String> getSourceField(){
-        return getItemMap("source-" + ATTR_EDGE_VERTEX_FIELD);
+    public Map<String,String> getSourceProperties(){
+        return getItemMap("source-" + ATTR_EDGE_VERTEX_PROPERTY);
     }
 
     /**
@@ -79,8 +79,8 @@ public final class EdgeSchema extends BaseElementSchema {
      * get target vertex field
      * @return k,v->(vertex property label,table field name)
      */
-    public Map<String,String> getTargetField(){
-        return getItemMap("target-" + ATTR_EDGE_VERTEX_FIELD);
+    public Map<String,String> getTargetProperties(){
+        return getItemMap("target-" + ATTR_EDGE_VERTEX_PROPERTY);
     }
 
 }

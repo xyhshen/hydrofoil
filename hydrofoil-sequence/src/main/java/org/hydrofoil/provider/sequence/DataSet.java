@@ -8,12 +8,12 @@ import org.apache.commons.collections4.multimap.HashSetValuedHashMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hydrofoil.common.graph.QMatch;
-import org.hydrofoil.common.provider.datasource.RowKey;
 import org.hydrofoil.common.schema.TableSchema;
 import org.hydrofoil.common.util.DataUtils;
 import org.hydrofoil.common.util.EncodeUtils;
 import org.hydrofoil.common.util.ParameterUtils;
 import org.hydrofoil.common.util.bean.FieldTriple;
+import org.hydrofoil.common.util.bean.KeyValueEntity;
 import org.hydrofoil.common.util.collect.SearchArrayList;
 
 import java.util.*;
@@ -142,7 +142,7 @@ public final class DataSet {
         return pl.stream().map(p->MapUtils.getString(primaryKey,p)).reduce((r1,r2)-> r1 + r2).orElse(null);
     }
 
-    List<FileRow> selectIn(final Collection<RowKey> primaryKeys){
+    List<FileRow> selectIn(final Collection<KeyValueEntity> primaryKeys){
         return primaryKeys.stream().map(primaryKey->{
             String rowKey = makeRowKey(primaryKey.getKeyValueMap());
             Integer i = MapUtils.getInteger(rowKeyMap,rowKey);

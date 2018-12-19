@@ -14,8 +14,8 @@ import org.hydrofoil.common.schema.LinkSchema;
 import org.hydrofoil.common.schema.PropertySchema;
 import org.hydrofoil.common.util.DataUtils;
 import org.hydrofoil.common.util.ParameterUtils;
+import org.hydrofoil.common.util.bean.KeyValueEntity;
 import org.hydrofoil.common.util.collect.ArrayMap;
-import org.hydrofoil.common.util.collect.FixedArrayMap;
 import org.hydrofoil.core.engine.EngineElement;
 import org.hydrofoil.core.engine.management.SchemaManager;
 import org.hydrofoil.core.engine.util.EngineElementUtils;
@@ -84,18 +84,18 @@ public abstract class AbstractElementMapper<E extends EngineElement> implements 
     private ElementMapping createGetMappings(BaseElementSchema elementSchema, Collection<GraphElementId> ids){
         RowQueryGet rowQueryGet = new RowQueryGet();
         rowQueryGet.setName(elementSchema.getTable());
-        Map<String,Integer> keyMap = FixedArrayMap.keyMapOf(elementSchema.getPrimaryKeys());
+        final KeyValueEntity.KeyValueEntityFactory keyFactory = KeyValueEntity.createFactory(elementSchema.getPrimaryKeys());
         ids.forEach(id->{
-            Map<String,Object> keyValue = new FixedArrayMap<>(keyMap);
+            final KeyValueEntity keyValue = keyFactory.create();
             elementSchema.getProperties().forEach((k,v)->{
                 if(v.isPrimary()){
                     Object value = MapUtils.getObject(id.unique(),v.getLabel());
                     keyValue.put(v.getField(),value);
                 }
             });
-            rowQueryGet.addRowKey(RowKey.of(keyValue));
+            rowQueryGet.addRowKey(keyValue);
         });
-        setRowQueryProperties(rowQueryGet,DataUtils.newMapWithMaxSize(0),elementSchema);
+        setRowQueryProperties(rowQueryGet,DataUtils.newMapWithMaxSize(0),null,elementSchema);
         return createMappingElement(rowQueryGet,elementSchema);
     }
 
@@ -111,10 +111,12 @@ public abstract class AbstractElementMapper<E extends EngineElement> implements 
     }
 
     @SuppressWarnings("unchecked")
-    ElementMapping createScanMapping(PropertyQueryCondition queryCondition, BaseElementSchema elementSchema, Long start, Long limit){
+    ElementMapping createScanMapping(PropertyQueryCondition queryCondition, BaseElementSchema elementSchema, RowQueryScanKey scanKey, Long start, Long limit){
         RowQueryScan rowQueryRequest = new RowQueryScan();
         rowQueryRequest.setName(elementSchema.getTable());
         Map<String,RowQueryScan.AssociateRowQuery> associateRowQueryMap = new TreeMap<>();
+
+        rowQueryRequest.setScanKey(scanKey);
 
         Set<QMatch.Q> mainCondition = queryCondition.getMainCondition();
         MultiValuedMap<String,BaseRowQuery.AssociateMatch> associateQueryCondition = queryCondition.getAssociateQueryCondition();
@@ -122,8 +124,7 @@ public abstract class AbstractElementMapper<E extends EngineElement> implements 
         elementSchema.getPrimaryKeys().forEach(v->rowQueryRequest.getUniqueField().add(v));
 
         //set property
-        setRowQueryProperties(rowQueryRequest,associateRowQueryMap,elementSchema);
-        //rowQueryRequest.getAssociateQuery().addAll(associateRowQueryMap.values());
+        setRowQueryProperties(rowQueryRequest,associateRowQueryMap,scanKey!=null?Collections.singleton(scanKey.getName()):null,elementSchema);
         //add main query condition
         rowQueryRequest.getMatch().addAll(mainCondition);
 
@@ -139,7 +140,7 @@ public abstract class AbstractElementMapper<E extends EngineElement> implements 
         if(start == null && limit != null){
             rowQueryRequest.setOffset(0L);
         }
-        return createMappingElement(rowQueryRequest,elementSchema);
+        return createMappingElement(rowQueryRequest, elementSchema);
     }
 
     @SuppressWarnings("unchecked")

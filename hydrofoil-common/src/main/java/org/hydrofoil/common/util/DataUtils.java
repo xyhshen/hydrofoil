@@ -33,6 +33,8 @@ public final class DataUtils {
 
     private static final int USE_HASH_MAP_MAX_SIZE = 50;
 
+    private static final int DEFAULT_SIZE = 10;
+
     private DataUtils(){}
 
     @SuppressWarnings("unchecked")
@@ -137,11 +139,19 @@ public final class DataUtils {
         return index < length?IterableUtils.get(c,index):defaultValue;
     }
 
+    public static <K, V> HashMap<K, V> newHashMapWithExpectedSize() {
+        return newHashMapWithExpectedSize(DEFAULT_SIZE);
+    }
+
     public static <K, V> HashMap<K, V> newHashMapWithExpectedSize(final int expectedSize) {
         if(expectedSize == 0){
             return new HashMap<K,V>();
         }
         return new HashMap<K, V>(hashMapCapacity(expectedSize));
+    }
+
+    public static <K> HashSet<K> newHashSetWithExpectedSize() {
+        return newHashSetWithExpectedSize(DEFAULT_SIZE);
     }
 
     public static <K> HashSet<K> newHashSetWithExpectedSize(final int expectedSize) {
@@ -234,6 +244,7 @@ public final class DataUtils {
         return new ArraySet<>(Stream.of(a).collect(Collectors.toSet()));
     }
 
+    @SuppressWarnings("unchecked")
     public static <T,R> Iterator<R> newIterator(final Iterator<T> iterator, final Function<T,R> function){
         return new Iterator<R>() {
             @Override

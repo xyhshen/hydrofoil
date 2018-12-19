@@ -1,8 +1,9 @@
 package org.hydrofoil.core.engine.internal;
 
-import org.apache.commons.collections4.keyvalue.DefaultKeyValue;
 import org.apache.commons.collections4.KeyValue;
+import org.apache.commons.collections4.MultiMapUtils;
 import org.apache.commons.collections4.MultiValuedMap;
+import org.apache.commons.collections4.keyvalue.DefaultKeyValue;
 import org.apache.commons.lang3.StringUtils;
 import org.hydrofoil.common.provider.IDataConnector;
 import org.hydrofoil.common.provider.datasource.BaseRowQuery;
@@ -95,10 +96,13 @@ public final class ConnectRunner<E> {
                         rowQueryResponseIterator = datasource.scanRow(DataUtils.castCollectType(rowQueryRequests));
                     }
                 }
+                //process response
                 while(rowQueryResponseIterator.hasNext()){
                     RowQueryResponse next = rowQueryResponseIterator.next();
-                    elements.addAll(handleFunction.apply(elementMappingMap.get(next.id()),
-                            next));
+                    ParameterUtils.mustTrueException(next.isSucceed(),
+                            "request datasource failed",
+                            next.getException());
+                    elements.addAll(processResponse(elementMappingMap.get(next.id()),next));
                 }
             }
         }catch (Throwable t){
@@ -106,6 +110,29 @@ public final class ConnectRunner<E> {
             return false;
         }
         return true;
+    }
+
+    private Collection<E> processResponse(final ElementMapping mapping,final RowQueryResponse response){
+        if(mapping.getDeriveFunction() == null){
+            return handleFunction.apply(mapping,response);
+        }
+        //derive
+        processDeriveRequest(mapping,response);
+        return handleFunction.apply(mapping,response);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void processDeriveRequest(final ElementMapping mapping, final RowQueryResponse response){
+        final Collection<ElementMapping> deriveMappings = mapping.getDeriveFunction().apply(mapping, response);
+        ParameterUtils.notEmpty(deriveMappings,"derive mapping");
+        deriveMappings.forEach(m->m.setBaseMapping(mapping));
+        for(ElementMapping deriveMapping:deriveMappings){
+            ConnectRunner deriveRunner =  new ConnectRunner(management,deriveMapping.getDeriveHandleFunction());
+            MultiValuedMap<String,ElementMapping> mappings = MultiMapUtils.newListValuedHashMap();
+            mappings.put(deriveMapping.getDatasource(),deriveMapping);
+            ParameterUtils.mustTrueMessage(deriveRunner.select(mappings),
+                    "derive query failed");
+        }
     }
 
     Iterator<E> toIterator(){

@@ -25,16 +25,20 @@ public final class RowStore {
 
     private final String collectSetName;
 
+    private Object extraData;
+
     RowStore(final RowColumnInformation informatio){
         this.rowFull = new Object[informatio.size()];
         this.information = informatio;
         this.collectSetName = null;
+        this.extraData = null;
     }
 
     private RowStore(final RowColumnInformation information, final String collectSetName){
         this.information = information;
         this.collectSetName = collectSetName;
         this.rowFull = new Object[information.size(collectSetName)];
+        this.extraData = null;
     }
 
     /**
@@ -157,4 +161,19 @@ public final class RowStore {
         return StringUtils.isNotBlank(collectSetName);
     }
 
+    /**
+     * @return Object
+     * @see RowStore#extraData
+     **/
+    public Object getExtraData() {
+        return extraData;
+    }
+
+    /**
+     * @param extraData Object
+     * @see RowStore#extraData
+     **/
+    public void setExtraData(Object extraData) {
+        this.extraData = extraData;
+    }
 }

@@ -3,6 +3,7 @@ package org.hydrofoil.common.provider.datasource;
 import org.hydrofoil.common.provider.datasource.response.RowStoreResponse;
 import org.hydrofoil.common.util.DataUtils;
 import org.hydrofoil.common.util.ParameterUtils;
+import org.hydrofoil.common.util.bean.KeyValueEntity;
 
 import java.util.Collection;
 
@@ -19,11 +20,11 @@ public final class RowQueryGet extends BaseRowQuery{
     /**
      * rowkey
      */
-    private Collection<RowKey> rowKeys;
+    private Collection<KeyValueEntity> rowKeys;
 
     public RowQueryGet(){
         super();
-        this.rowKeys = DataUtils.newList();
+        this.rowKeys = DataUtils.newHashSetWithExpectedSize(10);
     }
 
     @SuppressWarnings("unchecked")
@@ -37,7 +38,7 @@ public final class RowQueryGet extends BaseRowQuery{
      * @return RowKey>
      * @see RowQueryGet#rowKeys
      **/
-    public Collection<RowKey> getRowKeys() {
+    public Collection<KeyValueEntity> getRowKeys() {
         return rowKeys;
     }
 
@@ -45,7 +46,7 @@ public final class RowQueryGet extends BaseRowQuery{
      * @param rowkey rowkey
      * @see RowQueryGet#rowKeys
      **/
-    public RowQueryGet addRowKey(RowKey rowkey) {
+    public RowQueryGet addRowKey(KeyValueEntity rowkey) {
         this.rowKeys.add(rowkey);
         return this;
     }

@@ -1,8 +1,10 @@
 package org.hydrofoil.core.engine.internal;
 
+import org.apache.commons.collections4.SetUtils;
 import org.hydrofoil.common.graph.GraphElementId;
 import org.hydrofoil.common.graph.GraphVertexId;
 import org.hydrofoil.common.graph.QMatch;
+import org.hydrofoil.common.provider.datasource.RowQueryScanKey;
 import org.hydrofoil.common.provider.datasource.RowStore;
 import org.hydrofoil.common.schema.BaseElementSchema;
 import org.hydrofoil.common.schema.VertexSchema;
@@ -47,7 +49,17 @@ public final class VertexMapper extends AbstractElementMapper{
         if(propertyQueryCondtion == null){
             return null;
         }
-        return createScanMapping(propertyQueryCondtion,vertexSchema,start,limit);
+        return createScanMapping(propertyQueryCondtion,vertexSchema,null,start,limit);
+    }
+
+    public ElementMapping toMinimumMapping(String label, RowQueryScanKey scanKey, Long start, Long limit){
+        VertexSchema vertexSchema = schemaManager.getVertexSchema(label);
+        //create property query cond
+        final PropertyQueryCondition propertyQueryCondtion = createPropertyQueryCondtion(SetUtils.emptySet(), vertexSchema);
+        if(propertyQueryCondtion == null){
+            return null;
+        }
+        return createScanMapping(propertyQueryCondtion,vertexSchema,scanKey,start,limit);
     }
 
     public EngineVertex rowStoreToVertex(VertexSchema vertexSchema, RowStore rowStore){

@@ -148,9 +148,6 @@ public abstract class AbstractGraphQueryRunner <E,T extends IGraphQueryRunner> i
     }
 
     private Collection<E> handleRowRequest(ElementMapping mapping, RowQueryResponse response){
-        ParameterUtils.mustTrueException(response.isSucceed(),
-                "request datasource failed",
-                response.getException());
         Iterable<RowStore> rowStores = response.getRows();
         List<E> elements = new ArrayList<>(0);
         rowStores.forEach((row)->{

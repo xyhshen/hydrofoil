@@ -28,6 +28,11 @@ public final class RowQueryScan extends BaseRowQuery {
     private Set<String> uniqueField;
 
     /**
+     * scan key
+     */
+    private RowQueryScanKey scanKey;
+
+    /**
      * start pos
      */
     private Long offset;
@@ -40,7 +45,7 @@ public final class RowQueryScan extends BaseRowQuery {
     public RowQueryScan(){
         super();
         this.uniqueField = DataUtils.newSetWithMaxSize(0);
-        this.match = DataUtils.newSetWithMaxSize(0);
+        this.match = DataUtils.newHashSetWithExpectedSize(0);
         this.offset = 0L;
         this.limit = Long.MAX_VALUE;
     }
@@ -102,4 +107,20 @@ public final class RowQueryScan extends BaseRowQuery {
         return this;
     }
 
+    /**
+     * @return RowQueryScanKey
+     * @see RowQueryScan#scanKey
+     **/
+    public RowQueryScanKey getScanKey() {
+        return scanKey;
+    }
+
+    /**
+     * @param scanKey RowQueryScanKey
+     * @see RowQueryScan#scanKey
+     **/
+    public RowQueryScan setScanKey(RowQueryScanKey scanKey) {
+        this.scanKey = scanKey;
+        return this;
+    }
 }

@@ -16,12 +16,12 @@ import java.util.*;
  * @author xie_yh
  * @date 2018/11/8 18:53
  */
-public abstract class BaseRowQuery{
+public abstract class BaseRowQuery {
 
     /**
      * Associate match
      */
-    public static final class AssociateMatch{
+    public static final class AssociateMatch {
 
         /**
          * query match
@@ -42,7 +42,7 @@ public abstract class BaseRowQuery{
                 QMatch.Q match,
                 String name,
                 String joinField
-        ){
+        ) {
             this.match = match;
             this.name = name;
             this.joinField = joinField;
@@ -80,12 +80,12 @@ public abstract class BaseRowQuery{
         }
 
         @Override
-        public int hashCode(){
-            return Objects.hash(match,name, joinField);
+        public int hashCode() {
+            return Objects.hash(match, name, joinField);
         }
     }
 
-    public static final class AssociateRowQuery{
+    public static final class AssociateRowQuery {
         /**
          * Associate collect set name
          */
@@ -106,7 +106,7 @@ public abstract class BaseRowQuery{
          */
         private boolean onlyQueries;
 
-        public AssociateRowQuery(){
+        public AssociateRowQuery() {
             this.match = DataUtils.newHashSetWithExpectedSize(0);
         }
 
@@ -169,8 +169,18 @@ public abstract class BaseRowQuery{
             return this;
         }
 
-        public boolean hasNoneQuery(){
-            return match.stream().filter(p->StringUtils.isBlank(p.joinField)).count() > 0;
+        public boolean hasNoneQuery() {
+            return match.stream().filter(p -> StringUtils.isBlank(p.joinField)).count() > 0;
+        }
+
+        @Override
+        public int hashCode(){
+            return Objects.hash(name);
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            return obj instanceof AssociateRowQuery && StringUtils.equalsIgnoreCase(((AssociateRowQuery) obj).name, name);
         }
     }
 
@@ -192,10 +202,10 @@ public abstract class BaseRowQuery{
     /**
      * associate row query
      */
-    private List<AssociateRowQuery> associateQuery;
+    private Set<AssociateRowQuery> associateQuery;
 
-    BaseRowQuery(){
-        this.associateQuery = DataUtils.newList();
+    BaseRowQuery() {
+        this.associateQuery = DataUtils.newHashSetWithExpectedSize(0);
         this.columnInformation = new RowColumnInformation();
         this.id = RandomUtils.nextLong();
     }
@@ -229,7 +239,7 @@ public abstract class BaseRowQuery{
      * @return AssociateRowQuery>
      * @see BaseRowQuery#associateQuery
      **/
-    public List<AssociateRowQuery> getAssociateQuery() {
+    public Collection<AssociateRowQuery> getAssociateQuery() {
         return associateQuery;
     }
 
@@ -243,6 +253,7 @@ public abstract class BaseRowQuery{
 
     /**
      * create a row response
+     *
      * @param o result,RowStore collect
      * @return response
      */
@@ -250,20 +261,22 @@ public abstract class BaseRowQuery{
 
     /**
      * create count request
+     *
      * @param count total
      * @return count response
      */
-    public RowCountResponse createCountResponse(final Long count){
-        return new RowCountResponse(getId(),count);
+    public RowCountResponse createCountResponse(final Long count) {
+        return new RowCountResponse(getId(), count);
     }
 
     /**
      * create count request by group
+     *
      * @param countMap group count
      * @return result
      */
-    public RowCountResponse createCountResponse(final Map<String,Long> countMap){
-        return new RowCountResponse(getId(),countMap);
+    public RowCountResponse createCountResponse(final Map<String, Long> countMap) {
+        return new RowCountResponse(getId(), countMap);
     }
 
 }
