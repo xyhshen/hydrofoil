@@ -121,8 +121,13 @@
             </properties>
         </edge>
         <edge label="client.matching" table="match">
-            <source label="team" field="client.team.id=team_id" />
-            <target label="match" field="match.id=match_id;event.id=sport_event_id" />
+            <source label="team">
+                <connection edge="client.team.id" vertex="client.team.id"/>
+            </source>
+            <target label="match">
+                <connection edge="match.id" vertex="match.id"/>
+                <connection edge="event.id" vertex="event.id"/>
+            </target>
             <properties>
                 <property primary="true" label="match.id" field="match_id" />
                 <property primary="true" label="event.id" field="sport_event_id" />

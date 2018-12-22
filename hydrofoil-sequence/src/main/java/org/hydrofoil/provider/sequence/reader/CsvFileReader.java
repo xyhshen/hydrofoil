@@ -38,8 +38,9 @@ public class CsvFileReader implements IFileReader {
         reader.readRecord();
         String[] columns = reader.getValues();
         ParameterUtils.mustTrue(ArrayUtils.isNotEmpty(columns));
-        String tableName = DataUtils.lookup(tableSchemas,0).getRealName();
-        FileTable fileTable = new FileTable(tableName);
+        final TableSchema tableSchema = DataUtils.lookup(tableSchemas, 0);
+        String tableName = tableSchema.getRealName();
+        FileTable fileTable = new FileTable(tableSchema);
         for(int i = 0;i < columns.length;i++){
             fileTable.getHeader().put(columns[i],i);
         }

@@ -1,11 +1,12 @@
 package org.hydrofoil.common.schema;
 
 import org.dom4j.Element;
-import org.hydrofoil.common.util.FieldUtils;
 import org.hydrofoil.common.util.ParameterUtils;
 import org.hydrofoil.common.util.XmlUtils;
 
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * EdgeSchema
@@ -20,8 +21,45 @@ public final class EdgeSchema extends BaseElementSchema {
     private static final String NODE_EDGE_SOURCE_ELEMENT = "source";
     private static final String NODE_EDGE_TARGET_ELEMENT = "target";
 
+    private static final String NODE_EDGE_CONNECTION_ELEMENT = "connection";
+
+    private static final String ATTR_EDGE_CONNECTION_VERTEX = "vertex";
+    private static final String ATTR_EDGE_CONNECTION_EDGE = "edge";
+
     private static final String ATTR_EDGE_VERTEX_LABEL = "label";
     private static final String ATTR_EDGE_VERTEX_PROPERTY = "property";
+
+    public static class EdgeConnection{
+
+        private final String vertexPropertyLabel;
+
+        private final String edgePropertyLabel;
+
+        private EdgeConnection(final String vertexPropertyLabel,final String edgePropertyLabel){
+            this.vertexPropertyLabel = vertexPropertyLabel;
+            this.edgePropertyLabel = edgePropertyLabel;
+        }
+
+        /**
+         * @return String
+         * @see EdgeConnection#vertexPropertyLabel
+         **/
+        public String getVertexPropertyLabel() {
+            return vertexPropertyLabel;
+        }
+
+        /**
+         * @return String
+         * @see EdgeConnection#edgePropertyLabel
+         **/
+        public String getEdgePropertyLabel() {
+            return edgePropertyLabel;
+        }
+    }
+
+    private Collection<EdgeConnection> sourceConnections;
+
+    private Collection<EdgeConnection> targetConnections;
 
     public EdgeSchema(){}
 
@@ -36,19 +74,26 @@ public final class EdgeSchema extends BaseElementSchema {
         ParameterUtils.notNull(target);
 
         String sourceLabel = XmlUtils.attributeStringValue(source,ATTR_EDGE_VERTEX_LABEL);
-        Map<String, String> sourceProperty = FieldUtils.toMap(XmlUtils.attributeStringValue(source,ATTR_EDGE_VERTEX_PROPERTY));
-        String targetLabel = XmlUtils.attributeStringValue(target,ATTR_EDGE_VERTEX_LABEL);
-        Map<String, String> targetProperty = FieldUtils.toMap(XmlUtils.attributeStringValue(target,ATTR_EDGE_VERTEX_PROPERTY));
+        String targetLabel = XmlUtils.attributeStringValue(target,ATTR_EDGE_VERTEX_LABEL);;
 
         ParameterUtils.notBlank(sourceLabel);
-        ParameterUtils.mustTrue(!sourceProperty.isEmpty());
         ParameterUtils.notBlank(targetLabel);
-        ParameterUtils.mustTrue(!targetProperty.isEmpty());
 
         putItem("source-" + ATTR_EDGE_VERTEX_LABEL,sourceLabel);
-        putItem("source-" + ATTR_EDGE_VERTEX_PROPERTY,sourceProperty);
+        sourceConnections = loadConnection(source);
         putItem("target-" + ATTR_EDGE_VERTEX_LABEL,targetLabel);
-        putItem("target-" + ATTR_EDGE_VERTEX_PROPERTY,targetProperty);
+        targetConnections = loadConnection(target);
+    }
+
+    private Collection<EdgeConnection> loadConnection(final Element node){
+        final List<Element> elements = XmlUtils.listElement(node, NODE_EDGE_CONNECTION_ELEMENT);
+        Collection<EdgeConnection> connections = new ArrayList<>(elements.size());
+        for(Element element:elements){
+            String vertexPropertyLabel = ParameterUtils.notBlank(XmlUtils.attributeStringValue(element,ATTR_EDGE_CONNECTION_VERTEX));
+            String edgePropertyLabel = ParameterUtils.notBlank(XmlUtils.attributeStringValue(element,ATTR_EDGE_CONNECTION_EDGE));
+            connections.add(new EdgeConnection(vertexPropertyLabel,edgePropertyLabel));
+        }
+        return connections;
     }
 
     /**
@@ -63,8 +108,8 @@ public final class EdgeSchema extends BaseElementSchema {
      * get source vertex field
      * @return k,v->(vertex property label,table field name)
      */
-    public Map<String,String> getSourceProperties(){
-        return getItemMap("source-" + ATTR_EDGE_VERTEX_PROPERTY);
+    public Collection<EdgeConnection> getSourceConnections(){
+        return sourceConnections;
     }
 
     /**
@@ -79,8 +124,8 @@ public final class EdgeSchema extends BaseElementSchema {
      * get target vertex field
      * @return k,v->(vertex property label,table field name)
      */
-    public Map<String,String> getTargetProperties(){
-        return getItemMap("target-" + ATTR_EDGE_VERTEX_PROPERTY);
+    public Collection<EdgeConnection> getTargetConnections(){
+        return targetConnections;
     }
 
 }

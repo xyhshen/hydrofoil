@@ -1,6 +1,9 @@
 package org.hydrofoil.provider.sequence;
 
+import org.hydrofoil.common.schema.ColumnSchema;
+import org.hydrofoil.common.schema.TableSchema;
 import org.hydrofoil.common.util.DataUtils;
+import org.hydrofoil.common.util.SqlUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +22,7 @@ public final class FileTable {
     /**
      * table name
      */
-    private String tableName;
+    private TableSchema tableSchema;
 
     /**
      * table header
@@ -31,12 +34,12 @@ public final class FileTable {
      */
     private List<FileRow> rows;
 
-    public FileTable(String tableName){
-        this(tableName,20);
+    public FileTable(TableSchema tableSchema){
+        this(tableSchema,20);
     }
 
-    public FileTable(String tableName,int rowCount){
-        this.tableName = tableName;
+    public FileTable(TableSchema tableSchema,int rowCount){
+        this.tableSchema = tableSchema;
         this.header = DataUtils.newMapWithMaxSize(10);
         this.rows = new ArrayList<>(rowCount);
     }
@@ -44,10 +47,10 @@ public final class FileTable {
 
     /**
      * @return String
-     * @see FileTable#tableName
+     * @see FileTable#tableSchema
      **/
     public String getTableName() {
-        return tableName;
+        return tableSchema.getRealName();
     }
 
     /**
@@ -62,7 +65,16 @@ public final class FileTable {
      * put a row
      * @param row row
      */
-    public void putRow(String[] row){
+    public void putRow(Object[] row){
+        final Map<String, ColumnSchema> columnMap = tableSchema.getColumns();
+        columnMap.values().forEach(columnSchema -> {
+            Integer i = header.get(columnSchema.getColumnName());
+            try {
+                row[i] = SqlUtils.rawDataToAcceptData(columnSchema,row[i]);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
         rows.add(new FileRow(row,header));
     }
 

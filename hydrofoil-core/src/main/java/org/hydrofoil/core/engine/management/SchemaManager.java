@@ -6,6 +6,7 @@ import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.collections4.SetValuedMap;
 import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.dom4j.Element;
@@ -16,6 +17,8 @@ import org.hydrofoil.common.schema.*;
 import org.hydrofoil.common.util.DataUtils;
 import org.hydrofoil.common.util.ParameterUtils;
 import org.hydrofoil.common.util.XmlUtils;
+import org.hydrofoil.common.util.bean.KeyValueEntity;
+import org.hydrofoil.core.engine.management.schema.EdgeVertexConnectionInformation;
 
 import java.io.InputStream;
 import java.util.*;
@@ -78,9 +81,11 @@ public final class SchemaManager {
      */
     private final Map<String,Pair<Collection<String>,Collection<String>>> vertexEdgeSchemaMap;
 
+    private final Map<String,Pair<EdgeVertexConnectionInformation,EdgeVertexConnectionInformation>> edgeVertexPropertySetMap;
+
 
     SchemaManager(){
-        dataSourceSchemaMap = DataUtils.newHashMapWithExpectedSize(10);
+        dataSourceSchemaMap = DataUtils.newHashMapWithExpectedSize();
         tableSchemaMap = DataUtils.newHashMapWithExpectedSize(50);
         packageSchemaMap = DataUtils.newHashMapWithExpectedSize(50);
         vertexSchemaMap = DataUtils.newHashMapWithExpectedSize(50);
@@ -88,6 +93,7 @@ public final class SchemaManager {
         vertexEdgeSchemaMap = DataUtils.newHashMapWithExpectedSize(50);
         dataSourceTableMap = MultiMapUtils.newSetValuedHashMap();
         dataSourcePackageMap = MultiMapUtils.newSetValuedHashMap();
+        edgeVertexPropertySetMap = DataUtils.newHashMapWithExpectedSize();
     }
 
     /**
@@ -174,6 +180,49 @@ public final class SchemaManager {
             CollectionUtils.emptyIfNull(outSchema).forEach((v)->outLabelSet.add(v.getLabel()));
             vertexEdgeSchemaMap.put(vertexLabel,Pair.of(inLabelSet,outLabelSet));
         });
+        edgeSchemaMap.values().forEach(edgeSchema -> {
+            Pair<EdgeVertexConnectionInformation,EdgeVertexConnectionInformation> pair;
+            pair = Pair.of(
+                    createEdgeVertexPropertiesSet(edgeSchema,true),
+                    createEdgeVertexPropertiesSet(edgeSchema,false)
+            );
+            edgeVertexPropertySetMap.put(edgeSchema.getLabel(),pair);
+        });
+    }
+
+    private EdgeVertexConnectionInformation createEdgeVertexPropertiesSet(final EdgeSchema edgeSchema, final boolean source){
+        EdgeVertexConnectionInformation information = new EdgeVertexConnectionInformation();
+        VertexSchema vertexSchema = vertexSchemaMap.get(source?edgeSchema.getSourceLabel():edgeSchema.getTargetLabel());
+        Collection<EdgeSchema.EdgeConnection> connections = source?edgeSchema.getSourceConnections():edgeSchema.getTargetConnections();
+        boolean inMainTable = true;
+        for(EdgeSchema.EdgeConnection connection:connections){
+            PropertySchema vertexProperty = vertexSchema.getProperties().get(connection.getVertexPropertyLabel());
+            PropertySchema edgeProperty = edgeSchema.getProperties().get(connection.getVertexPropertyLabel());
+            ParameterUtils.mustTrue(ObjectUtils.allNotNull(vertexProperty,edgeProperty));
+            //edge property
+            information.getEdgeProperties().add(edgeProperty.getLabel());
+            //vertex properties
+            information.getVertexProperties().add(edgeProperty.getLabel());
+            //vertex and edge,property
+            information.getVertexEdgeProperties().add(Pair.of(vertexProperty,edgeProperty));
+            //
+            information.getVertex2EdgePropertyFields().put(vertexProperty.getField(),edgeProperty.getField());
+            //
+            information.getVertexField2EdgeProperty().add(Pair.of(vertexProperty.getField(),edgeProperty.getLabel()));
+            //
+            information.getEdgeFieldProperty().add(Pair.of(edgeProperty.getField(),edgeProperty.getLabel()));
+            if(!StringUtils.isBlank(vertexProperty.getLinkTable())){
+                inMainTable = false;
+                information.setTableName(vertexProperty.getLinkTable());
+            }
+        }
+        information.setEdgePropertyFactory(KeyValueEntity.createFactory(information.getEdgeProperties()));
+        information.setMainTable(inMainTable);
+        information.setPrimaryKey(CollectionUtils.isEqualCollection(
+                information.getVertexProperties(),
+                vertexSchema.getPrimaryKeys()
+                ));
+        return information;
     }
 
     private void loadMapper(final InputStream is) throws Exception{
@@ -210,25 +259,12 @@ public final class SchemaManager {
         return edgeSchemaMap.get(label);
     }
 
-    public Collection<Pair<PropertySchema,PropertySchema>> getEdgeVertexProperties(final String label,final boolean source){
-        final EdgeSchema edgeSchema = edgeSchemaMap.get(label);
-        final Map<String, String> edgeVertexProperties;
-        final String vertexLabel;
-        if(source){
-            edgeVertexProperties = edgeSchema.getSourceProperties();
-            vertexLabel = edgeSchema.getSourceLabel();
-        }else{
-            edgeVertexProperties = edgeSchema.getTargetProperties();
-            vertexLabel = edgeSchema.getTargetLabel();
+    public EdgeVertexConnectionInformation getEdgeVertexPropertySet(final String label, boolean source){
+        final Pair<EdgeVertexConnectionInformation, EdgeVertexConnectionInformation> pair = edgeVertexPropertySetMap.get(label);
+        if(pair == null){
+            return null;
         }
-
-        final Map<String, PropertySchema> vertexProperties = vertexSchemaMap.get(vertexLabel).getProperties();
-        final Map<String, PropertySchema> edgeProperties = edgeSchemaMap.get(label).getProperties();
-        List<Pair<PropertySchema,PropertySchema>> properties = new ArrayList<>(edgeVertexProperties.size());
-        for(Map.Entry<String,String> entry:edgeVertexProperties.entrySet()){
-            properties.add(Pair.of(vertexProperties.get(entry.getKey()),edgeProperties.get(entry.getValue())));
-        }
-        return properties;
+        return source?pair.getLeft():pair.getRight();
     }
 
     /**

@@ -24,6 +24,39 @@ import java.util.function.BiPredicate;
  */
 public final class TinkerpopElementUtils {
 
+    private static final class EmptyElement implements Element{
+
+        @Override
+        public Object id() {
+            return null;
+        }
+
+        @Override
+        public String label() {
+            return null;
+        }
+
+        @Override
+        public Graph graph() {
+            return null;
+        }
+
+        @Override
+        public <V> Property<V> property(String key, V value) {
+            return null;
+        }
+
+        @Override
+        public void remove() {
+
+        }
+
+        @Override
+        public <V> Iterator<? extends Property<V>> properties(String... propertyKeys) {
+            return null;
+        }
+    }
+
     private static EmptyElement EMPTY_ELEMENT = new EmptyElement();
 
     public static EdgeDirection toStdDirection(Direction direction){
@@ -102,38 +135,5 @@ public final class TinkerpopElementUtils {
 
     public static Element emptyElement(){
         return EMPTY_ELEMENT;
-    }
-}
-
-final class EmptyElement implements Element{
-
-    @Override
-    public Object id() {
-        return null;
-    }
-
-    @Override
-    public String label() {
-        return null;
-    }
-
-    @Override
-    public Graph graph() {
-        return null;
-    }
-
-    @Override
-    public <V> Property<V> property(String key, V value) {
-        return null;
-    }
-
-    @Override
-    public void remove() {
-
-    }
-
-    @Override
-    public <V> Iterator<? extends Property<V>> properties(String... propertyKeys) {
-        return null;
     }
 }

@@ -34,13 +34,6 @@ interface PropertyHeper extends MapperHelper {
                 filter(p -> labels.contains(p.pair().name())).count() == 0;
     }
 
-    default boolean propertiesInMainTable(final BaseElementSchema elementSchema, final Collection<String> propertyLabels){
-        final Map<String, PropertySchema> properties = elementSchema.getProperties();
-        return propertyLabels.stream().filter(label->{
-            return !isPropertyInMainTable(properties.get(label));
-        }).count() == 0;
-    }
-
     default PropertyQueryCondition createPropertyQueryCondtion(final Set<QMatch.Q> propertyQuerySet, final BaseElementSchema elementSchema) {
         PropertyQueryCondition queryCondition = new PropertyQueryCondition();
         if (invalidProperties(propertyQuerySet, elementSchema)) {

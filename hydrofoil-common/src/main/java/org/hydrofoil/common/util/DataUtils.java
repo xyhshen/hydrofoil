@@ -223,6 +223,31 @@ public final class DataUtils {
     }
 
     public static <E> Iterator<E> newCountIterator(final int count,final E empty){
+        class CountIterator<E> implements Iterator<E>{
+
+            private final long total;
+
+            private long current;
+
+            private final E empty;
+
+            private CountIterator(final long count, final E empty){
+                this.total = count;
+                this.empty = empty;
+                this.current = 0;
+            }
+
+            @Override
+            public boolean hasNext() {
+                return current < total;
+            }
+
+            @Override
+            public E next() {
+                current++;
+                return empty;
+            }
+        }
         return new CountIterator<>(count,empty);
     }
 
@@ -265,30 +290,4 @@ public final class DataUtils {
         return c.stream().map(v->(B)v).collect(Collectors.toList());
     }
 
-}
-
-class CountIterator<E> implements Iterator<E>{
-
-    private final long total;
-
-    private long current;
-
-    private final E empty;
-
-    CountIterator(final long count,final E empty){
-        this.total = count;
-        this.empty = empty;
-        this.current = 0;
-    }
-
-    @Override
-    public boolean hasNext() {
-        return current < total;
-    }
-
-    @Override
-    public E next() {
-        current++;
-        return empty;
-    }
 }

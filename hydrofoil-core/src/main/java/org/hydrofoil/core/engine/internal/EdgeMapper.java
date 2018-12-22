@@ -17,10 +17,13 @@ import org.hydrofoil.common.schema.EdgeSchema;
 import org.hydrofoil.common.schema.PropertySchema;
 import org.hydrofoil.common.schema.VertexSchema;
 import org.hydrofoil.common.util.DataUtils;
+import org.hydrofoil.common.util.ParameterUtils;
 import org.hydrofoil.common.util.bean.KeyValueEntity;
 import org.hydrofoil.core.engine.EngineEdge;
+import org.hydrofoil.core.engine.EngineProperty;
 import org.hydrofoil.core.engine.EngineVertex;
 import org.hydrofoil.core.engine.management.SchemaManager;
+import org.hydrofoil.core.engine.management.schema.EdgeVertexConnectionInformation;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -55,44 +58,49 @@ public class EdgeMapper extends AbstractElementMapper {
 
     private boolean useOtherContactEdgeProperty(final EdgeSchema edgeSchema,final boolean sourceVertex){
         String label;
-        Map<String,String> fieldMap;
-        if(sourceVertex){
-            fieldMap = edgeSchema.getSourceProperties();
-            label = edgeSchema.getSourceLabel();
-        }else{
-            fieldMap = edgeSchema.getTargetProperties();
-            label = edgeSchema.getSourceLabel();
-        }
-
-        final VertexSchema vertexSchema = schemaManager().getVertexSchema(label);
-        if(CollectionUtils.isEqualCollection(
-                vertexSchema.getPrimaryKeys(),
-                fieldMap.keySet()
-        )){
-            return false;
-        }
-        return true;
+        final EdgeVertexConnectionInformation edgeVertexConnectionInformation =
+                (EdgeVertexConnectionInformation) ParameterUtils.notNull(
+                schemaManager.getEdgeVertexPropertySet(edgeSchema.getLabel(), sourceVertex));
+        return edgeVertexConnectionInformation.isPrimaryKey();
     }
 
     private class EdgeContext{
-
-        private Collection<EngineVertex> vertices;
 
         private String label;
 
         private EdgeDirection direction;
 
+        private Map<KeyValueEntity,GraphVertexId> sourceVertexIds;
+
+        private Map<KeyValueEntity,GraphVertexId> targetVertexIds;
+
     }
 
-    private ElementMapping createQueryDeriveVertexMapping(final String vertexLabel,final EdgeSchema edgeSchema,final Map<String,String> edgeVertexProperies,final Collection<Pair<PropertySchema,PropertySchema>> propertySchemas,final Iterable<RowStore> rows){
+    private class VertexContext{
+
+        private String label;
+
+        private boolean source;
+
+        private String tableName;
+
+        private EdgeVertexConnectionInformation edgeVertexConnectionInformation;
+    }
+
+    private ElementMapping createQueryDeriveVertexMapping(
+            final boolean source,
+            final String vertexLabel,
+            final EdgeSchema edgeSchema,
+            final EdgeVertexConnectionInformation edgeVertexConnectionInformation,
+            final Iterable<RowStore> rows){
         final VertexMapper vertexMapper = new VertexMapper(schemaManager);
         final VertexSchema vertexSchema = schemaManager.getVertexSchema(vertexLabel);
         //get properties is main table
-        final boolean inMain = propertiesInMainTable(vertexSchema,edgeVertexProperies.keySet());
         Set<KeyValueEntity> keyValueEntities = DataUtils.newHashSetWithExpectedSize();
-        final Set<String> vertexProperties = edgeVertexProperies.keySet();
-        final KeyValueEntity.KeyValueEntityFactory keyFactory = KeyValueEntity.createFactory(vertexProperties);
-        String vertexPropertylinkTable = null;
+        final Collection<String> vertexFields = edgeVertexConnectionInformation.getVertexFields();
+        final KeyValueEntity.KeyValueEntityFactory keyFactory = KeyValueEntity.createFactory(vertexFields);
+        String vertexPropertylinkTable = edgeVertexConnectionInformation.getTableName();
+        final Collection<Pair<PropertySchema, PropertySchema>> propertySchemas = edgeVertexConnectionInformation.getVertexEdgeProperties();
         //get all property
         //parse row store
         for(RowStore row:rows){
@@ -107,27 +115,36 @@ public class EdgeMapper extends AbstractElementMapper {
                     value = row.value(edgeProperty.getLinkTable(),edgeProperty.getField());
                 }
                 keyValue.put(vertexProperty.getField(),value);
-                vertexPropertylinkTable = vertexProperty.getLinkTable();
             }
             keyValueEntities.add(keyValue);
         }
 
+        VertexContext vertexContext = new VertexContext();
         //to vertex mapping
-        return vertexMapper.toMinimumMapping(vertexSchema.getLabel(),new RowQueryScanKey(vertexPropertylinkTable,keyFactory,keyValueEntities), null, null);
+        final ElementMapping elementMapping = vertexMapper.toMinimumMapping(vertexSchema.getLabel(), new RowQueryScanKey(vertexPropertylinkTable,
+                keyFactory, keyValueEntities), null, null);
+        ParameterUtils.notNull(vertexContext);
+        elementMapping.setContext(vertexContext);
+        vertexContext.tableName = vertexPropertylinkTable;
+        vertexContext.label = vertexLabel;
+        vertexContext.source = source;
+        vertexContext.edgeVertexConnectionInformation = edgeVertexConnectionInformation;
+
+        return elementMapping;
     }
 
     private Collection<ElementMapping> createDeriveMapping(final ElementMapping mapping, final RowQueryResponse response){
         final EdgeContext edgeContext = (EdgeContext) mapping.getContext();
         final EdgeSchema edgeSchema = schemaManager.getEdgeSchema(edgeContext.label);
         List<ElementMapping> elementMappings = new ArrayList<>();
-        if(edgeContext.direction == EdgeDirection.In|| edgeContext.vertices == null){
-            elementMappings.add(createQueryDeriveVertexMapping(edgeSchema.getTargetLabel(),edgeSchema,edgeSchema.getTargetProperties(),
-                    schemaManager.getEdgeVertexProperties(edgeSchema.getLabel(),false),
+        if(edgeContext.direction == EdgeDirection.In || edgeContext.targetVertexIds == null){
+            elementMappings.add(createQueryDeriveVertexMapping(false,edgeSchema.getTargetLabel(),edgeSchema,
+                    schemaManager.getEdgeVertexPropertySet(edgeSchema.getLabel(),false),
                     response.getRows()));
         }
-        if(edgeContext.direction == EdgeDirection.Out|| edgeContext.vertices == null){
-            elementMappings.add(createQueryDeriveVertexMapping(edgeSchema.getSourceLabel(),edgeSchema,edgeSchema.getSourceProperties(),
-                    schemaManager.getEdgeVertexProperties(edgeSchema.getLabel(),true),
+        if(edgeContext.direction == EdgeDirection.Out || edgeContext.sourceVertexIds == null){
+            elementMappings.add(createQueryDeriveVertexMapping(true,edgeSchema.getSourceLabel(),edgeSchema,
+                    schemaManager.getEdgeVertexPropertySet(edgeSchema.getLabel(),true),
                     response.getRows()));
         }
         return elementMappings;
@@ -135,28 +152,70 @@ public class EdgeMapper extends AbstractElementMapper {
 
     private Collection<?> handleDeriveResponse(final ElementMapping mapping, final RowQueryResponse response){
         EdgeContext edgeContext = (EdgeContext) mapping.getBaseMapping().getContext();
-        Map<KeyValueEntity,GraphVertexId> key2VertexId = DataUtils.newHashMapWithExpectedSize();
+        VertexContext vertexContext = (VertexContext) mapping.getContext();
+        Map<KeyValueEntity,GraphVertexId> key2VertexIds = DataUtils.newHashMapWithExpectedSize();
+        VertexSchema vertexSchema = schemaManager.getVertexSchema(vertexContext.label);
+        String table = StringUtils.isBlank(vertexContext.tableName)?vertexSchema.getTable():vertexContext.tableName;
+        final KeyValueEntity.KeyValueEntityFactory keyFactory = KeyValueEntity.createFactory(vertexContext.edgeVertexConnectionInformation.getEdgeProperties());
+        final Collection<Pair<String, String>> vertexField2EdgeProperty = vertexContext.edgeVertexConnectionInformation.getVertexField2EdgeProperty();
         for(RowStore store:response.getRows()){
-
+            final KeyValueEntity keyValueEntity = keyFactory.create();
+            vertexField2EdgeProperty.forEach(pair->{
+                keyValueEntity.put(pair.getRight(),store.value(table,pair.getLeft()));
+            });
+            key2VertexIds.put(keyValueEntity, (GraphVertexId) rowElementToId(vertexSchema,store,GraphVertexId.class));
         }
+        if(vertexContext.source){
+            edgeContext.sourceVertexIds = key2VertexIds;
+        }else{
+            edgeContext.targetVertexIds = key2VertexIds;
+        }
+        return Collections.singleton(edgeContext);
+    }
+
+    private Map<KeyValueEntity,GraphVertexId> getVertexPropertyMap(final EdgeSchema edgeSchema,final boolean source,final Collection<EngineVertex> vertices){
+        Map<KeyValueEntity,GraphVertexId> keyIds = DataUtils.newHashMapWithExpectedSize(vertices.size());
+        final EdgeVertexConnectionInformation edgeVertexConnectionInformation = schemaManager.getEdgeVertexPropertySet(edgeSchema.getLabel(), source);
+        KeyValueEntity.KeyValueEntityFactory keyFactory = edgeVertexConnectionInformation.getEdgePropertyFactory();
+        for(EngineVertex vertex:vertices){
+            final KeyValueEntity keyValueEntity = keyFactory.create();
+            final Collection<Pair<PropertySchema, PropertySchema>> vertexEdgeProperties = edgeVertexConnectionInformation.
+                    getVertexEdgeProperties();
+            for(Pair<PropertySchema, PropertySchema> pair:vertexEdgeProperties){
+                final EngineProperty property = vertex.property(pair.getLeft().getLabel());
+                if(property == null){
+                    continue;
+                }
+                keyValueEntity.put(pair.getRight().getLabel(),property.property().content());
+            }
+        }
+        return keyIds;
     }
 
     private ElementMapping wrapLinkQuery(final ElementMapping mapping,final String label,final EdgeDirection direction,final Collection<EngineVertex> vertices){
         final EdgeSchema edgeSchema = schemaManager.getEdgeSchema(label);
         final VertexSchema sourceVertexSchema = schemaManager.getVertexSchema(edgeSchema.getSourceLabel());
         final VertexSchema targetVertexSchema = schemaManager.getVertexSchema(edgeSchema.getTargetLabel());
-        if(CollectionUtils.isEqualCollection(sourceVertexSchema.getPrimaryKeys(),edgeSchema.getSourceProperties().keySet()) &&
-                CollectionUtils.isEqualCollection(targetVertexSchema.getPrimaryKeys(),edgeSchema.getTargetProperties().keySet())){
+        if(useOtherContactEdgeProperty(edgeSchema,true)
+                &&useOtherContactEdgeProperty(edgeSchema,false)){
             return mapping;
         }
 
         EdgeContext edgeContext = new EdgeContext();
-        edgeContext.vertices = vertices;
         edgeContext.label = label;
         edgeContext.direction = direction;
         mapping.setContext(edgeContext);
         mapping.setDeriveFunction(this::createDeriveMapping);
         mapping.setDeriveHandleFunction(this::handleDeriveResponse);
+
+        //set already exist vertex
+        if(vertices != null){
+            if(direction == EdgeDirection.In){
+                edgeContext.targetVertexIds = getVertexPropertyMap(edgeSchema,false,vertices);
+            }else{
+                edgeContext.sourceVertexIds = getVertexPropertyMap(edgeSchema,true,vertices);
+            }
+        }
 
         return mapping;
     }
@@ -172,14 +231,14 @@ public class EdgeMapper extends AbstractElementMapper {
         if(CollectionUtils.isNotEmpty(vertices)){
             //if not empty
             //process vertex
-            Map<String,String> fields;
+            Collection<EdgeSchema.EdgeConnection> connections;
             //is use primary key
             boolean useOtherProperty = useOtherContactEdgeProperty(edgeSchema,direction != EdgeDirection.In);
             //get edge and vertex property
             if(direction == EdgeDirection.In){
-                fields = edgeSchema.getTargetProperties();
+                connections = edgeSchema.getTargetConnections();
             }else{
-                fields = edgeSchema.getSourceProperties();
+                connections = edgeSchema.getSourceConnections();
             }
             //property to field
             final Map<String, Pair<String,String>> property2Field = getPropertyToFieldMapOfElement(edgeSchema);
@@ -195,17 +254,17 @@ public class EdgeMapper extends AbstractElementMapper {
             Set<KeyValueEntity> valueEntities = DataUtils.newHashSetWithExpectedSize(vertices.size());
             for(EngineVertex vertex:vertices) {
                 final KeyValueEntity keyValue = keyFactory.create();
-                fields.forEach((vertexPropertyLabel,edgePropertyLabel)->{
+                connections.forEach((connection)->{
                     Object value;
                     if (useOtherProperty) {
-                        value = vertex.property(vertexPropertyLabel).property().content();
+                        value = vertex.property(connection.getVertexPropertyLabel()).property().content();
                     } else {
-                        value = MapUtils.getObject(vertex.elementId().unique(),vertexPropertyLabel);
+                        value = MapUtils.getObject(vertex.elementId().unique(),connection.getVertexPropertyLabel());
                     }
                     if(null == value){
                         return;
                     }
-                    keyValue.put(property2Field.get(edgePropertyLabel).getValue(),value);
+                    keyValue.put(property2Field.get(connection.getEdgePropertyLabel()).getValue(),value);
                 });
                 valueEntities.add(keyValue);
             }
@@ -264,26 +323,49 @@ public class EdgeMapper extends AbstractElementMapper {
         return elementMappings;
     }
 
-    GraphVertexId[] getEdgeVertexId(EdgeSchema edgeSchema, RowStore rowStore){
+    private KeyValueEntity getEdgeProperties(String tableName,Collection<Pair<String,String>> edgeFieldProperty,KeyValueEntity.KeyValueEntityFactory edgePropertyFactory,RowStore rowStore){
+        final KeyValueEntity keyValueEntity = edgePropertyFactory.create();
+        edgeFieldProperty.forEach(pair->{
+            keyValueEntity.put(pair.getRight(),rowStore.value(tableName,pair.getLeft()));
+        });
+        return keyValueEntity;
+    }
+
+    private GraphVertexId[] getEdgeVertexId(ElementMapping mapping, EdgeSchema edgeSchema, RowStore rowStore){
         GraphVertexId[] vertexIds = new GraphVertexId[2];
         String tableName = edgeSchema.getTable();
+        final EdgeContext context = (EdgeContext) mapping.getContext();
         GraphElementId.GraphElementBuilder fromBuilder = GraphElementId.builder(edgeSchema.getSourceLabel());
-        edgeSchema.getSourceProperties().forEach((k, v)->{
-            fromBuilder.unique(k,rowStore.value(tableName,v));
-        });
-        GraphElementId.GraphElementBuilder toBuilder = GraphElementId.builder(edgeSchema.getTargetLabel());
-        edgeSchema.getTargetProperties().forEach((k, v)->{
-            toBuilder.unique(k,rowStore.value(tableName,v));
-        });
-        vertexIds[0] = fromBuilder.buildVertexId();
-        vertexIds[1] = toBuilder.buildVertexId();
+        if(context != null && context.sourceVertexIds != null){
+            EdgeVertexConnectionInformation edgeVertexConnectionInformation = schemaManager.getEdgeVertexPropertySet(edgeSchema.getLabel(),true);
+            final KeyValueEntity e = getEdgeProperties(edgeVertexConnectionInformation.getTableName(), edgeVertexConnectionInformation.getEdgeFieldProperty(), edgeVertexConnectionInformation.getEdgePropertyFactory(),rowStore);
+            vertexIds[0] = context.sourceVertexIds.get(e);
+        }else{
+            edgeSchema.getSourceConnections().forEach((connection)->{
+                fromBuilder.unique(connection.getVertexPropertyLabel(),rowStore.value(tableName,connection.getEdgePropertyLabel()));
+            });
+            vertexIds[0] = fromBuilder.buildVertexId();
+        }
+
+        if(context != null && context.targetVertexIds != null){
+            EdgeVertexConnectionInformation edgeVertexConnectionInformation = schemaManager.getEdgeVertexPropertySet(edgeSchema.getLabel(),false);
+            final KeyValueEntity e = getEdgeProperties(edgeVertexConnectionInformation.getTableName(), edgeVertexConnectionInformation.getEdgeFieldProperty(), edgeVertexConnectionInformation.getEdgePropertyFactory(),rowStore);
+            vertexIds[1] = context.targetVertexIds.get(e);
+        }else{
+            GraphElementId.GraphElementBuilder toBuilder = GraphElementId.builder(edgeSchema.getTargetLabel());
+            edgeSchema.getTargetConnections().forEach((connection)->{
+                toBuilder.unique(connection.getVertexPropertyLabel(),rowStore.value(tableName,connection.getEdgePropertyLabel()));
+            });
+            vertexIds[1] = toBuilder.buildVertexId();
+        }
+
         return vertexIds;
     }
 
     @SuppressWarnings("unchecked")
-    public EngineEdge rowStoreToEdge(EdgeSchema edgeSchema, RowStore rowStore){
+    public EngineEdge rowStoreToEdge(ElementMapping mapping,EdgeSchema edgeSchema, RowStore rowStore){
         //make edge id
-        GraphVertexId[] vertexIds = getEdgeVertexId(edgeSchema,rowStore);
+        GraphVertexId[] vertexIds = getEdgeVertexId(mapping,edgeSchema,rowStore);
         //create edge
         return new EngineEdge(rowElementToId(edgeSchema,rowStore,GraphEdgeId.class),
                 vertexIds[0],vertexIds[1],rowToProperties(edgeSchema, rowStore));

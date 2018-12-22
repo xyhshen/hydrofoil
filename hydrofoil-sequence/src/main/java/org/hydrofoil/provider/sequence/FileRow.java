@@ -12,23 +12,23 @@ import java.util.Map;
  * @author xie_yh
  * @date 2018/11/9 15:29
  */
-public final class FileRow {
+final class FileRow {
 
-    private final String[] values;
+    private final Object[] values;
 
     private final Map<String,Integer> header;
 
-    public FileRow(final String[] values, final Map<String, Integer> header) {
+    FileRow(final Object[] values, final Map<String, Integer> header) {
         this.values = values;
         this.header = header;
     }
 
-    public String value(final String fieldname){
+    Object value(final String fieldname){
         Integer i = MapUtils.getInteger(header,fieldname);
         return values[i];
     }
 
-    public String[] values(){
+    Object[] values(){
         return values;
     }
 }

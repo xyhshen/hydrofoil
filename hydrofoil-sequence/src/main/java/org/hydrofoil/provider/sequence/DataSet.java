@@ -5,7 +5,7 @@ import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.collections4.SetValuedMap;
 import org.apache.commons.collections4.multimap.HashSetValuedHashMap;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hydrofoil.common.graph.QMatch;
 import org.hydrofoil.common.schema.TableSchema;
@@ -27,7 +27,22 @@ import java.util.stream.Collectors;
  * @author xie_yh
  * @date 2018/10/16 18:07
  */
-public final class DataSet {
+final class DataSet {
+
+    private final class IndexKey implements Comparable<IndexKey>{
+
+        private final Object key;
+
+        private IndexKey(final Object key){
+            this.key = key;
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public int compareTo(IndexKey o) {
+            return ObjectUtils.compare((Comparable)key,(Comparable) o.key);
+        }
+    }
 
     /**
      * file table
@@ -37,7 +52,7 @@ public final class DataSet {
     /**
      * indxe map
      */
-    private final Map<String,SearchArrayList<String,Integer>> indexMap;
+    private final Map<String,SearchArrayList<IndexKey,Integer>> indexMap;
 
     private final Map<String,SetValuedMap<String,Integer>> textIndexMap;
 
@@ -62,10 +77,10 @@ public final class DataSet {
                 return;
             }
             if(columnSchema.canNormalQuery()){
-                SearchArrayList<String,Integer> index = new SearchArrayList<>();
+                SearchArrayList<IndexKey,Integer> index = new SearchArrayList<>();
                 int columnSeq = fileTable.getHeader().get(columnName);
                 for(int i = 0;i < fileTable.getRows().size();i++){
-                    index.add(fileTable.getRows().get(i).values()[columnSeq],i);
+                    index.add(new IndexKey(fileTable.getRows().get(i).values()[columnSeq]),i);
                 }
                 index.sorting();
                 indexMap.put(columnName,index);
@@ -74,7 +89,7 @@ public final class DataSet {
                 int columnSeq = fileTable.getHeader().get(columnName);
                 SetValuedMap<String,Integer> index = new HashSetValuedHashMap<>(100);
                 for(int i = 0;i < fileTable.getRows().size();i++){
-                    String value = fileTable.getRows().get(i).values()[columnSeq];
+                    String value = Objects.toString(fileTable.getRows().get(i).values()[columnSeq],"");
                     final Set<String> wordSet = EncodeUtils.splitText(value);
                     final int indexId = i;
                     wordSet.forEach(word->{
@@ -102,30 +117,35 @@ public final class DataSet {
         }
     }
 
-    List<FileRow> selectWhere(final List<Pair<QMatch.Q,String>> matches){
+    List<FileRow> selectWhere(final List<Pair<QMatch.Q,Object>> matches){
         List<Integer> l = new ArrayList<>();
         if(CollectionUtils.isEmpty(matches)){
             return fileTable.getRows();
         }
-        for(Pair<QMatch.Q,String> match:matches){
+        for(Pair<QMatch.Q,Object> match:matches){
             QMatch.Q q = match.getLeft();
-            SearchArrayList<String, Integer> index = indexMap.get(q.pair().name());
+            SearchArrayList<IndexKey, Integer> index = indexMap.get(q.pair().name());
             final SetValuedMap<String, Integer> textIndex = textIndexMap.get(q.pair().name());
             List<Integer> rowNumbers = new ArrayList<>();
-            String firstValue = StringUtils.isNotBlank(match.getRight())?match.getRight():Objects.toString(q.pair().first(), null);
+            Object firstValue = match.getRight()!=null?match.getRight():q.pair().first();
             if(q.type() != QMatch.QType.like){
                 ParameterUtils.mustTrue(index != null);
                 if(q.type() == QMatch.QType.eq){
-                    rowNumbers.addAll(index.find(firstValue));
+                    rowNumbers.addAll(index.find(new IndexKey(firstValue)));
                 }else if(q.type() == QMatch.QType.prefix){
-                    rowNumbers.addAll(CollectionUtils.emptyIfNull(index.getRange(firstValue,firstValue + Character.toString((char) 255))));
+                    rowNumbers.addAll(CollectionUtils.emptyIfNull(index.getRange(new IndexKey(firstValue),new IndexKey(firstValue + Character.toString((char) 255)))));
                 }else if(q.type() == QMatch.QType.between){
-                    String end = Objects.toString(((FieldTriple)q.pair()).last(), null);
-                    rowNumbers.addAll(CollectionUtils.emptyIfNull(index.getRange(firstValue,end)));
+                    Object end = ((FieldTriple)q.pair()).last();
+                    rowNumbers.addAll(CollectionUtils.emptyIfNull(index.getRange(new IndexKey(firstValue),new IndexKey(end))));
+                }else if(q.type() == QMatch.QType.in){
+                    final Collection<Object> list = (Collection<Object>) firstValue;
+                    for(Object o:list){
+                        rowNumbers.addAll(index.find(new IndexKey(o)));
+                    }
                 }
             }else{
                 ParameterUtils.mustTrue(textIndex != null);
-                rowNumbers.addAll(CollectionUtils.emptyIfNull(textIndex.get(firstValue)));
+                rowNumbers.addAll(CollectionUtils.emptyIfNull(textIndex.get(Objects.toString(firstValue))));
             }
             if(rowNumbers.isEmpty()){
                 break;

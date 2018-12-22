@@ -48,7 +48,7 @@ public final class RowStorageer {
     RowQueryResponse scanRows(final RowQueryScan rowQueryScan){
         final DataSet dataSet = getDataSet(rowQueryScan.getName());
         final List<FileRow> crossRows = dataSet.selectWhere(rowQueryScan.getMatch().stream().map((q) ->
-                Pair.of(q, "")).collect(Collectors.toList()));
+                Pair.of(q, null)).collect(Collectors.toList()));
         List<RowStore> rowStores = crossRows.stream().map(crossRow -> {
             final Map<String, Collection<FileRow>> joinRowMap = joinOnAll(crossRow, rowQueryScan,true);
             if(joinRowMap == null){
@@ -82,7 +82,7 @@ public final class RowStorageer {
         }else{
             RowQueryScan rowQueryScan = (RowQueryScan) baseRowQuery;
             final List<FileRow> crossRows = dataSet.selectWhere(rowQueryScan.getMatch().stream().map((q) ->
-                    Pair.of(q, "")).collect(Collectors.toList()));
+                    Pair.of(q, null)).collect(Collectors.toList()));
             count = crossRows.stream().map(crossRow -> {
                 final Map<String, Collection<FileRow>> joinRowMap = joinOnAll(crossRow, rowQueryScan,true);
                 if(joinRowMap == null){
@@ -146,8 +146,8 @@ public final class RowStorageer {
     }
 
     private Collection<FileRow> joinOn(FileRow crossRow,String tableName,Set<BaseRowQuery.AssociateMatch> associateMatches){
-        List<Pair<QMatch.Q,String>> pl = associateMatches.stream().map(associateMatch -> {
-            Pair<QMatch.Q,String> p;
+        List<Pair<QMatch.Q,Object>> pl = associateMatches.stream().map(associateMatch -> {
+            Pair<QMatch.Q,Object> p;
             if(StringUtils.isBlank(associateMatch.getJoinField())){
                 p = Pair.of(associateMatch.getMatch(),null);
             }else{
