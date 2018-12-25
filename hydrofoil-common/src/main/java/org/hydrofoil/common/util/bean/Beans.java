@@ -5,11 +5,9 @@ import org.apache.commons.lang3.CharUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.Fraction;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.apache.commons.lang3.time.DateUtils;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.text.ParseException;
 import java.util.Date;
 import java.util.Objects;
 
@@ -122,12 +120,7 @@ public final class Beans {
         if(StringUtils.isBlank(s)){
             return (Date) d;
         }
-        try {
-            return DateUtils.parseDate(s,"yyyy-MM-dd'T'HH:mm:ss");
-        } catch (ParseException e) {
-            e.printStackTrace();
-            return (Date) d;
-        }
+        return new Date(NumberUtils.toLong(s));
     }
 
 }

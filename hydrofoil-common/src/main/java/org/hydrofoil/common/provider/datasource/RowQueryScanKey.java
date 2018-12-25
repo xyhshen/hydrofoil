@@ -1,8 +1,9 @@
 package org.hydrofoil.common.provider.datasource;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.hydrofoil.common.util.bean.KeyValueEntity;
 
-import java.util.Collection;
+import java.util.*;
 
 /**
  * RowQueryScanKey
@@ -51,5 +52,31 @@ public final class RowQueryScanKey {
      **/
     public Collection<KeyValueEntity> getKeyValueEntities() {
         return keyValueEntities;
+    }
+
+    public Collection<RowStore> filter(final Collection<RowStore> rows){
+        List<RowStore> l = new ArrayList<>(rows.size());
+        for(RowStore row:rows){
+            List<Pair<String,Object>> values = new ArrayList<>();
+            for(String key:keyFactory.keys()){
+                values.add(Pair.of(key,row.value(name,key)));
+            }
+            for(KeyValueEntity keyValue:keyValueEntities){
+                boolean found = false;
+                final Map<String, Object> keyValueMap = keyValue.getKeyValueMap();
+                for(Pair<String,Object> pair:values){
+                    Object value = keyValueMap.get(pair.getLeft());
+                    found = Objects.equals(value,pair.getLeft());
+                    if(!found){
+                        break;
+                    }
+                }
+                if(!found){
+                    l.add(row);
+                    break;
+                }
+            }
+        }
+        return l;
     }
 }

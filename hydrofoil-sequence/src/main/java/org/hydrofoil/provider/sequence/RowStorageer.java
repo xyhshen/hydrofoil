@@ -56,6 +56,10 @@ public final class RowStorageer {
             }
             return combineRowKeyValue(crossRow, joinRowMap, rowQueryScan);
         }).filter(Objects::nonNull).collect(Collectors.toList());
+        final RowQueryScanKey scanKey = rowQueryScan.getScanKey();
+        if(scanKey != null){
+            rowStores = (List<RowStore>) scanKey.filter(rowStores);
+        }
         rowStores = DataUtils.ranger(rowStores,rowQueryScan.getOffset(),rowQueryScan.getLimit());
         return rowQueryScan.createResponse(rowStores);
     }
@@ -73,7 +77,7 @@ public final class RowStorageer {
 
     RowQueryResponse countRow(final BaseRowQuery baseRowQuery,String groupField){
         final DataSet dataSet = getDataSet(baseRowQuery.getName());
-        Long count = 0L;
+        Long count;
         if(baseRowQuery instanceof RowQueryGet){
             RowQueryGet rowQueryGet = (RowQueryGet) baseRowQuery;
             final Collection<KeyValueEntity> rowKeys = rowQueryGet.getRowKeys();
