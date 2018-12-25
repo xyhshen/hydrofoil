@@ -12,6 +12,7 @@ import org.hydrofoil.common.graph.expand.ElementPredicate;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.function.BiPredicate;
 
 /**
@@ -86,6 +87,23 @@ public final class TinkerpopElementUtils {
         return true;
     }
 
+    static QMatch.Q makeBetween(final String key,final P<?> predicate){
+        if(predicate instanceof AndP
+                && predicate.getValue() instanceof List){
+            List l = (List) predicate.getValue();
+            if(l.size() != 2){
+                return null;
+            }
+            P p1 = (P) l.get(0);
+            P p2 = (P) l.get(1);
+            if(p1.getBiPredicate() == Compare.gte
+                    && p2.getBiPredicate() == Compare.lt ){
+                return QMatch.between(key,p1.getValue(),p2.getValue());
+            }
+        }
+        return null;
+    }
+
     public static boolean isPredicateQueriable(String key,P<?> predicate){
         if(!isQueriableKeyLabel(key)){
             return false;
@@ -96,6 +114,7 @@ public final class TinkerpopElementUtils {
                 bp == Compare.gte ||
                 bp == Compare.lt ||
                 bp == Compare.lte ||
+                makeBetween(key,predicate) != null ||
                 bp == Contains.within ||
                 bp == ElementPredicate.like;
     }
@@ -126,11 +145,7 @@ public final class TinkerpopElementUtils {
         if(predicate.getBiPredicate() == ElementPredicate.like){
             return QMatch.like(key,predicate.getValue());
         }
-        if(predicate.getBiPredicate().getClass().equals(AndP.class)){
-            Collection<?> values = (Collection<?>) predicate.getValue();
-            return QMatch.in(key,values.toArray());
-        }
-        return null;
+        return makeBetween(key,predicate);
     }
 
     public static Element emptyElement(){
