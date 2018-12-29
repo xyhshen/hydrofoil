@@ -8,6 +8,7 @@ import org.hydrofoil.common.schema.EdgeSchema;
 import org.hydrofoil.common.util.DataUtils;
 import org.hydrofoil.common.util.ParameterUtils;
 import org.hydrofoil.core.engine.EngineEdge;
+import org.hydrofoil.core.engine.EngineElement;
 import org.hydrofoil.core.engine.EngineVertex;
 import org.hydrofoil.core.engine.internal.AbstractGraphQueryRunner;
 import org.hydrofoil.core.engine.internal.ElementMapping;
@@ -58,7 +59,7 @@ public class EdgeGraphQueryRunner extends AbstractGraphQueryRunner<EngineEdge,Ed
             Long start = this.offset;
             Long limit = this.length;
             if(CollectionUtils.isNotEmpty(vertexSet)){
-                ParameterUtils.mustTrue(vertexMapper.checkElementIds(vertexSet),"check vertex id");
+                ParameterUtils.mustTrue(vertexMapper.checkElementIds(vertexSet.stream().map(EngineElement::elementId).collect(Collectors.toSet())),"check vertex id");
                 elementRequests.addAll(edgeMapper.toEdgeScanMapper(labels,propertyQuerySet,vertexSet,direction));
             }else{
                 /*
@@ -86,7 +87,7 @@ public class EdgeGraphQueryRunner extends AbstractGraphQueryRunner<EngineEdge,Ed
 
     @Override
     protected EngineEdge handleRowToElement(ElementMapping mapping, RowStore rowStore) {
-        return edgeMapper.rowStoreToEdge((EdgeSchema) mapping.getSchemaItem(),rowStore);
+        return edgeMapper.rowStoreToEdge(mapping,(EdgeSchema) mapping.getSchemaItem(),rowStore);
     }
 
     /**

@@ -30,12 +30,12 @@ public class HydrofoilVertex extends HydrofoilElement implements Vertex {
 
     @Override
     public Iterator<Edge> edges(Direction direction, String... edgeLabels) {
-        return TinkerpopGraphTransit.listEdgesByVertices(graph, Collections.singletonList(this),direction,edgeLabels);
+        return TinkerpopGraphTransit.of(graph).listEdgesByVertices(Collections.singletonList(this),direction,edgeLabels);
     }
 
     @Override
     public Iterator<Vertex> vertices(Direction direction, String... edgeLabels) {
-        return TinkerpopGraphTransit.listEdgeVerticesByVertices(graph,Collections.singletonList(this),direction,edgeLabels);
+        return TinkerpopGraphTransit.of(graph).listEdgeVerticesByVertices(Collections.singletonList(this),direction,edgeLabels);
     }
 
     @Override
@@ -50,6 +50,6 @@ public class HydrofoilVertex extends HydrofoilElement implements Vertex {
 
     @Override
     public <V> Iterator<VertexProperty<V>> properties(String... propertyKeys) {
-        return TinkerpopGraphTransit.listVertexProperties(this,propertyKeys);
+        return TinkerpopGraphTransit.of(graph).listVertexProperties(this,propertyKeys);
     }
 }

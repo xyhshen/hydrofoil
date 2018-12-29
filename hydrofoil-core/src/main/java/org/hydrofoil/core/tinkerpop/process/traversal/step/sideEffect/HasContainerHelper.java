@@ -4,13 +4,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.tinkerpop.gremlin.process.traversal.Compare;
 import org.apache.tinkerpop.gremlin.process.traversal.Contains;
 import org.apache.tinkerpop.gremlin.process.traversal.Traversal;
+import org.apache.tinkerpop.gremlin.process.traversal.step.HasContainerHolder;
 import org.apache.tinkerpop.gremlin.process.traversal.step.util.HasContainer;
 import org.apache.tinkerpop.gremlin.structure.T;
+import org.hydrofoil.common.graph.GraphElementType;
 import org.hydrofoil.common.graph.QMatch;
 import org.hydrofoil.common.util.DataUtils;
-import org.hydrofoil.core.engine.IGraphQueryRunner;
 import org.hydrofoil.core.engine.management.SchemaManager;
-import org.hydrofoil.core.engine.query.VertexGraphQueryRunner;
+import org.hydrofoil.core.tinkerpop.glue.MultipleCondition;
 import org.hydrofoil.core.tinkerpop.glue.TinkerpopElementUtils;
 import org.hydrofoil.core.tinkerpop.structure.HydrofoilTinkerpopGraph;
 
@@ -28,6 +29,11 @@ import java.util.stream.Collectors;
  */
 public final class HasContainerHelper {
 
+    static boolean isProcessIdContainer(HasContainer hasContainer){
+        return hasContainer.getKey().equals(T.id.getAccessor()) &&
+                (hasContainer.getBiPredicate() == Compare.eq || hasContainer.getBiPredicate() == Contains.within);
+    }
+
     private static boolean isUsableHasSpecial(HasContainer hasContainer){
         if(!StringUtils.equalsIgnoreCase(hasContainer.getKey(),
                 T.label.getAccessor())){
@@ -40,32 +46,30 @@ public final class HasContainerHelper {
                 bp == Contains.without;
     }
 
-    static boolean isHasContainerQueriable(final HydrofoilGraphStep<?,?> graphStep){
-        return graphStep.getHasContainers().stream().
+    static boolean isHasContainerQueriable(final List<HasContainer> containers){
+        return containers.stream().
+                filter(p->!isProcessIdContainer(p)).
                 filter(p->!isUsableHasSpecial(p)).
                 filter(p->!TinkerpopElementUtils.isPredicateQueriable(p.getKey(),p.getPredicate())).count() == 0;
     }
 
-    static IGraphQueryRunner buildQueryRunner(final Traversal.Admin<?, ?> traversal,final HydrofoilGraphStep<?,?> graphStep){
+    static MultipleCondition buildCondition(final Traversal.Admin<?, ?> traversal, final IActionStep actionStep){
         HydrofoilTinkerpopGraph graph = (HydrofoilTinkerpopGraph) DataUtils.
                 getOptional(traversal.getGraph());
-        IGraphQueryRunner graphQueryRunner;
-        if(graphStep.returnsVertex()){
-            graphQueryRunner = graph.getConnector().vertices();
-        }else{
-            graphQueryRunner = graph.getConnector().edges();
-        }
-        extractLabels(graph,graphQueryRunner,graphStep.getHasContainers());
-        extractPropertyQuery(graph,graphQueryRunner,graphStep.getHasContainers());
-        return graphQueryRunner;
+        MultipleCondition condition = new MultipleCondition();
+        condition.setReturnType(actionStep.getReturnType());
+        HasContainerHolder holder = (HasContainerHolder) actionStep;
+        extractLabels(graph,condition,holder.getHasContainers());
+        extractPropertyQuery(graph,condition,holder.getHasContainers());
+        return condition;
     }
 
     @SuppressWarnings("unchecked")
-    static void extractLabels(final HydrofoilTinkerpopGraph graph, final IGraphQueryRunner graphQueryRunner, final List<HasContainer> hasContainers){
+    private static void extractLabels(final HydrofoilTinkerpopGraph graph, final MultipleCondition condition, final List<HasContainer> hasContainers){
         Set<String> elementLabels = DataUtils.newSetWithMaxSize(5);
         SchemaManager schemaManager = graph.getConnector().getManagement().getSchemaManager();
         Set<String> schemaLabels;
-        if(graphQueryRunner instanceof VertexGraphQueryRunner){
+        if(condition.getReturnType() == GraphElementType.vertex){
             schemaLabels = schemaManager.getVertexSchemaMap().keySet();
         }else {
             schemaLabels = schemaManager.getEdgeSchemaMap().keySet();
@@ -97,16 +101,16 @@ public final class HasContainerHelper {
             }
         }
         //set to query
-        elementLabels.stream().filter(StringUtils::isNotBlank).forEach(graphQueryRunner::label);
+        elementLabels.stream().filter(StringUtils::isNotBlank).forEach(label-> condition.getLabels().add(label));
     }
     private static Collection<String> getWithoutLabels(Set<String> schemaLabels,
                                                 Collection<String> values){
         return values.stream().filter(p->!schemaLabels.contains(p)).collect(Collectors.toSet());
     }
 
-    static void extractPropertyQuery(final HydrofoilTinkerpopGraph graph,
-                                     final IGraphQueryRunner graphQueryRunner,
-                                     final List<HasContainer> hasContainers){
+    private static void extractPropertyQuery(final HydrofoilTinkerpopGraph graph,
+                                             final MultipleCondition condition,
+                                             final List<HasContainer> hasContainers){
         List<QMatch.Q> fieldQuerys = new ArrayList<>(hasContainers.size());
 
         for(HasContainer hasContainer:hasContainers){
@@ -120,7 +124,7 @@ public final class HasContainerHelper {
             }
         }
 
-        graphQueryRunner.fields(DataUtils.toArray(fieldQuerys,QMatch.Q.class));
+        condition.getFieldQueries().addAll(fieldQuerys);
     }
 
 

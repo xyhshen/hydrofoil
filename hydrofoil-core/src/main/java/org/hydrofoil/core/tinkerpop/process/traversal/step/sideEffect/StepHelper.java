@@ -2,7 +2,6 @@ package org.hydrofoil.core.tinkerpop.process.traversal.step.sideEffect;
 
 import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.tinkerpop.gremlin.process.traversal.Step;
 import org.apache.tinkerpop.gremlin.process.traversal.Traversal;
 import org.apache.tinkerpop.gremlin.process.traversal.step.HasContainerHolder;
@@ -11,11 +10,16 @@ import org.apache.tinkerpop.gremlin.process.traversal.step.filter.RangeGlobalSte
 import org.apache.tinkerpop.gremlin.process.traversal.step.map.CountGlobalStep;
 import org.apache.tinkerpop.gremlin.process.traversal.step.map.GraphStep;
 import org.apache.tinkerpop.gremlin.process.traversal.step.map.NoOpBarrierStep;
+import org.apache.tinkerpop.gremlin.process.traversal.step.map.VertexStep;
 import org.apache.tinkerpop.gremlin.process.traversal.step.sideEffect.IdentityStep;
 import org.apache.tinkerpop.gremlin.process.traversal.step.util.HasContainer;
 import org.apache.tinkerpop.gremlin.process.traversal.util.TraversalHelper;
 import org.apache.tinkerpop.gremlin.structure.Element;
+import org.hydrofoil.common.util.DataUtils;
 import org.hydrofoil.core.engine.IGraphQueryRunner;
+import org.hydrofoil.core.tinkerpop.glue.MultipleCondition;
+import org.hydrofoil.core.tinkerpop.glue.TinkerpopGraphTransit;
+import org.hydrofoil.core.tinkerpop.structure.HydrofoilTinkerpopGraph;
 
 import java.util.Iterator;
 
@@ -29,8 +33,8 @@ import java.util.Iterator;
  */
 public final class StepHelper {
 
-    static Step<?,?> getNextExecutableStep(GraphStep<?,?> graphStep){
-        Step<?, ?> step = graphStep.getNextStep();
+    private static Step<?,?> getNextExecutableStep(Step<?, ?> currentStep){
+        Step<?, ?> step = currentStep.getNextStep();
         while (step instanceof IdentityStep){
             step = step.getNextStep();
         }
@@ -43,83 +47,110 @@ public final class StepHelper {
                 p->HasContainer.testAll((Element) p,holder.getHasContainers()));
     }
 
-    public static boolean isAvailableStep(Step step){
+    private static boolean isAvailableStep(Step step){
         return step instanceof HasStep ||
                 step instanceof NoOpBarrierStep ||
                 step instanceof IdentityStep;
     }
 
-    static void assignPagingStep(
+    private static void assignPagingStep(
             Traversal.Admin<?, ?> traversal,
-            HydrofoilGraphStep<?,?> graphStep
+            IActionStep actionStep
     ){
-        IGraphQueryRunner graphQueryRunner = graphStep.getGraphQueryRunner();
-        Step<?, ?> step = getNextExecutableStep(graphStep);
+        MultipleCondition multipleCondition = actionStep.getMultipleCondition();
+        Step<?, ?> step = getNextExecutableStep((Step<?, ?>) actionStep);
         //find range step,only global
         if(!(step instanceof RangeGlobalStep)){
             return;
         }
         RangeGlobalStep rangeGlobalStep = (RangeGlobalStep) step;
-        if(!HasContainerHelper.isHasContainerQueriable(graphStep)){
+        if(!HasContainerHelper.isHasContainerQueriable(((HasContainerHolder)actionStep).getHasContainers())){
             return;
         }
-        if(!graphQueryRunner.operable(IGraphQueryRunner.OperationType.paging)){
+        HydrofoilTinkerpopGraph graph = (HydrofoilTinkerpopGraph) DataUtils.
+                getOptional(traversal.getGraph());
+        if(!TinkerpopGraphTransit.of(graph).checkConditionOperator(multipleCondition,IGraphQueryRunner.OperationType.paging)){
             return;
         }
-        //set ranger
-        graphQueryRunner.offset(rangeGlobalStep.getLowRange());
-        graphQueryRunner.length(rangeGlobalStep.getHighRange());
+        //set range
+        multipleCondition.setStart(rangeGlobalStep.getLowRange());
+        multipleCondition.setLimit(rangeGlobalStep.getHighRange());
         //remove current step
         traversal.removeStep(rangeGlobalStep);
     }
 
     @SuppressWarnings("unchecked")
-    static void processCountStep(
+    private static void processCountStep(
             Traversal.Admin<?, ?> traversal,
-            HydrofoilGraphStep<?,?> graphStep){
-        Step<?, ?> step = getNextExecutableStep(graphStep);
+            IActionStep actionStep){
+        Step<?, ?> step = getNextExecutableStep((Step<?, ?>) actionStep);
+        Step<?,?> currentStep = (Step<?, ?>) actionStep;
         //find count step,only global
         if(!(step instanceof CountGlobalStep) ||
-                CollectionUtils.isNotEmpty(graphStep.getLabels())){
+                CollectionUtils.isNotEmpty(currentStep.getLabels())){
             //must filter flow of has label
             return;
         }
         //set placeholder flag
-        graphStep.setPlaceholder(true);
+        actionStep.setPlaceholder(true);
         //get global count step
         CountGlobalStep countGlobalStep = (CountGlobalStep) step;
         //remove current step
-        Step countStep = new HydrofoilCountStep<>(traversal,graphStep.getGraphQueryRunner());
+        Step countStep = new HydrofoilCountStep<>(traversal,actionStep.getMultipleCondition());
         TraversalHelper.replaceStep(countGlobalStep,countStep,traversal);
     }
 
     @SuppressWarnings("unchecked")
-    public static void processGraphStep(Traversal.Admin<?, ?> traversal,final GraphStep originalStep){
-        //not by id way query
-        HydrofoilGraphStep<?,?> newGraphStep = new HydrofoilGraphStep<>(originalStep);
-        TraversalHelper.replaceStep(originalStep,newGraphStep,traversal);
-        Step<?, ?> currentStep = newGraphStep.getNextStep();
+    private static void moveHasContainers(final Traversal.Admin<?, ?> traversal, Step<?, ?> newStep){
+        Step<?, ?> currentStep = newStep.getNextStep();
+        HasContainerHolder holder = (HasContainerHolder) newStep;
         while(isAvailableStep(currentStep)){
             if(currentStep instanceof HasStep){
-                ((HasStep) currentStep).getHasContainers().
-                        stream().
-                        filter(p->!GraphStep.processHasContainerIds(newGraphStep, (HasContainer) p)).
-                        forEach(v->newGraphStep.addHasContainer((HasContainer) v));
-                currentStep.getLabels().forEach(newGraphStep::addLabel);
+                if(newStep instanceof GraphStep){
+                    ((HasStep) currentStep).getHasContainers().
+                            stream().
+                            filter(p->!GraphStep.processHasContainerIds((GraphStep<?, ?>) newStep, (HasContainer) p)).
+                            forEach(v->holder.addHasContainer((HasContainer) v));
+                }else{
+                    ((HasStep) currentStep).getHasContainers().forEach(v->holder.addHasContainer((HasContainer) v));
+                }
+                currentStep.getLabels().forEach(newStep::addLabel);
                 TraversalHelper.copyLabels(currentStep, currentStep.getPreviousStep(), false);
                 traversal.removeStep(currentStep);
             }
             currentStep = currentStep.getNextStep();
         }
-        if(ArrayUtils.isEmpty(newGraphStep.getIds())){
+    }
+
+    @SuppressWarnings("unchecked")
+    private static void processActionStep(final Traversal.Admin<?, ?> traversal, final Step originalStep, final IActionStep actionStep){
+        //replace has step
+        Step newStep = (Step) actionStep;
+        TraversalHelper.replaceStep(originalStep,newStep,traversal);
+        //move has to new step
+        moveHasContainers(traversal,newStep);
+        if(!actionStep.hasIdProcess()){
             //build and assign graph query runner
-            IGraphQueryRunner graphQueryRunner = HasContainerHelper.
-                    buildQueryRunner(traversal, newGraphStep);
-            newGraphStep.setGraphQueryRunner(graphQueryRunner);
+            final MultipleCondition condition = HasContainerHelper.
+                    buildCondition(traversal, actionStep);
+            actionStep.setMultipleCondition(condition);
             //set paging
-            assignPagingStep(traversal,newGraphStep);
+            assignPagingStep(traversal,actionStep);
             //set count
-            processCountStep(traversal,newGraphStep);
+            processCountStep(traversal,actionStep);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static void processGraphStep(final Traversal.Admin<?, ?> traversal,final GraphStep originalStep){
+        //not by id way query
+        HydrofoilGraphStep<?,?> newGraphStep = new HydrofoilGraphStep<>(originalStep);
+        processActionStep(traversal,originalStep,newGraphStep);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static void processVertexStep(final Traversal.Admin<?, ?> traversal, final VertexStep originalStep){
+        HydrofoilVertexStep<?> newVertexStep = new HydrofoilVertexStep<>(originalStep);
+        processActionStep(traversal,originalStep,newVertexStep);
     }
 }

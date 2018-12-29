@@ -60,7 +60,7 @@ public final class RowStorageer {
         if(scanKey != null){
             rowStores = (List<RowStore>) scanKey.filter(rowStores);
         }
-        rowStores = DataUtils.ranger(rowStores,rowQueryScan.getOffset(),rowQueryScan.getLimit());
+        rowStores = DataUtils.range(rowStores,rowQueryScan.getOffset(),rowQueryScan.getLimit());
         return rowQueryScan.createResponse(rowStores);
     }
 

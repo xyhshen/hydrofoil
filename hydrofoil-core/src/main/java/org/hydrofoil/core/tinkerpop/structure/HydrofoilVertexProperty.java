@@ -76,6 +76,6 @@ public final class HydrofoilVertexProperty<V> implements VertexProperty<V>{
     @SuppressWarnings("unchecked")
     @Override
     public <U> Iterator<Property<U>> properties(String... propertyKeys) {
-        return TinkerpopGraphTransit.listProperties(this,propertyKeys);
+        return TinkerpopGraphTransit.of(vertex.graph).listProperties(this,propertyKeys);
     }
 }

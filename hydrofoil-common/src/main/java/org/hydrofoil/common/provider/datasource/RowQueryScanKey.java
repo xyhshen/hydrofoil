@@ -71,7 +71,7 @@ public final class RowQueryScanKey {
                         break;
                     }
                 }
-                if(!found){
+                if(found){
                     l.add(row);
                     break;
                 }

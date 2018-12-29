@@ -6,7 +6,10 @@ import org.apache.tinkerpop.gremlin.process.traversal.Traverser;
 import org.apache.tinkerpop.gremlin.process.traversal.step.util.ReducingBarrierStep;
 import org.apache.tinkerpop.gremlin.process.traversal.traverser.TraverserRequirement;
 import org.apache.tinkerpop.gremlin.util.function.ConstantSupplier;
-import org.hydrofoil.core.engine.IGraphQueryRunner;
+import org.hydrofoil.common.util.DataUtils;
+import org.hydrofoil.core.tinkerpop.glue.MultipleCondition;
+import org.hydrofoil.core.tinkerpop.glue.TinkerpopGraphTransit;
+import org.hydrofoil.core.tinkerpop.structure.HydrofoilTinkerpopGraph;
 
 import java.util.EnumSet;
 import java.util.Set;
@@ -24,19 +27,21 @@ public final class HydrofoilCountStep<S> extends ReducingBarrierStep<S, Long> {
 
     private static final Set<TraverserRequirement> REQUIREMENTS = EnumSet.of(TraverserRequirement.BULK);
 
-    private final IGraphQueryRunner graphQueryRunner;
+    private final MultipleCondition multipleCondition;
 
     @SuppressWarnings("unchecked")
-    public HydrofoilCountStep(final Traversal.Admin traversal, final IGraphQueryRunner graphQueryRunner) {
+    HydrofoilCountStep(final Traversal.Admin traversal, final MultipleCondition multipleCondition) {
         super(traversal);
-        this.graphQueryRunner = graphQueryRunner;
+        this.multipleCondition = multipleCondition;
         this.setSeedSupplier(new ConstantSupplier<>(0L));
         this.setReducingBiOperator((BinaryOperator) Operator.sumLong);
     }
 
     @Override
     public Long projectTraverser(Traverser.Admin<S> traverser) {
-        return graphQueryRunner.count();
+        HydrofoilTinkerpopGraph graph = (HydrofoilTinkerpopGraph) DataUtils.
+                getOptional(traversal.getGraph());
+        return TinkerpopGraphTransit.of(graph).countElement(multipleCondition);
     }
 
     @Override

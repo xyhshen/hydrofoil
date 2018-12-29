@@ -103,9 +103,12 @@ public final class DataUtils {
         return optional.orElse(null);
     }
 
-    public static <E> List<E> ranger(final List<E> l,Long offset,Long limit){
+    public static <E> List<E> range(final List<E> l, Long offset, Long limit){
         long start = offset==null?0:offset;
         long end = limit==null||start + limit>l.size()?l.size() - start:limit;
+        if(start == 0 && end == l.size()){
+            return l;
+        }
         return l.subList((int)start,(int)end);
     }
 

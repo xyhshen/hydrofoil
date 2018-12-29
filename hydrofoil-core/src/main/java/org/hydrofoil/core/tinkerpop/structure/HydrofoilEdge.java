@@ -41,14 +41,14 @@ public class HydrofoilEdge extends HydrofoilElement implements Edge {
     @Override
     public Vertex outVertex() {
         EngineEdge engineEdge = (EngineEdge) engineElement;
-        return DataUtils.iteratorFirst(TinkerpopGraphTransit.listVerticesByIds(graph,
+        return DataUtils.iteratorFirst(TinkerpopGraphTransit.of(graph).listVerticesByIds(
                 engineEdge.sourceId()));
     }
 
     @Override
     public Vertex inVertex() {
         EngineEdge engineEdge = (EngineEdge) engineElement;
-        return DataUtils.iteratorFirst(TinkerpopGraphTransit.listVerticesByIds(graph,
+        return DataUtils.iteratorFirst(TinkerpopGraphTransit.of(graph).listVerticesByIds(
                 engineEdge.targetId()));
     }
 

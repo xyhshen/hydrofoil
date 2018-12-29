@@ -52,4 +52,18 @@ public abstract class HydrofoilElement implements Element {
     public EngineElement standard(){
         return engineElement;
     }
+
+    @Override
+    public int hashCode() {
+        return engineElement.elementId().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(!(obj instanceof HydrofoilElement)){
+            return false;
+        }
+        HydrofoilElement right = (HydrofoilElement) obj;
+        return right.engineElement.elementId().equals(engineElement.elementId());
+    }
 }

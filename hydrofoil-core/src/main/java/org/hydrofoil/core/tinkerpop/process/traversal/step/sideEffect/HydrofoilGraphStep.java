@@ -7,11 +7,10 @@ import org.apache.tinkerpop.gremlin.process.traversal.step.map.GraphStep;
 import org.apache.tinkerpop.gremlin.process.traversal.step.util.HasContainer;
 import org.apache.tinkerpop.gremlin.structure.Element;
 import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.hydrofoil.common.graph.GraphElementType;
 import org.hydrofoil.common.util.DataUtils;
 import org.hydrofoil.common.util.ParameterUtils;
-import org.hydrofoil.core.engine.IGraphQueryRunner;
-import org.hydrofoil.core.engine.query.EdgeGraphQueryRunner;
-import org.hydrofoil.core.engine.query.VertexGraphQueryRunner;
+import org.hydrofoil.core.tinkerpop.glue.MultipleCondition;
 import org.hydrofoil.core.tinkerpop.glue.TinkerpopElementUtils;
 import org.hydrofoil.core.tinkerpop.glue.TinkerpopGraphTransit;
 import org.hydrofoil.core.tinkerpop.structure.HydrofoilTinkerpopGraph;
@@ -30,19 +29,22 @@ import java.util.stream.Stream;
  * @author xie_yh
  * @date 2018/7/25 15:10
  */
-public final class HydrofoilGraphStep<S, E extends Element> extends GraphStep<S, E> implements HasContainerHolder {
+public final class HydrofoilGraphStep<S, E extends Element> extends GraphStep<S, E> implements HasContainerHolder,IActionStep {
 
     /**
      * Has step Container list
      */
     private List<HasContainer> hasContainers = new LinkedList<>();
 
-    private IGraphQueryRunner graphQueryRunner = null;
-
     /**
      * is place holder
      */
     private boolean placeholder;
+
+    /**
+     *
+     */
+    private MultipleCondition multipleCondition;
 
     HydrofoilGraphStep(final GraphStep<S, E> originalStep) {
         super(originalStep.getTraversal(), originalStep.getReturnClass(), originalStep.isStartStep(), originalStep.getIds());
@@ -53,7 +55,7 @@ public final class HydrofoilGraphStep<S, E extends Element> extends GraphStep<S,
     @SuppressWarnings("unchecked")
     private Iterator<E> handler(){
         Iterator<E> iterator;
-        if(placeholder){
+        if(isPlaceholder()){
             return DataUtils.newCountIterator(1, (E) TinkerpopElementUtils.emptyElement());
         }
         if(ArrayUtils.isNotEmpty(this.getIds())){
@@ -66,18 +68,16 @@ public final class HydrofoilGraphStep<S, E extends Element> extends GraphStep<S,
 
     @SuppressWarnings("unchecked")
     private Iterator<E> queryGraph(){
-        ParameterUtils.notNull(graphQueryRunner,"graph query runner");
+        ParameterUtils.notNull(multipleCondition,"graph query runner");
         HydrofoilTinkerpopGraph graph = (HydrofoilTinkerpopGraph)DataUtils.getOptional(traversal.getGraph());
-        Iterator<E> iterator = null;
+        final TinkerpopGraphTransit transit = TinkerpopGraphTransit.of(graph);
         if(returnsVertex()){
-            iterator = (Iterator<E>) TinkerpopGraphTransit.
-                    executeQuery(graph,(VertexGraphQueryRunner) graphQueryRunner);
+            multipleCondition.setReturnType(GraphElementType.vertex);
         }
         if(returnsEdge()){
-            iterator = (Iterator<E>) TinkerpopGraphTransit.
-                    executeQuery(graph,(EdgeGraphQueryRunner) graphQueryRunner);
+            multipleCondition.setReturnType(GraphElementType.edge);
         }
-        return iterator != null?iterator:IteratorUtils.emptyIterator();
+        return transit.listElements(multipleCondition);
     }
 
     @SuppressWarnings("unchecked")
@@ -112,18 +112,11 @@ public final class HydrofoilGraphStep<S, E extends Element> extends GraphStep<S,
         hasContainers.add(hasContainer);
     }
 
-    void setGraphQueryRunner(final IGraphQueryRunner graphQueryRunner){
-        this.graphQueryRunner = graphQueryRunner;
-    }
-
-    IGraphQueryRunner getGraphQueryRunner(){
-        return graphQueryRunner;
-    }
-
     /**
      * @return $field.TypeName
      * @see HydrofoilGraphStep#placeholder
      **/
+    @Override
     public boolean isPlaceholder() {
         return placeholder;
     }
@@ -132,7 +125,42 @@ public final class HydrofoilGraphStep<S, E extends Element> extends GraphStep<S,
      * @param placeholder $field.typeName
      * @see HydrofoilGraphStep#placeholder
      **/
+    @Override
     public void setPlaceholder(boolean placeholder) {
         this.placeholder = placeholder;
+    }
+
+    /**
+     * @return MultipleCondition
+     * @see HydrofoilGraphStep#multipleCondition
+     **/
+    @Override
+    public MultipleCondition getMultipleCondition() {
+        return multipleCondition;
+    }
+
+    /**
+     * @param multipleCondition MultipleCondition
+     * @see HydrofoilGraphStep#multipleCondition
+     **/
+    @Override
+    public void setMultipleCondition(MultipleCondition multipleCondition) {
+        this.multipleCondition = multipleCondition;
+    }
+
+    @Override
+    public boolean hasIdProcess() {
+        return ArrayUtils.isEmpty(getIds());
+    }
+
+    @Override
+    public GraphElementType getReturnType() {
+        if(returnsVertex()){
+            return GraphElementType.vertex;
+        }
+        if(returnsEdge()){
+            return GraphElementType.edge;
+        }
+        return GraphElementType.none;
     }
 }

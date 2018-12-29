@@ -15,6 +15,7 @@ import org.hydrofoil.core.HydrofoilGraph;
 import org.hydrofoil.core.tinkerpop.glue.IdManage;
 import org.hydrofoil.core.tinkerpop.glue.TinkerpopGraphTransit;
 import org.hydrofoil.core.tinkerpop.process.traversal.strategy.optimization.HydrofoilGraphStepStrategy;
+import org.hydrofoil.core.tinkerpop.process.traversal.strategy.optimization.HydrofoilVertexStepStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +49,8 @@ public final class HydrofoilTinkerpopGraph implements Graph {
     static{
         TraversalStrategies.GlobalCache.registerStrategies(HydrofoilTinkerpopGraph.class,
                 TraversalStrategies.GlobalCache.getStrategies(Graph.class).clone().addStrategies(
-                        HydrofoilGraphStepStrategy.instance()
+                        HydrofoilGraphStepStrategy.instance(),
+                        HydrofoilVertexStepStrategy.instance()
                 ));
     }
 
@@ -100,13 +102,13 @@ public final class HydrofoilTinkerpopGraph implements Graph {
     @Override
     public Iterator<Vertex> vertices(Object... vertexIds) {
         ParameterUtils.mustTrueMessage(ArrayUtils.isNotEmpty(vertexIds),"vertex id's not empty");
-        return TinkerpopGraphTransit.listVerticesByIds(this,vertexIds);
+        return TinkerpopGraphTransit.of(this).listVerticesByIds(vertexIds);
     }
 
     @Override
     public Iterator<Edge> edges(Object... edgeIds) {
         ParameterUtils.mustTrueMessage(ArrayUtils.isNotEmpty(edgeIds),"edge id's not empty");
-        return TinkerpopGraphTransit.listEdgesByIds(this,edgeIds);
+        return TinkerpopGraphTransit.of(this).listEdgesByIds(edgeIds);
     }
 
     @Override

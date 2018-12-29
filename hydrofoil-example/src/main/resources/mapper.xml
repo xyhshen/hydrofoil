@@ -98,11 +98,20 @@
                 <link table="match_result" join-field="match_id=match_id;sport_event_id=sport_event_id" />
             </links>
         </vertex>
+        <vertex label="city" table="city">
+            <properties>
+                <property label="city" field="city" primary="true" />
+            </properties>
+        </vertex>
     </vertices>
     <edges>
         <edge label="employ" table="sportsman_employ">
-            <source label="sportsman" field="sportsman.id=sportsman_id" />
-            <target label="team" field="team.id=team_id" />
+            <source label="sportsman" >
+                <connection vertex="sportsman.id" edge="sportsman.id" />
+            </source>
+            <target label="team" >
+                <connection vertex="team.id" edge="team.id" />
+            </target>
             <properties>
                 <property primary="true" label="uuid" field="uuid" />
                 <property label="team.id" field="team_id" />
@@ -112,8 +121,13 @@
             </properties>
         </edge>
         <edge label="home.matching" table="match">
-            <source label="team" field="home.team.id=team_id" />
-            <target label="match" field="match.id=match_id;event.id=sport_event_id" />
+            <source label="team" >
+                <connection vertex="team.id" edge="home.team.id" />
+            </source>
+            <target label="match" >
+                <connection vertex="match.id" edge="match.id" />
+                <connection vertex="event.id" edge="event.id" />
+            </target>
             <properties>
                 <property primary="true" label="match.id" field="match_id" />
                 <property primary="true" label="event.id" field="sport_event_id" />
@@ -122,7 +136,7 @@
         </edge>
         <edge label="client.matching" table="match">
             <source label="team">
-                <connection edge="client.team.id" vertex="client.team.id"/>
+                <connection edge="client.team.id" vertex="team.id"/>
             </source>
             <target label="match">
                 <connection edge="match.id" vertex="match.id"/>
@@ -133,6 +147,21 @@
                 <property primary="true" label="event.id" field="sport_event_id" />
                 <property label="client.team.id" field="client_team_id" />
             </properties>
+        </edge>
+        <edge label="belong.to" table="team">
+            <source label="team">
+                <connection edge="city" vertex="city"/>
+            </source>
+            <target label="city">
+                <connection edge="city" vertex="city" />
+            </target>
+            <properties>
+                <property label="team.id" field="team.id" primary="true" />
+                <property label="city" field="city" link-table="team_place"/>
+            </properties>
+            <links>
+                <link table="team_place" join-field="team_id=team_id" />
+            </links>
         </edge>
     </edges>
 </mapper>

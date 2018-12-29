@@ -197,7 +197,7 @@ public final class SchemaManager {
         boolean inMainTable = true;
         for(EdgeSchema.EdgeConnection connection:connections){
             PropertySchema vertexProperty = vertexSchema.getProperties().get(connection.getVertexPropertyLabel());
-            PropertySchema edgeProperty = edgeSchema.getProperties().get(connection.getVertexPropertyLabel());
+            PropertySchema edgeProperty = edgeSchema.getProperties().get(connection.getEdgePropertyLabel());
             ParameterUtils.mustTrue(ObjectUtils.allNotNull(vertexProperty,edgeProperty));
             //edge property
             information.getEdgeProperties().add(edgeProperty.getLabel());

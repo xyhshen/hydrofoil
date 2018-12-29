@@ -9,6 +9,11 @@ package org.hydrofoil.common.graph;
  * @date 2018/11/30 10:42
  */
 public enum  GraphElementType {
+
+    /**
+     * none
+     */
+    none,
     /**
      * graph
      */
