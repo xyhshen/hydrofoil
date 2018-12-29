@@ -108,6 +108,14 @@
             <delimiter>,</delimiter>
         </options>
     </package>
+    <package name="city" datasource="sports">
+        <options>
+            <path>city.csv</path>
+            <file-type>csv</file-type>
+            <encode>utf-8</encode>
+            <delimiter>,</delimiter>
+        </options>
+    </package>
     <table name="sportsman" package="sportsman">
         <column name="sportsman_id" index-type="primary" />
         <column name="name" index-type="normal" />
@@ -171,6 +179,9 @@
         <column name="uuid" index-type="primary" />
         <column name="sport_event_id" index-type="normal" />
         <column name="match_id" index-type="normal" />
+    </table>
+    <table name="city" package="city">
+        <column name="city" index-type="primary|normal" />
     </table>
     <!--<table name="in_match_team" package="in_match_team">
         <column name="sportsman_id" index-type="primary|normal" />

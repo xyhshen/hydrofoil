@@ -95,7 +95,7 @@ public abstract class AbstractElementMapper<E extends EngineElement> implements 
             });
             rowQueryGet.addRowKey(keyValue);
         });
-        setRowQueryProperties(rowQueryGet,DataUtils.newMapWithMaxSize(0),null,elementSchema);
+        setRowQueryProperties(rowQueryGet,DataUtils.newMapWithMaxSize(0),null,false,elementSchema);
         return createMappingElement(rowQueryGet,elementSchema);
     }
 
@@ -111,10 +111,10 @@ public abstract class AbstractElementMapper<E extends EngineElement> implements 
     }
 
     @SuppressWarnings("unchecked")
-    ElementMapping createScanMapping(PropertyQueryCondition queryCondition, BaseElementSchema elementSchema, RowQueryScanKey scanKey, Long start, Long limit){
+    ElementMapping createScanMapping(PropertyQueryCondition queryCondition, BaseElementSchema elementSchema, RowQueryScanKey scanKey,boolean minimum, Long start, Long limit){
         RowQueryScan rowQueryRequest = new RowQueryScan();
         rowQueryRequest.setName(elementSchema.getTable());
-        Map<String,RowQueryScan.AssociateRowQuery> associateRowQueryMap = new TreeMap<>();
+        Map<String,RowQueryScan.AssociateRowQuery> associateRowQueryMap = DataUtils.newHashMapWithExpectedSize();
 
         rowQueryRequest.setScanKey(scanKey);
 
@@ -124,7 +124,7 @@ public abstract class AbstractElementMapper<E extends EngineElement> implements 
         elementSchema.getPrimaryKeys().forEach(v->rowQueryRequest.getUniqueField().add(v));
 
         //set property
-        setRowQueryProperties(rowQueryRequest,associateRowQueryMap,scanKey!=null?Collections.singleton(scanKey.getName()):null,elementSchema);
+        setRowQueryProperties(rowQueryRequest,associateRowQueryMap,scanKey!=null?Collections.singleton(scanKey.getName()):null,minimum,elementSchema);
         //add main query condition
         rowQueryRequest.getMatch().addAll(mainCondition);
 

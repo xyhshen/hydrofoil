@@ -136,7 +136,7 @@
         </edge>
         <edge label="client.matching" table="match">
             <source label="team">
-                <connection edge="client.team.id" vertex="team.id"/>
+                <connection vertex="team.id" edge="client.team.id"/>
             </source>
             <target label="match">
                 <connection edge="match.id" vertex="match.id"/>
@@ -156,7 +156,7 @@
                 <connection edge="city" vertex="city" />
             </target>
             <properties>
-                <property label="team.id" field="team.id" primary="true" />
+                <property label="team.id" field="team_id" primary="true" />
                 <property label="city" field="city" link-table="team_place"/>
             </properties>
             <links>

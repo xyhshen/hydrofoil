@@ -202,7 +202,7 @@ public final class SchemaManager {
             //edge property
             information.getEdgeProperties().add(edgeProperty.getLabel());
             //vertex properties
-            information.getVertexProperties().add(edgeProperty.getLabel());
+            information.getVertexProperties().add(vertexProperty.getLabel());
             //vertex and edge,property
             information.getVertexEdgeProperties().add(Pair.of(vertexProperty,edgeProperty));
             //

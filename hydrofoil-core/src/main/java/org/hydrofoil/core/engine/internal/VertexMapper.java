@@ -49,7 +49,7 @@ public final class VertexMapper extends AbstractElementMapper{
         if(propertyQueryCondtion == null){
             return null;
         }
-        return createScanMapping(propertyQueryCondtion,vertexSchema,null,start,limit);
+        return createScanMapping(propertyQueryCondtion,vertexSchema,null,false,start,limit);
     }
 
     public ElementMapping toMinimumMapping(String label, RowQueryScanKey scanKey, Long start, Long limit){
@@ -59,7 +59,7 @@ public final class VertexMapper extends AbstractElementMapper{
         if(propertyQueryCondtion == null){
             return null;
         }
-        return createScanMapping(propertyQueryCondtion,vertexSchema,scanKey,start,limit);
+        return createScanMapping(propertyQueryCondtion,vertexSchema,scanKey,true,start,limit);
     }
 
     public EngineVertex rowStoreToVertex(VertexSchema vertexSchema, RowStore rowStore){

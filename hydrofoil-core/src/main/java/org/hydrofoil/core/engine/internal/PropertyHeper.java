@@ -61,14 +61,16 @@ interface PropertyHeper extends MapperHelper {
         return queryCondition;
     }
 
-    default void setRowQueryProperties(final BaseRowQuery rowQueryRequest, final Map<String, BaseRowQuery.AssociateRowQuery> associateRowQueryMap,final Collection<String> hasLinkTables, final BaseElementSchema elementSchema) {
+    default void setRowQueryProperties(final BaseRowQuery rowQueryRequest, final Map<String, BaseRowQuery.AssociateRowQuery> associateRowQueryMap,final Collection<String> hasLinkTables, boolean minimum,final BaseElementSchema elementSchema) {
         elementSchema.getProperties().forEach((propertyLabel, propertySchema) -> {
             if (isPropertyInMainTable(propertySchema)) {
                 rowQueryRequest.getColumnInformation().column(elementSchema.getTable(), propertySchema.getField());
             } else {
-                if(hasLinkTables != null
-                        && !hasLinkTables.contains(propertySchema.getLinkTable())){
-                    return;
+                if(minimum){
+                    if(hasLinkTables != null
+                            && !hasLinkTables.contains(propertySchema.getLinkTable())){
+                        return;
+                    }
                 }
                 BaseRowQuery.AssociateRowQuery associateRowQuery =
                         associateRowQueryMap.computeIfAbsent(propertySchema.getLinkTable(),

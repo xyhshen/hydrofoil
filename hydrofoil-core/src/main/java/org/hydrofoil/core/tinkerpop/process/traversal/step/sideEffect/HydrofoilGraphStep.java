@@ -150,7 +150,7 @@ public final class HydrofoilGraphStep<S, E extends Element> extends GraphStep<S,
 
     @Override
     public boolean hasIdProcess() {
-        return ArrayUtils.isEmpty(getIds());
+        return ArrayUtils.isNotEmpty(getIds());
     }
 
     @Override

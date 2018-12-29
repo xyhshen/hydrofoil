@@ -8,7 +8,6 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hydrofoil.common.graph.*;
-import org.hydrofoil.common.provider.datasource.BaseRowQuery;
 import org.hydrofoil.common.provider.datasource.RowQueryResponse;
 import org.hydrofoil.common.provider.datasource.RowQueryScanKey;
 import org.hydrofoil.common.provider.datasource.RowStore;
@@ -57,7 +56,6 @@ public class EdgeMapper extends AbstractElementMapper {
     }
 
     private boolean useOtherContactEdgeProperty(final EdgeSchema edgeSchema,final boolean sourceVertex){
-        String label;
         final EdgeVertexConnectionInformation edgeVertexConnectionInformation =
                 (EdgeVertexConnectionInformation) ParameterUtils.notNull(
                 schemaManager.getEdgeVertexPropertySet(edgeSchema.getLabel(), sourceVertex));
@@ -228,6 +226,7 @@ public class EdgeMapper extends AbstractElementMapper {
         if(propertyQueryCondtion == null){
             return null;
         }
+        RowQueryScanKey scanKey = null;
         if(CollectionUtils.isNotEmpty(vertices)){
             //if not empty
             //process vertex
@@ -268,15 +267,14 @@ public class EdgeMapper extends AbstractElementMapper {
                 });
                 valueEntities.add(keyValue);
             }
+
             if(StringUtils.isBlank(linkName)){
-                propertyQueryCondtion.getMainCondition().add(QMatch.key(valueEntities));
-            }else{
-                BaseRowQuery.AssociateMatch associateMatch = new BaseRowQuery.AssociateMatch(QMatch.key(valueEntities),linkName,null);
-                propertyQueryCondtion.getAssociateQueryCondition().put(linkName,associateMatch);
+                linkName = edgeSchema.getTable();
             }
+            scanKey = new RowQueryScanKey(linkName,keyFactory,valueEntities);
         }
 
-        final ElementMapping scanMapping = createScanMapping(propertyQueryCondtion, edgeSchema,null, start, limit);
+        final ElementMapping scanMapping = createScanMapping(propertyQueryCondtion, edgeSchema,scanKey,false, start, limit);
         return wrapLinkQuery(scanMapping,label,direction,vertices);
     }
 

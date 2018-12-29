@@ -109,7 +109,6 @@ public final class RowStorageer {
                 return;
             }
             final Collection<FileRow> fileRows = joinRowMap.get(associateRowQuery.getName());
-            Collection<String> fields = information.columns(associateRowQuery.getName());
             if(CollectionUtils.isEmpty(fileRows)){
                 return;
             }

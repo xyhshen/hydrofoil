@@ -1,6 +1,7 @@
 package org.hydrofoil.provider.sequence;
 
 import org.apache.commons.collections4.MapUtils;
+import org.hydrofoil.common.util.ParameterUtils;
 
 import java.util.Map;
 
@@ -25,6 +26,7 @@ final class FileRow {
 
     Object value(final String fieldname){
         Integer i = MapUtils.getInteger(header,fieldname);
+        ParameterUtils.notNull(i);
         return values[i];
     }
 

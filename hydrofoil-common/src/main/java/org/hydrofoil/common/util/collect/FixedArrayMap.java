@@ -179,7 +179,7 @@ public class FixedArrayMap<K,V> implements Map<K,V>, Cloneable, Serializable {
     @SuppressWarnings("unchecked")
     @Override
     public Collection<V> values() {
-        return Stream.of(values).map(v->(V)v.getValue()).collect(Collectors.toList());
+        return Stream.of(values).filter(Objects::nonNull).map(v->(V)v.getValue()).collect(Collectors.toList());
     }
 
     @SuppressWarnings("unchecked")
