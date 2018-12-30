@@ -33,11 +33,19 @@ public final class EdgeVertexConnectionInformation {
 
     private KeyValueEntity.KeyValueEntityFactory edgePropertyFactory;
 
-    private boolean mainTable;
+    private KeyValueEntity.KeyValueEntityFactory edgeFieldFactory;
 
-    private String tableName;
+    private boolean vertexInMainTable;
 
-    private boolean primaryKey;
+    private String vertexTableName;
+
+    private boolean vertexPrimaryKey;
+
+    private boolean edgeInMainTable;
+
+    private String edgeTableName;
+
+    private boolean edgePrimaryKey;
 
     public EdgeVertexConnectionInformation(){
         vertex2EdgePropertyFields = DataUtils.newHashMapWithExpectedSize();
@@ -65,22 +73,6 @@ public final class EdgeVertexConnectionInformation {
     }
 
     /**
-     * @return $field.TypeName
-     * @see EdgeVertexConnectionInformation#mainTable
-     **/
-    public boolean inMainTable() {
-        return mainTable;
-    }
-
-    /**
-     * @param mainTable $field.typeName
-     * @see EdgeVertexConnectionInformation#mainTable
-     **/
-    public void setMainTable(boolean mainTable) {
-        this.mainTable = mainTable;
-    }
-
-    /**
      * @return PropertySchema>>
      * @see EdgeVertexConnectionInformation#vertexEdgeProperties
      **/
@@ -105,18 +97,18 @@ public final class EdgeVertexConnectionInformation {
     }
     /**
      * @return String
-     * @see EdgeVertexConnectionInformation#tableName
+     * @see EdgeVertexConnectionInformation#vertexTableName
      **/
-    public String getTableName() {
-        return tableName;
+    public String getVertexTableName() {
+        return vertexTableName;
     }
 
     /**
-     * @param tableName String
-     * @see EdgeVertexConnectionInformation#tableName
+     * @param vertexTableName String
+     * @see EdgeVertexConnectionInformation#vertexTableName
      **/
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
+    public void setVertexTableName(String vertexTableName) {
+        this.vertexTableName = vertexTableName;
     }
 
     /**
@@ -153,17 +145,97 @@ public final class EdgeVertexConnectionInformation {
 
     /**
      * @return $field.TypeName
-     * @see EdgeVertexConnectionInformation#primaryKey
+     * @see EdgeVertexConnectionInformation#vertexInMainTable
      **/
-    public boolean isPrimaryKey() {
-        return primaryKey;
+    public boolean isVertexInMainTable() {
+        return vertexInMainTable;
     }
 
     /**
-     * @param primaryKey $field.typeName
-     * @see EdgeVertexConnectionInformation#primaryKey
+     * @param vertexInMainTable $field.typeName
+     * @see EdgeVertexConnectionInformation#vertexInMainTable
      **/
-    public void setPrimaryKey(boolean primaryKey) {
-        this.primaryKey = primaryKey;
+    public void setVertexInMainTable(boolean vertexInMainTable) {
+        this.vertexInMainTable = vertexInMainTable;
+    }
+
+    /**
+     * @return $field.TypeName
+     * @see EdgeVertexConnectionInformation#vertexPrimaryKey
+     **/
+    public boolean isVertexPrimaryKey() {
+        return vertexPrimaryKey;
+    }
+
+    /**
+     * @param vertexPrimaryKey $field.typeName
+     * @see EdgeVertexConnectionInformation#vertexPrimaryKey
+     **/
+    public void setVertexPrimaryKey(boolean vertexPrimaryKey) {
+        this.vertexPrimaryKey = vertexPrimaryKey;
+    }
+
+    /**
+     * @return $field.TypeName
+     * @see EdgeVertexConnectionInformation#edgeInMainTable
+     **/
+    public boolean isEdgeInMainTable() {
+        return edgeInMainTable;
+    }
+
+    /**
+     * @param edgeInMainTable $field.typeName
+     * @see EdgeVertexConnectionInformation#edgeInMainTable
+     **/
+    public void setEdgeInMainTable(boolean edgeInMainTable) {
+        this.edgeInMainTable = edgeInMainTable;
+    }
+
+    /**
+     * @return String
+     * @see EdgeVertexConnectionInformation#edgeTableName
+     **/
+    public String getEdgeTableName() {
+        return edgeTableName;
+    }
+
+    /**
+     * @param edgeTableName String
+     * @see EdgeVertexConnectionInformation#edgeTableName
+     **/
+    public void setEdgeTableName(String edgeTableName) {
+        this.edgeTableName = edgeTableName;
+    }
+
+    /**
+     * @return $field.TypeName
+     * @see EdgeVertexConnectionInformation#edgePrimaryKey
+     **/
+    public boolean isEdgePrimaryKey() {
+        return edgePrimaryKey;
+    }
+
+    /**
+     * @param edgePrimaryKey $field.typeName
+     * @see EdgeVertexConnectionInformation#edgePrimaryKey
+     **/
+    public void setEdgePrimaryKey(boolean edgePrimaryKey) {
+        this.edgePrimaryKey = edgePrimaryKey;
+    }
+
+    /**
+     * @return KeyValueEntityFactory
+     * @see EdgeVertexConnectionInformation#edgeFieldFactory
+     **/
+    public KeyValueEntity.KeyValueEntityFactory getEdgeFieldFactory() {
+        return edgeFieldFactory;
+    }
+
+    /**
+     * @param edgeFieldFactory KeyValueEntityFactory
+     * @see EdgeVertexConnectionInformation#edgeFieldFactory
+     **/
+    public void setEdgeFieldFactory(KeyValueEntity.KeyValueEntityFactory edgeFieldFactory) {
+        this.edgeFieldFactory = edgeFieldFactory;
     }
 }

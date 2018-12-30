@@ -17,10 +17,7 @@ import org.hydrofoil.core.tinkerpop.glue.TinkerpopGraphTransit;
 import org.hydrofoil.core.tinkerpop.structure.HydrofoilTinkerpopGraph;
 import org.hydrofoil.core.tinkerpop.structure.HydrofoilVertex;
 
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * HydrofoilVertexStep
@@ -63,9 +60,13 @@ public final class HydrofoilVertexStep<E extends Element> extends VertexStep<E> 
     private void expand(){
         ParameterUtils.mustTrueException(starts.hasNext(),"expand failed", FastNoSuchElementException.instance());
         final Set<HydrofoilVertex> vertexSet = DataUtils.newHashSetWithExpectedSize();
+        final List<Traverser.Admin<Vertex>> backStarts = new ArrayList<>();
         starts.forEachRemaining(v -> {
             vertexSet.add((HydrofoilVertex) v.get());
+            backStarts.add(v);
         });
+        //must save starts
+        starts.add(backStarts.iterator());
         HydrofoilTinkerpopGraph graph = (HydrofoilTinkerpopGraph) DataUtils.
                 getOptional(traversal.getGraph());
         final TinkerpopGraphTransit transit = TinkerpopGraphTransit.of(graph);

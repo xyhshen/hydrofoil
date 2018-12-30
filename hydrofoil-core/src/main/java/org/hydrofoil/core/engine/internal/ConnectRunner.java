@@ -127,7 +127,7 @@ public final class ConnectRunner<E> {
         ParameterUtils.notEmpty(deriveMappings,"derive mapping");
         deriveMappings.forEach(m->m.setBaseMapping(mapping));
         for(ElementMapping deriveMapping:deriveMappings){
-            ConnectRunner deriveRunner =  new ConnectRunner(management,deriveMapping.getDeriveHandleFunction());
+            ConnectRunner deriveRunner =  new ConnectRunner(management,mapping.getDeriveHandleFunction());
             MultiValuedMap<String,ElementMapping> mappings = MultiMapUtils.newListValuedHashMap();
             mappings.put(deriveMapping.getDatasource(),deriveMapping);
             ParameterUtils.mustTrueMessage(deriveRunner.select(mappings),

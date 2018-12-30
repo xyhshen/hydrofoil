@@ -194,7 +194,8 @@ public final class SchemaManager {
         EdgeVertexConnectionInformation information = new EdgeVertexConnectionInformation();
         VertexSchema vertexSchema = vertexSchemaMap.get(source?edgeSchema.getSourceLabel():edgeSchema.getTargetLabel());
         Collection<EdgeSchema.EdgeConnection> connections = source?edgeSchema.getSourceConnections():edgeSchema.getTargetConnections();
-        boolean inMainTable = true;
+        boolean vertexInMainTable = true;
+        boolean edgeInMainTable = true;
         for(EdgeSchema.EdgeConnection connection:connections){
             PropertySchema vertexProperty = vertexSchema.getProperties().get(connection.getVertexPropertyLabel());
             PropertySchema edgeProperty = edgeSchema.getProperties().get(connection.getEdgePropertyLabel());
@@ -211,17 +212,27 @@ public final class SchemaManager {
             information.getVertexField2EdgeProperty().add(Pair.of(vertexProperty.getField(),edgeProperty.getLabel()));
             //
             information.getEdgeFieldProperty().add(Pair.of(edgeProperty.getField(),edgeProperty.getLabel()));
-            if(!StringUtils.isBlank(vertexProperty.getLinkTable())){
-                inMainTable = false;
-                information.setTableName(vertexProperty.getLinkTable());
+            if(StringUtils.isNotBlank(vertexProperty.getLinkTable())){
+                vertexInMainTable = false;
+                information.setVertexTableName(vertexProperty.getLinkTable());
+            }else{
+                information.setVertexTableName(vertexSchema.getTable());
+            }
+            if(StringUtils.isNotBlank(edgeProperty.getLinkTable())){
+                edgeInMainTable = false;
+                information.setEdgeTableName(edgeProperty.getLinkTable());
+            }else{
+                information.setEdgeTableName(edgeSchema.getTable());
             }
         }
         information.setEdgePropertyFactory(KeyValueEntity.createFactory(information.getEdgeProperties()));
-        information.setMainTable(inMainTable);
-        information.setPrimaryKey(CollectionUtils.isEqualCollection(
+        information.setEdgeFieldFactory(KeyValueEntity.createFactory(information.getEdgeFields()));
+        information.setVertexInMainTable(vertexInMainTable);
+        information.setVertexPrimaryKey(CollectionUtils.isEqualCollection(
                 information.getVertexProperties(),
                 vertexSchema.getPrimaryKeys()
                 ));
+        information.setEdgeInMainTable(edgeInMainTable);
         return information;
     }
 

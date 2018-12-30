@@ -41,6 +41,11 @@ public class FixedArrayMap<K,V> implements Map<K,V>, Cloneable, Serializable {
             this.value = value;
             return old;
         }
+
+        @Override
+        public String toString() {
+            return Objects.toString(value);
+        }
     }
 
     class FixedArrayMapEntry<K,V> implements Entry{
@@ -82,6 +87,11 @@ public class FixedArrayMap<K,V> implements Map<K,V>, Cloneable, Serializable {
                 return false;
             }
             return Objects.equals(((FixedArrayMapEntry)obj).getKey(),getKey());
+        }
+
+        @Override
+        public String toString() {
+            return key + "=" + values;
         }
     }
 

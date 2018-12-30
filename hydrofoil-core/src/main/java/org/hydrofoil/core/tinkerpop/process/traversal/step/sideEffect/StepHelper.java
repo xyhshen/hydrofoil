@@ -21,6 +21,7 @@ import org.hydrofoil.core.tinkerpop.glue.MultipleCondition;
 import org.hydrofoil.core.tinkerpop.glue.TinkerpopGraphTransit;
 import org.hydrofoil.core.tinkerpop.structure.HydrofoilTinkerpopGraph;
 
+import java.util.Arrays;
 import java.util.Iterator;
 
 /**
@@ -152,5 +153,9 @@ public final class StepHelper {
     public static void processVertexStep(final Traversal.Admin<?, ?> traversal, final VertexStep originalStep){
         HydrofoilVertexStep<?> newVertexStep = new HydrofoilVertexStep<>(originalStep);
         processActionStep(traversal,originalStep,newVertexStep);
+        final MultipleCondition multipleCondition = newVertexStep.getMultipleCondition();
+        if(multipleCondition != null){
+            multipleCondition.getLabels().addAll(Arrays.asList(originalStep.getEdgeLabels()));
+        }
     }
 }

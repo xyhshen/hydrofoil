@@ -150,7 +150,7 @@
         </edge>
         <edge label="belong.to" table="team">
             <source label="team">
-                <connection edge="city" vertex="city"/>
+                <connection edge="team.id" vertex="team.id"/>
             </source>
             <target label="city">
                 <connection edge="city" vertex="city" />

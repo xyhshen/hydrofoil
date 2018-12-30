@@ -25,7 +25,7 @@ public final class TinkerpopExample {
         configuration.put("hydrofoil.schema.mapper.resource","mapper.xml");
         try(HydrofoilTinkerpopGraph graph = HydrofoilFactory.open(configuration)){
             final GraphTraversalSource g = graph.traversal();
-            final List<Edge> edges = g.V().hasLabel("team").bothE().toList();
+            final List<Edge> edges = g.V().hasLabel("team").bothE().hasLabel("belong.to").toList();
             System.out.println(edges);
         }
     }

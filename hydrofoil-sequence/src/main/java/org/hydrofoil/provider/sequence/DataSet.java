@@ -42,6 +42,20 @@ final class DataSet {
         public int compareTo(IndexKey o) {
             return ObjectUtils.compare((Comparable)key,(Comparable) o.key);
         }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(key);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if(!(obj instanceof IndexKey)){
+                return false;
+            }
+            IndexKey right = (IndexKey) obj;
+            return Objects.equals(right.key,this.key);
+        }
     }
 
     /**

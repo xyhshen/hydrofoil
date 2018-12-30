@@ -77,6 +77,11 @@ public class ArrayMap<K extends Comparable<? super K>,V> implements Map<K,V>, Cl
                     Objects.equals(((ArrayMapEntry)(otherObj)).key,this.key) &&
                         Objects.equals(((ArrayMapEntry)(otherObj)).value,this.value);
         }
+
+        @Override
+        public String toString() {
+            return key + ":" + value;
+        }
     }
 
     @SuppressWarnings("unchecked")
