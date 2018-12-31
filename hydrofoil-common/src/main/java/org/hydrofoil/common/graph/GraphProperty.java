@@ -9,6 +9,7 @@ import org.hydrofoil.common.util.bean.Beans;
 import java.net.URL;
 import java.sql.Blob;
 import java.util.Date;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -241,9 +242,7 @@ public final class GraphProperty {
 
     @Override
     public String toString(){
-        return PropertyType.String.isMatch(content)?
-                (String)content:
-                (String) PropertyType.String.nullValue;
+        return Objects.toString(content, (String) PropertyType.String.nullValue);
     }
 
     public Integer toInteger(){

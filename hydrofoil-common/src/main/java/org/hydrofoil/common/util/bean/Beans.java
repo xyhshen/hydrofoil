@@ -77,16 +77,25 @@ public final class Beans {
     }
 
     public static Long toLong(final Object o,final Object n){
+        if(o == null){
+            return (Long) n;
+        }
+        if(o instanceof Number){
+            return ((Number) o).longValue();
+        }
         return NumberUtils.toLong(Objects.toString(o, null), (Long) n);
     }
 
     public static Double toDouble(final Object o){
-        return toDouble(0,0L);
+        return toDouble(o,0.0d);
     }
 
     public static Double toDouble(final Object o,final Object n){
         if(o == null){
             return (Double) n;
+        }
+        if(o instanceof Number){
+            return ((Number) o).doubleValue();
         }
         return Fraction.getFraction(Objects.toString(o, null)).doubleValue();
     }

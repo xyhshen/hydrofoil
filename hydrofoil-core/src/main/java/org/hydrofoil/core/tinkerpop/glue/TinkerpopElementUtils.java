@@ -87,15 +87,15 @@ public final class TinkerpopElementUtils {
         return true;
     }
 
-    static QMatch.Q makeBetween(final String key,final P<?> predicate){
-        if(predicate instanceof AndP
-                && predicate.getValue() instanceof List){
-            List l = (List) predicate.getValue();
-            if(l.size() != 2){
+    @SuppressWarnings("unchecked")
+    static QMatch.Q makeBetween(final String key, final P<?> predicate){
+        if(predicate instanceof AndP){
+            List<P> pl = ((AndP) predicate).getPredicates();
+            if(pl.size() != 2){
                 return null;
             }
-            P p1 = (P) l.get(0);
-            P p2 = (P) l.get(1);
+            P p1 = pl.get(0);
+            P p2 = pl.get(1);
             if(p1.getBiPredicate() == Compare.gte
                     && p2.getBiPredicate() == Compare.lt ){
                 return QMatch.between(key,p1.getValue(),p2.getValue());

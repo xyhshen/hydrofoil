@@ -51,6 +51,7 @@
     <table name="team" package="team">
         <column name="team_id" index-type="primary" />
         <column name="team_name" index-type="normal|text" />
+        <column name="created_date" index-type="normal" accept-type="date" />
     </table>
     <table name="team_coach" package="team_coach">
         <column name="uuid" index-type="primary" />
@@ -60,11 +61,13 @@
     <table name="team_owner" package="team_owner">
         <column name="uuid" index-type="primary" />
         <column name="team_id" index-type="normal" />
+        <column name="capital" accept-type="double" />
     </table>
     <table name="team_place" package="team_place">
         <column name="uuid" index-type="primary" />
         <column name="team_id" index-type="normal" />
         <column name="city" index-type="normal|text" />
+        <column name="home_capacity" accept-type="integer" />
     </table>
     <table name="team_star" package="team_star">
         <column name="uuid" index-type="primary" />
@@ -74,6 +77,7 @@
     <table name="team_honour" package="team_honour">
         <column name="uuid" index-type="primary" />
         <column name="team_id" index-type="normal" />
+        <column name="count" accept-type="integer" />
     </table>
 
     <package name="sportsman" datasource="sports">

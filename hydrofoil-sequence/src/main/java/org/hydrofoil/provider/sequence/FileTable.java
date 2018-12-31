@@ -67,15 +67,17 @@ public final class FileTable {
      */
     public void putRow(Object[] row){
         final Map<String, ColumnSchema> columnMap = tableSchema.getColumns();
+        final Object[] fullrow = new Object[row.length];
+        System.arraycopy(row,0,fullrow,0,row.length);
         columnMap.values().forEach(columnSchema -> {
             Integer i = header.get(columnSchema.getColumnName());
             try {
-                row[i] = SqlUtils.rawDataToAcceptData(columnSchema,row[i]);
+                fullrow[i] = SqlUtils.rawDataToAcceptData(columnSchema,row[i]);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         });
-        rows.add(new FileRow(row,header));
+        rows.add(new FileRow(fullrow,header));
     }
 
     /**
