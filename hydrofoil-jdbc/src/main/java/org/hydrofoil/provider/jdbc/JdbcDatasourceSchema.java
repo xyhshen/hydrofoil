@@ -21,24 +21,60 @@ public final class JdbcDatasourceSchema {
     /**
      * jdbc jdbc
      */
-    public final static String MYSQL_DRIVER_NAME = "com.jdbc.jdbc.Driver";
+    public enum DataBaseType{
+
+        //mysql
+        Mysql("mysql","com.mysql.jdbc.Driver");
+
+        private final String name;
+
+        private final String className;
+
+        DataBaseType(final String name,final String className){
+            this.name = name;
+            this.className = className;
+        }
+
+        /**
+         * @return String
+         * @see DataBaseType#name
+         **/
+        public String getName() {
+            return name;
+        }
+
+        /**
+         * @return String
+         * @see DataBaseType#className
+         **/
+        public String getClassName() {
+            return className;
+        }
+
+        public static DataBaseType of(final String name){
+            final DataBaseType[] values = DataBaseType.values();
+            for(DataBaseType dbType:values){
+                if(StringUtils.equalsIgnoreCase(name,dbType.name)){
+                    return dbType;
+                }
+            }
+            return null;
+        }
+    }
 
     public enum DatasourceItem{
 
         /**
          * config item
          */
+        DbType("dbType","",true),
         ConnectUrl("url","",true),
         Username("username","",true),
         Password("password","",true),
         TestWhileIdle("testWhileIdle","false",false),
-        ValidationQuery("validationQuery","",false),
-        ValidationQueryTimeout("validationQueryTimeout","10",false),
         ConnectPoolMinIdle("connectPoolMinIdle","2",false),
         ConnectPoolMaxIdle("connectPoolMaxIdle","4",false),
-        ConnectPoolMaxTotal("connectPoolMaxTotal","8",false),
-        CacheTime("cacheTime","1000",false),
-        CachePoolMaxSize("cachePoolMaxSize","1000",false);
+        ConnectPoolMaxTotal("connectPoolMaxTotal","8",false);
 
         private final String name;
         private final String defaultValue;

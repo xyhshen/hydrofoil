@@ -18,8 +18,19 @@ public final class KeyValueEntity {
 
     private final Map<String,Object> keyValueMap;
 
-    private KeyValueEntity(final Map<String,Object> keyValueMap){
+    private final KeyValueEntityFactory factory;
+
+    private KeyValueEntity(final KeyValueEntityFactory factory,final Map<String,Object> keyValueMap){
+        this.factory = factory;
         this.keyValueMap = keyValueMap;
+    }
+
+    /**
+     * @return KeyValueEntityFactory
+     * @see KeyValueEntity#factory
+     **/
+    public KeyValueEntityFactory getFactory() {
+        return factory;
     }
 
     public static class KeyValueEntityFactory{
@@ -31,7 +42,7 @@ public final class KeyValueEntity {
         }
 
         public KeyValueEntity create(){
-            return new KeyValueEntity(new FixedArrayMap<>(keyMap));
+            return new KeyValueEntity(this,new FixedArrayMap<>(keyMap));
         }
 
         public Collection<String> keys(){

@@ -1,13 +1,12 @@
 package org.hydrofoil.provider.jdbc;
 
 import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.dbcp2.BasicDataSource;
 import org.hydrofoil.common.provider.IDataConnector;
-import org.hydrofoil.common.provider.IDataConnectContext;
-import org.hydrofoil.common.provider.datasource.*;
+import org.hydrofoil.common.provider.datasource.BaseRowQuery;
+import org.hydrofoil.common.provider.datasource.RowQueryGet;
+import org.hydrofoil.common.provider.datasource.RowQueryResponse;
+import org.hydrofoil.common.provider.datasource.RowQueryScan;
 import org.hydrofoil.common.util.DataUtils;
-import org.hydrofoil.provider.jdbc.internal.AbstractDbQueryService;
-import org.hydrofoil.provider.jdbc.internal.MysqlDbQueryService;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -25,19 +24,10 @@ import java.util.Map;
  */
 public final class JdbcDataConnector implements IDataConnector {
 
-    private BasicDataSource dataSource;
-    private IDataConnectContext dataSourceContext;
+    private JdbcConnection connection;
 
-    JdbcDataConnector(BasicDataSource dataSource,
-                      IDataConnectContext dataSourceContext){
-        this.dataSource = dataSource;
-        this.dataSourceContext = dataSourceContext;
-    }
-
-    private AbstractDbQueryService getQueryServeice(RowQueryScan query){
-        AbstractDbQueryService dbQueryService = new MysqlDbQueryService(dataSource,dataSourceContext,query);
-        dbQueryService.init();
-        return dbQueryService;
+    JdbcDataConnector(final JdbcConnection connection){
+        this.connection = connection;
     }
 
     @Override
@@ -45,15 +35,14 @@ public final class JdbcDataConnector implements IDataConnector {
         final String groupField = MapUtils.getString(parameters,PARAMETER_GROUP_FIELD_NAME);
         return DataUtils.newIterator(querySet.iterator(), query->{
             try{
-                AbstractDbQueryService queryServeice = null;//getQueryServeice(query);
-                Collection<RowStore> rowStores = queryServeice.executeQuery();
+                final IJdbcService service = connection.getService();
                 switch (requestType){
                     case GET:
-                        return null;
+                        return service.scanRows((RowQueryScan) query);
                     case SCAN:
-                        return null;
+                        return service.getRows((RowQueryGet) query);
                     case COUNT:
-                        return null;
+                        return service.countRow(query,groupField);
                     default:break;
                 }
             }catch(Throwable t){
@@ -65,10 +54,6 @@ public final class JdbcDataConnector implements IDataConnector {
 
     @Override
     public void close() throws IOException {
-        try {
-            dataSource.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        connection.close();
     }
 }

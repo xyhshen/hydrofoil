@@ -86,6 +86,9 @@ public final class StepHelper {
             IActionStep actionStep){
         Step<?, ?> step = getNextExecutableStep((Step<?, ?>) actionStep);
         Step<?,?> currentStep = (Step<?, ?>) actionStep;
+        if(!(actionStep instanceof HydrofoilGraphStep)){
+            return;
+        }
         //find count step,only global
         if(!(step instanceof CountGlobalStep) ||
                 CollectionUtils.isNotEmpty(currentStep.getLabels())){
@@ -97,7 +100,7 @@ public final class StepHelper {
         //get global count step
         CountGlobalStep countGlobalStep = (CountGlobalStep) step;
         //remove current step
-        Step countStep = new HydrofoilCountStep<>(traversal,actionStep.getMultipleCondition());
+        Step countStep = new HydrofoilCountStep<>(traversal,actionStep);
         TraversalHelper.replaceStep(countGlobalStep,countStep,traversal);
     }
 
