@@ -13,6 +13,7 @@ public enum  HydrofoilConfigurationItem {
     SchemaDatasource("schema.datasource","",false,ConfigType.file),
     SchemaDataset("schema.dataset","",false,ConfigType.file),
     SchemaMapper("schema.mapper","",false,ConfigType.file),
+    GlobalVariables("global.variables","",false,ConfigType.file),
     QueryCacheTime("query.cache.time","30000",false,ConfigType.string),
     QueryCacheMaxsize("query.cache.maxsize","10000",false,ConfigType.string),
     TinkerpopDefaultReturnLength("tinkerpop.default.return.length","10000",false,ConfigType.string);

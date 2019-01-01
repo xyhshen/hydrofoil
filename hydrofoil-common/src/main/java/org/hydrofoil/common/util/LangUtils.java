@@ -1,12 +1,20 @@
 package org.hydrofoil.common.util;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Properties;
 
 /**
  * LangUtils
@@ -115,5 +123,27 @@ public final class LangUtils {
             e.printStackTrace();
         }
         return classloader;
+    }
+
+    public static Map<String,String> loadProperties(final InputStream is, final String encode){
+        final Map<String,String> map = DataUtils.newHashMapWithExpectedSize();
+        InputStreamReader isr = null;
+        try {
+            isr = new InputStreamReader(is,encode);
+            Properties properties = new Properties();
+            properties.load(isr);
+            properties.forEach((k,v)->{
+                map.put(
+                        StringUtils.trimToEmpty(Objects.toString(k)),
+                        StringUtils.trimToNull(Objects.toString(v,null)));
+            });
+        }catch (Throwable t){
+            t.printStackTrace();
+            return Collections.emptyMap();
+        }finally {
+            IOUtils.closeQuietly(isr);
+            IOUtils.closeQuietly(is);
+        }
+        return map;
     }
 }

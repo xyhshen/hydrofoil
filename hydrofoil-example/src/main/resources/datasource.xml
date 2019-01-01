@@ -3,7 +3,7 @@
     <datasource name="sports" provider="sequence">
         <configitem>
             <type>local</type>
-            <path>resource:data/sports</path>
+            <path>${resource.path}</path>
         </configitem>
     </datasource>
 </datasources>

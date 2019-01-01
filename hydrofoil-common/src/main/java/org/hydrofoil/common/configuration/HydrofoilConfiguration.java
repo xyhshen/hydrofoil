@@ -3,10 +3,10 @@ package org.hydrofoil.common.configuration;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.hydrofoil.common.util.DataUtils;
 import org.hydrofoil.common.util.ParameterUtils;
 
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -28,7 +28,7 @@ public class HydrofoilConfiguration {
     private Map<String,Object> configProperties;
 
     public HydrofoilConfiguration(){
-        this.configProperties = new HashMap<>();
+        this.configProperties = DataUtils.newHashMapWithExpectedSize();
     }
 
     public HydrofoilConfiguration put(String name,Object content){

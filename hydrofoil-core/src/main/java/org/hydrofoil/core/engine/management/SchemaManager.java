@@ -14,9 +14,7 @@ import org.hydrofoil.common.configuration.HydrofoilConfiguration;
 import org.hydrofoil.common.configuration.HydrofoilConfigurationItem;
 import org.hydrofoil.common.graph.EdgeDirection;
 import org.hydrofoil.common.schema.*;
-import org.hydrofoil.common.util.DataUtils;
-import org.hydrofoil.common.util.ParameterUtils;
-import org.hydrofoil.common.util.XmlUtils;
+import org.hydrofoil.common.util.*;
 import org.hydrofoil.common.util.bean.KeyValueEntity;
 import org.hydrofoil.core.engine.management.schema.EdgeVertexConnectionInformation;
 
@@ -76,6 +74,8 @@ public final class SchemaManager {
      */
     private final Map<String,EdgeSchema> edgeSchemaMap;
 
+    private final Map<String,String> variableMap;
+
     /**
      * vertex edge schema map,2nd param as left:in,right:out
      */
@@ -94,6 +94,7 @@ public final class SchemaManager {
         dataSourceTableMap = MultiMapUtils.newSetValuedHashMap();
         dataSourcePackageMap = MultiMapUtils.newSetValuedHashMap();
         edgeVertexPropertySetMap = DataUtils.newHashMapWithExpectedSize();
+        variableMap = DataUtils.newHashMapWithExpectedSize();
     }
 
     /**
@@ -101,9 +102,25 @@ public final class SchemaManager {
      * @param configuration config collect
      */
     void load(final HydrofoilConfiguration configuration) throws Exception {
-        loadDataSource(configuration.getStream(HydrofoilConfigurationItem.SchemaDatasource));
-        loadDataSet(configuration.getStream(HydrofoilConfigurationItem.SchemaDataset));
-        loadMapper(configuration.getStream(HydrofoilConfigurationItem.SchemaMapper));
+        loadVariable(
+                configuration.toMap(),
+                configuration.getStream(HydrofoilConfigurationItem.GlobalVariables)
+        );
+        VariableUtils.setLocal(variableMap);
+        try {
+            loadDataSource(configuration.getStream(HydrofoilConfigurationItem.SchemaDatasource));
+            loadDataSet(configuration.getStream(HydrofoilConfigurationItem.SchemaDataset));
+            loadMapper(configuration.getStream(HydrofoilConfigurationItem.SchemaMapper));
+        }finally {
+            VariableUtils.clearLocal();
+        }
+    }
+
+    private void loadVariable(final Map<String,Object> localPropertiesMap,final InputStream is){
+        if(is != null){
+            variableMap.putAll(LangUtils.loadProperties(is,"utf-8"));
+        }
+        localPropertiesMap.forEach((k,v)-> variableMap.put(k,Objects.toString(v,null)));
     }
 
     private void loadDataSource(final InputStream is) throws Exception {
