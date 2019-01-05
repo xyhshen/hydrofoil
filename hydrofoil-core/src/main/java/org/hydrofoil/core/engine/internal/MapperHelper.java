@@ -5,7 +5,7 @@ import org.hydrofoil.common.graph.QMatch;
 import org.hydrofoil.common.provider.datasource.BaseRowQuery;
 import org.hydrofoil.common.provider.datasource.RowStore;
 import org.hydrofoil.common.schema.*;
-import org.hydrofoil.common.util.ParameterUtils;
+import org.hydrofoil.common.util.ArgumentUtils;
 import org.hydrofoil.core.engine.management.SchemaManager;
 
 /**
@@ -22,15 +22,15 @@ interface MapperHelper {
 
     default String getDatasourceName(String tableName){
         TableSchema tableSchema = schemaManager().getTableSchema(tableName);
-        ParameterUtils.notNull(tableSchema,"table schema");
+        ArgumentUtils.notNull(tableSchema,"table schema");
         String datasourceName =  tableSchema.getDatasourceName();
         if(!StringUtils.isBlank(datasourceName)){
             return datasourceName;
         }
         //by package get datasource
-        ParameterUtils.notBlank(tableSchema.getPackage());
+        ArgumentUtils.notBlank(tableSchema.getPackage());
         PackageSchema packageSchema = schemaManager().getPackageSchema(tableSchema.getPackage());
-        ParameterUtils.notNull(packageSchema);
+        ArgumentUtils.notNull(packageSchema);
         return packageSchema.getDatasourceName();
     }
 

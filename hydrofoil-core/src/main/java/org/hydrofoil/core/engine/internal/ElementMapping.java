@@ -25,6 +25,8 @@ public final class ElementMapping{
 
     private Object context;
 
+    private BiFunction<ElementMapping,RowQueryResponse,ElementMapping> toGetMappingFunction;
+
     private BiFunction<ElementMapping,RowQueryResponse,Collection<ElementMapping>> deriveFunction;
 
     private BiFunction<ElementMapping,RowQueryResponse,Collection<?>> deriveHandleFunction;
@@ -141,5 +143,21 @@ public final class ElementMapping{
      **/
     public void setBaseMapping(ElementMapping baseMapping) {
         this.baseMapping = baseMapping;
+    }
+
+    /**
+     * @return ElementMapping>
+     * @see ElementMapping#toGetMappingFunction
+     **/
+    public BiFunction<ElementMapping, RowQueryResponse, ElementMapping> getToGetMappingFunction() {
+        return toGetMappingFunction;
+    }
+
+    /**
+     * @param toGetMappingFunction ElementMapping>
+     * @see ElementMapping#toGetMappingFunction
+     **/
+    public void setToGetMappingFunction(BiFunction<ElementMapping, RowQueryResponse, ElementMapping> toGetMappingFunction) {
+        this.toGetMappingFunction = toGetMappingFunction;
     }
 }

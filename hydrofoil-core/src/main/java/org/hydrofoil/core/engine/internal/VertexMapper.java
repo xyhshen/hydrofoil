@@ -4,10 +4,12 @@ import org.apache.commons.collections4.SetUtils;
 import org.hydrofoil.common.graph.GraphElementId;
 import org.hydrofoil.common.graph.GraphVertexId;
 import org.hydrofoil.common.graph.QMatch;
+import org.hydrofoil.common.provider.datasource.RowQueryResponse;
 import org.hydrofoil.common.provider.datasource.RowQueryScanKey;
 import org.hydrofoil.common.provider.datasource.RowStore;
 import org.hydrofoil.common.schema.BaseElementSchema;
 import org.hydrofoil.common.schema.VertexSchema;
+import org.hydrofoil.common.util.DataUtils;
 import org.hydrofoil.core.engine.EngineVertex;
 import org.hydrofoil.core.engine.management.SchemaManager;
 
@@ -35,6 +37,16 @@ public final class VertexMapper extends AbstractElementMapper{
     @Override
     protected boolean checkElementIdType(GraphElementId elementId) {
         return elementId instanceof GraphVertexId;
+    }
+
+    @Override
+    protected ElementMapping scanToGetHandle(ElementMapping scanMapping, RowQueryResponse scanResponse) {
+        VertexSchema vertexSchema = (VertexSchema) scanMapping.getSchemaItem();
+        Set<GraphElementId> ids = DataUtils.newHashSetWithExpectedSize();
+        for(RowStore rowStore:scanResponse.getRows()){
+            ids.add(rowElementToId(vertexSchema,rowStore,GraphVertexId.class));
+        }
+        return toGetMapping(vertexSchema.getLabel(),ids);
     }
 
     @Override

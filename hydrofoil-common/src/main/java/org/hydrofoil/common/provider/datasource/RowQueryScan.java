@@ -3,7 +3,7 @@ package org.hydrofoil.common.provider.datasource;
 import org.hydrofoil.common.graph.QMatch;
 import org.hydrofoil.common.provider.datasource.response.RowStoreResponse;
 import org.hydrofoil.common.util.DataUtils;
-import org.hydrofoil.common.util.ParameterUtils;
+import org.hydrofoil.common.util.ArgumentUtils;
 
 import java.util.Set;
 
@@ -42,18 +42,24 @@ public final class RowQueryScan extends BaseRowQuery {
      */
     private Long limit;
 
+    /**
+     * simple scan
+     */
+    private boolean simpleScan;
+
     public RowQueryScan(){
         super();
         this.uniqueField = DataUtils.newSetWithMaxSize(0);
         this.match = DataUtils.newHashSetWithExpectedSize(0);
         this.offset = 0L;
         this.limit = Long.MAX_VALUE;
+        this.simpleScan = false;
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public RowQueryResponse createResponse(Object o) {
-        ParameterUtils.mustTrue(o instanceof Iterable);
+        ArgumentUtils.mustTrue(o instanceof Iterable);
         return new RowStoreResponse(getId(), (Iterable<RowStore>) o);
     }
 
@@ -122,5 +128,21 @@ public final class RowQueryScan extends BaseRowQuery {
     public RowQueryScan setScanKey(RowQueryScanKey scanKey) {
         this.scanKey = scanKey;
         return this;
+    }
+
+    /**
+     * @return $field.TypeName
+     * @see RowQueryScan#simpleScan
+     **/
+    public boolean isSimpleScan() {
+        return simpleScan;
+    }
+
+    /**
+     * @param simpleScan $field.typeName
+     * @see RowQueryScan#simpleScan
+     **/
+    public void setSimpleScan(boolean simpleScan) {
+        this.simpleScan = simpleScan;
     }
 }

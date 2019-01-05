@@ -51,7 +51,7 @@ public final class XmlUtils {
         }
 
         String value = attribute.getStringValue();
-        value = VariableUtils.getValue(value);
+        value = VariableUtils.parseText(value);
         return StringUtils.isNotBlank(value)?value:defaultValue;
     }
 
@@ -107,7 +107,7 @@ public final class XmlUtils {
                 return;
             }
             String text = children.getText();
-            text = VariableUtils.getValue(text);
+            text = VariableUtils.parseText(text);
             map.put(children.getName(),text);
         });
         return map;

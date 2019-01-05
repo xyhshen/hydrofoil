@@ -10,7 +10,7 @@ import org.hydrofoil.common.schema.DataSourceSchema;
 import org.hydrofoil.common.schema.PackageSchema;
 import org.hydrofoil.common.schema.TableSchema;
 import org.hydrofoil.common.util.LangUtils;
-import org.hydrofoil.common.util.ParameterUtils;
+import org.hydrofoil.common.util.ArgumentUtils;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -55,12 +55,12 @@ public final class DataSourceManager implements Closeable {
             return dataSourceMap.computeIfAbsent(dataSourceName,(name)->{
                 DataSourceSchema datasourceSchema = management.getSchemaManager().
                         getDatasourceSchema(name);
-                ParameterUtils.notNull(datasourceSchema,"collect source schema" + name);
+                ArgumentUtils.notNull(datasourceSchema,"collect source schema" + name);
                 IDataProvider provider = loadProvider(datasourceSchema.getProvider());
                 IDataConnector connect = provider.connect(
                         new DefaultDatasourceContext(management.getSchemaManager(),
                         datasourceSchema));
-                ParameterUtils.nullMessage(connect,"collect source " + name
+                ArgumentUtils.notNullMessage(connect,"collect source " + name
                         + " connect failed");
                 return connect;
             });
@@ -76,7 +76,7 @@ public final class DataSourceManager implements Closeable {
         IDataProvider p = LangUtils.newInstance(Thread.currentThread().
                 getContextClassLoader(), IDataProvider.DATA_PROVIDER_CLASS_PATH + "." +
                 provider + "." + IDataProvider.DATA_PROVIDER_CLASS_NAME);
-        ParameterUtils.notNull(p,"provider instance " + provider);
+        ArgumentUtils.notNull(p,"provider instance " + provider);
         return p;
     }
 

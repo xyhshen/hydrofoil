@@ -194,7 +194,7 @@ public final class DataUtils {
             return 0;
         }
         if (expectedSize < 3) {
-            ParameterUtils.mustTrue(expectedSize > 0,"expectedSize");
+            ArgumentUtils.mustTrue(expectedSize > 0,"expectedSize");
             return expectedSize + 1;
         }
         if (expectedSize < MAX_POWER_OF_TWO) {   //MAX_POWER_OF_TWO = 1 << (Integer.SIZE - 2); //Integer.SIZE = 32;
@@ -209,7 +209,7 @@ public final class DataUtils {
     @SuppressWarnings("unchecked")
     public static <K,V> Map<K,V> toMap(Object ...keyvalues){
         int length = ArrayUtils.getLength(keyvalues);
-        ParameterUtils.mustTrue(length > 2 && (length % 2) == 0);
+        ArgumentUtils.mustTrue(length > 2 && (length % 2) == 0);
         Map<K,V> map = DataUtils.newMapWithMaxSize(length / 2);
         for(int i = 0;i < length / 2;i++){
             map.put((K)keyvalues[i],(V)keyvalues[i * 2 + 1]);
@@ -268,7 +268,7 @@ public final class DataUtils {
     }
 
     public static <V extends Comparable<? super V>> Set<V> newArraySet(V ...a){
-        ParameterUtils.mustTrue(ArrayUtils.isNotEmpty(a));
+        ArgumentUtils.mustTrue(ArrayUtils.isNotEmpty(a));
         return new ArraySet<>(Stream.of(a).collect(Collectors.toSet()));
     }
 

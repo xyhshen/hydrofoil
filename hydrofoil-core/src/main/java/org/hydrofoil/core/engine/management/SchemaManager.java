@@ -120,7 +120,9 @@ public final class SchemaManager {
         if(is != null){
             variableMap.putAll(LangUtils.loadProperties(is,"utf-8"));
         }
-        localPropertiesMap.forEach((k,v)-> variableMap.put(k,Objects.toString(v,null)));
+        localPropertiesMap.forEach((k,v)-> {
+            variableMap.put(k,Objects.toString(v,null));
+        });
     }
 
     private void loadDataSource(final InputStream is) throws Exception {
@@ -153,12 +155,12 @@ public final class SchemaManager {
                 TableSchema tableSchema = new TableSchema();
                 tableSchema.read(element);
                 tableSchemaMap.put(tableSchema.getName(),tableSchema);
-                ParameterUtils.mustTrue(!StringUtils.isAllBlank(tableSchema.getDatasourceName(), tableSchema.getPackage()));
+                ArgumentUtils.mustTrue(!StringUtils.isAllBlank(tableSchema.getDatasourceName(), tableSchema.getPackage()));
                 if(StringUtils.isNotBlank(tableSchema.getDatasourceName())){
                     dataSourceTableMap.put(tableSchema.getDatasourceName(),tableSchema.getName());
                 }else{
                     PackageSchema packageSchema = packageSchemaMap.get(tableSchema.getPackage());
-                    ParameterUtils.notNull(packageSchema);
+                    ArgumentUtils.notNull(packageSchema);
                     dataSourceTableMap.put(packageSchema.getDatasourceName(),tableSchema.getName());
                 }
             }
@@ -216,7 +218,7 @@ public final class SchemaManager {
         for(EdgeSchema.EdgeConnection connection:connections){
             PropertySchema vertexProperty = vertexSchema.getProperties().get(connection.getVertexPropertyLabel());
             PropertySchema edgeProperty = edgeSchema.getProperties().get(connection.getEdgePropertyLabel());
-            ParameterUtils.mustTrue(ObjectUtils.allNotNull(vertexProperty,edgeProperty));
+            ArgumentUtils.mustTrue(ObjectUtils.allNotNull(vertexProperty,edgeProperty));
             //edge property
             information.getEdgeProperties().add(edgeProperty.getLabel());
             //vertex properties

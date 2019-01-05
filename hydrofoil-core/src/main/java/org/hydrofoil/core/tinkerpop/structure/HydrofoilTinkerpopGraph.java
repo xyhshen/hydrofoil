@@ -10,7 +10,7 @@ import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Transaction;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
-import org.hydrofoil.common.util.ParameterUtils;
+import org.hydrofoil.common.util.ArgumentUtils;
 import org.hydrofoil.core.HydrofoilGraph;
 import org.hydrofoil.core.tinkerpop.glue.IdManage;
 import org.hydrofoil.core.tinkerpop.glue.TinkerpopGraphTransit;
@@ -101,13 +101,13 @@ public final class HydrofoilTinkerpopGraph implements Graph {
 
     @Override
     public Iterator<Vertex> vertices(Object... vertexIds) {
-        ParameterUtils.mustTrueMessage(ArrayUtils.isNotEmpty(vertexIds),"vertex id's not empty");
+        ArgumentUtils.mustTrueMessage(ArrayUtils.isNotEmpty(vertexIds),"vertex id's not empty");
         return TinkerpopGraphTransit.of(this).listVerticesByIds(vertexIds);
     }
 
     @Override
     public Iterator<Edge> edges(Object... edgeIds) {
-        ParameterUtils.mustTrueMessage(ArrayUtils.isNotEmpty(edgeIds),"edge id's not empty");
+        ArgumentUtils.mustTrueMessage(ArrayUtils.isNotEmpty(edgeIds),"edge id's not empty");
         return TinkerpopGraphTransit.of(this).listEdgesByIds(edgeIds);
     }
 

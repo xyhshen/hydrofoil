@@ -11,7 +11,7 @@ import org.hydrofoil.common.graph.GraphVertexId;
 import org.hydrofoil.common.schema.BaseElementSchema;
 import org.hydrofoil.common.util.DataUtils;
 import org.hydrofoil.common.util.EncodeUtils;
-import org.hydrofoil.common.util.ParameterUtils;
+import org.hydrofoil.common.util.ArgumentUtils;
 import org.hydrofoil.core.engine.management.SchemaManager;
 import org.json.JSONObject;
 
@@ -28,10 +28,6 @@ import java.util.Objects;
  * @date 2018/7/27 15:23
  */
 public final class IdManage {
-
-    private static final String ID_LABEL_NAME = "label";
-
-    private static final String ID_KEY_NAME = "keys";
 
     private static final char ID_FIELD_SPLIT = ':';
 
@@ -64,12 +60,9 @@ public final class IdManage {
         }else{
             //by json
             JSONObject fulljson = new JSONObject();
-            fulljson.put(ID_LABEL_NAME,elementId.label());
             JSONObject keyjson = new JSONObject();
-            elementId.unique().forEach((k,v)->{
-                keyjson.put(k,Objects.toString(v,null));
-            });
-            fulljson.put(ID_KEY_NAME,keyjson);
+            elementId.unique().forEach((k,v)-> keyjson.put(k,Objects.toString(v,null)));
+            fulljson.put(elementId.label(),keyjson);
             idstring.append(fulljson.toString());
         }
 
@@ -101,8 +94,8 @@ public final class IdManage {
         Map<String,Object> uniqueMap = null;
         if(StringUtils.startsWith(idstring,JSON_FIRST)){
             JSONObject fulljson = new JSONObject(idstring);
-            label = fulljson.getString(ID_LABEL_NAME);
-            final JSONObject keyjson = fulljson.getJSONObject(ID_KEY_NAME);
+            label = DataUtils.collectFirst(fulljson.keySet());
+            final JSONObject keyjson = fulljson.getJSONObject(label);
             uniqueMap = keyjson.toMap();
         }else{
             int index = StringUtils.indexOf(idstring,ID_FIELD_SPLIT);
@@ -115,7 +108,7 @@ public final class IdManage {
         }else{
             elementSchema = schemaManager.getEdgeSchema(label);
         }
-        ParameterUtils.notNull(elementSchema,"label");
+        ArgumentUtils.notNull(elementSchema,"label");
         if(uniqueMap == null){
             final String key = DataUtils.collectFirst(elementSchema.getPrimaryKeys());
             uniqueMap = Collections.singletonMap(key,uniqueKey);

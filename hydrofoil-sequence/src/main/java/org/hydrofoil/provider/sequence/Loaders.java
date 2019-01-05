@@ -8,7 +8,7 @@ import org.hydrofoil.common.schema.PackageSchema;
 import org.hydrofoil.common.schema.TableSchema;
 import org.hydrofoil.common.util.DataUtils;
 import org.hydrofoil.common.util.LangUtils;
-import org.hydrofoil.common.util.ParameterUtils;
+import org.hydrofoil.common.util.ArgumentUtils;
 import org.hydrofoil.provider.sequence.loader.LocalFileLoader;
 import org.hydrofoil.provider.sequence.reader.CsvFileReader;
 
@@ -53,9 +53,9 @@ public final class Loaders {
         String datasourceType = MapUtils.getString(configItems,SequenceConfiguration.DATASOURCE_TYPE);
         String directoryPath = MapUtils.getString(configItems,SequenceConfiguration.DATASOURCE_DIRECTORY_PATH);
         Class<? extends IFileLoader> loaderClz = loaderClassMap.get(datasourceType);
-        ParameterUtils.notNull(loaderClz);
+        ArgumentUtils.notNull(loaderClz);
         IFileLoader loader = LangUtils.newInstance(loaderClz);
-        ParameterUtils.notNull(loader);
+        ArgumentUtils.notNull(loader);
         loader.create(dataSourceContext.getDatasourceSchema());
         //get file list
         Map<String,Map<String,DataSet>> packageMap = DataUtils.newHashMapWithExpectedSize(10);
@@ -70,7 +70,7 @@ public final class Loaders {
             Map<String,FileTable> fileTables;
             try{
                 IFileReader fileReader = readerMap.get(fileType);
-                ParameterUtils.notNull(fileReader);
+                ArgumentUtils.notNull(fileReader);
                 fileTables = fileReader.read(is, packageSchemaEntry.getValue().getOptionMap(),tableSchemas);
             }finally {
                 IOUtils.closeQuietly(is);

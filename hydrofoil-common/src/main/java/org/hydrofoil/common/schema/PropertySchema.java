@@ -4,7 +4,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.dom4j.Element;
 import org.hydrofoil.common.util.DataUtils;
-import org.hydrofoil.common.util.ParameterUtils;
+import org.hydrofoil.common.util.ArgumentUtils;
 import org.hydrofoil.common.util.XmlUtils;
 
 import java.util.List;
@@ -54,7 +54,7 @@ public final class PropertySchema extends SchemaItem{
         String multiple = XmlUtils.attributeStringValue(node,ATTR_PROPERTY_MULTIPLE,"false");
 
         if(!subclass){
-            ParameterUtils.notBlank(label);
+            ArgumentUtils.notBlank(label);
             putItem(ATTR_PROPERTY_LABEL,label);
             putItem(ATTR_PROPERTY_PRIMARY,primary);
             putItem(ATTR_PROPERTY_LINK_TABLE,linkTable);
@@ -62,7 +62,7 @@ public final class PropertySchema extends SchemaItem{
             //load children property
             loadChildren(node);
         }else{
-            ParameterUtils.notBlank(name);
+            ArgumentUtils.notBlank(name);
             putItem(ATTR_PROPERTY_NAME,name);
         }
         putItem(ATTR_PROPERTY_FIELD,field);

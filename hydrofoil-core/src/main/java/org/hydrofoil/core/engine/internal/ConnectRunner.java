@@ -5,6 +5,7 @@ import org.apache.commons.collections4.MultiMapUtils;
 import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.collections4.keyvalue.DefaultKeyValue;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.mutable.MutableObject;
 import org.hydrofoil.common.provider.IDataConnector;
 import org.hydrofoil.common.provider.datasource.BaseRowQuery;
 import org.hydrofoil.common.provider.datasource.RowQueryResponse;
@@ -12,7 +13,7 @@ import org.hydrofoil.common.provider.datasource.RowQueryScan;
 import org.hydrofoil.common.provider.datasource.response.RowCountResponse;
 import org.hydrofoil.common.util.DataUtils;
 import org.hydrofoil.common.util.LogUtils;
-import org.hydrofoil.common.util.ParameterUtils;
+import org.hydrofoil.common.util.ArgumentUtils;
 import org.hydrofoil.core.engine.management.Management;
 import org.slf4j.Logger;
 
@@ -61,9 +62,9 @@ public final class ConnectRunner<E> {
     @SuppressWarnings("unchecked")
     private Collection<E> doHandelCountRequest(final ElementMapping elementMapping,
                                                final RowQueryResponse rowQueryResponse){
-        ParameterUtils.mustTrue(rowQueryResponse instanceof RowCountResponse);
+        ArgumentUtils.mustTrue(rowQueryResponse instanceof RowCountResponse);
         RowCountResponse countResponse = (RowCountResponse) rowQueryResponse;
-        ParameterUtils.mustTrueException(countResponse.isSucceed(),"count failed",countResponse.getException());
+        ArgumentUtils.mustTrueException(countResponse.isSucceed(),"count failed",countResponse.getException());
         Collection<KeyValue<?,Long>> counts;
         if(StringUtils.isNotBlank(groupFieldName)){
             counts = new ArrayList<>(rowQueryResponse.counts());
@@ -99,10 +100,16 @@ public final class ConnectRunner<E> {
                 //process response
                 while(rowQueryResponseIterator.hasNext()){
                     RowQueryResponse next = rowQueryResponseIterator.next();
-                    ParameterUtils.mustTrueException(next.isSucceed(),
+                    ArgumentUtils.mustTrueException(next.isSucceed(),
                             "request datasource failed",
                             next.getException());
-                    elements.addAll(processResponse(elementMappingMap.get(next.id()),next));
+                    final ElementMapping elementMapping = elementMappingMap.get(next.id());
+                    if(!getQuery &&
+                            ((RowQueryScan)elementMapping.getQueryRequest()).isSimpleScan() &&
+                            !returnCount){
+                        next = nextGetScan(elementMapping,next);
+                    }
+                    elements.addAll(processResponse(elementMapping,next));
                 }
             }
         }catch (Throwable t){
@@ -122,15 +129,30 @@ public final class ConnectRunner<E> {
     }
 
     @SuppressWarnings("unchecked")
+    private RowQueryResponse nextGetScan(final ElementMapping mapping,final RowQueryResponse scanResponse){
+        final ElementMapping getElementMapping = mapping.getToGetMappingFunction().apply(mapping, scanResponse);
+        final MutableObject mutableObject = new MutableObject();
+        ConnectRunner getRunner = new ConnectRunner(management,(m, p)-> {
+            mutableObject.setValue(p);
+            return Collections.singleton(p);
+        });
+        MultiValuedMap<String,ElementMapping> mappings = MultiMapUtils.newListValuedHashMap();
+        mappings.put(getElementMapping.getDatasource(),getElementMapping);
+        ArgumentUtils.mustTrueMessage(getRunner.select(mappings),
+                "get query failed");
+        return (RowQueryResponse) mutableObject.getValue();
+    }
+
+    @SuppressWarnings("unchecked")
     private void processDeriveRequest(final ElementMapping mapping, final RowQueryResponse response){
         final Collection<ElementMapping> deriveMappings = mapping.getDeriveFunction().apply(mapping, response);
-        ParameterUtils.notEmpty(deriveMappings,"derive mapping");
+        ArgumentUtils.notEmpty(deriveMappings,"derive mapping");
         deriveMappings.forEach(m->m.setBaseMapping(mapping));
         for(ElementMapping deriveMapping:deriveMappings){
             ConnectRunner deriveRunner =  new ConnectRunner(management,mapping.getDeriveHandleFunction());
             MultiValuedMap<String,ElementMapping> mappings = MultiMapUtils.newListValuedHashMap();
             mappings.put(deriveMapping.getDatasource(),deriveMapping);
-            ParameterUtils.mustTrueMessage(deriveRunner.select(mappings),
+            ArgumentUtils.mustTrueMessage(deriveRunner.select(mappings),
                     "derive query failed");
         }
     }

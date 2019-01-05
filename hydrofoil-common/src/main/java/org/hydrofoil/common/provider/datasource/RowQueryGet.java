@@ -2,7 +2,7 @@ package org.hydrofoil.common.provider.datasource;
 
 import org.hydrofoil.common.provider.datasource.response.RowStoreResponse;
 import org.hydrofoil.common.util.DataUtils;
-import org.hydrofoil.common.util.ParameterUtils;
+import org.hydrofoil.common.util.ArgumentUtils;
 import org.hydrofoil.common.util.bean.KeyValueEntity;
 
 import java.util.Collection;
@@ -30,7 +30,7 @@ public final class RowQueryGet extends BaseRowQuery{
     @SuppressWarnings("unchecked")
     @Override
     public RowQueryResponse createResponse(Object o) {
-        ParameterUtils.mustTrue(o instanceof Iterable);
+        ArgumentUtils.mustTrue(o instanceof Iterable);
         return new RowStoreResponse(getId(), (Iterable<RowStore>) o);
     }
 

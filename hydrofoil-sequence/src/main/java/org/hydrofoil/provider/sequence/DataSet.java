@@ -11,7 +11,7 @@ import org.hydrofoil.common.graph.QMatch;
 import org.hydrofoil.common.schema.TableSchema;
 import org.hydrofoil.common.util.DataUtils;
 import org.hydrofoil.common.util.EncodeUtils;
-import org.hydrofoil.common.util.ParameterUtils;
+import org.hydrofoil.common.util.ArgumentUtils;
 import org.hydrofoil.common.util.bean.FieldTriple;
 import org.hydrofoil.common.util.bean.KeyValueEntity;
 import org.hydrofoil.common.util.collect.SearchArrayList;
@@ -114,7 +114,7 @@ final class DataSet {
             }
         });
 
-        ParameterUtils.notEmpty(primaryKeys);
+        ArgumentUtils.notEmpty(primaryKeys);
         Collections.sort(primaryKeys);
         List<Integer> primaryKeyIndex = new ArrayList<>(primaryKeys.size());
         final Map<String, Integer> header = fileTable.getHeader();
@@ -143,7 +143,7 @@ final class DataSet {
             List<Integer> rowNumbers = new ArrayList<>();
             Object firstValue = match.getRight()!=null?match.getRight():q.pair().first();
             if(q.type() != QMatch.QType.like){
-                ParameterUtils.mustTrue(index != null);
+                ArgumentUtils.mustTrue(index != null);
                 if(q.type() == QMatch.QType.eq){
                     rowNumbers.addAll(index.find(new IndexKey(firstValue)));
                 }else if(q.type() == QMatch.QType.prefix){
@@ -158,7 +158,7 @@ final class DataSet {
                     }
                 }
             }else{
-                ParameterUtils.mustTrue(textIndex != null);
+                ArgumentUtils.mustTrue(textIndex != null);
                 rowNumbers.addAll(CollectionUtils.emptyIfNull(textIndex.get(Objects.toString(firstValue))));
             }
             if(rowNumbers.isEmpty()){

@@ -9,7 +9,7 @@ import org.hydrofoil.common.schema.BaseElementSchema;
 import org.hydrofoil.common.schema.LinkSchema;
 import org.hydrofoil.common.schema.PropertySchema;
 import org.hydrofoil.common.util.DataUtils;
-import org.hydrofoil.common.util.ParameterUtils;
+import org.hydrofoil.common.util.ArgumentUtils;
 
 import java.util.Collection;
 import java.util.Map;
@@ -52,7 +52,7 @@ interface PropertyHeper extends MapperHelper {
                     clone.pair().name(propertySchema.getField());
                     if (StringUtils.isNotBlank(propertySchema.getLinkTable())) {
                         LinkSchema linkSchema = elementSchema.getLinks().get(propertySchema.getLinkTable());
-                        ParameterUtils.notNull(linkSchema);
+                        ArgumentUtils.notNull(linkSchema);
                         associateQueryCondition.put(linkSchema.getTable(), new BaseRowQuery.AssociateMatch(clone, linkSchema.getTable(), null));
                     } else {
                         mainCondition.add(clone);

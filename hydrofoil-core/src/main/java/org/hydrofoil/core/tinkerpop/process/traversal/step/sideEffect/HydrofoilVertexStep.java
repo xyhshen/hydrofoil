@@ -11,7 +11,7 @@ import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.hydrofoil.common.graph.GraphElementType;
 import org.hydrofoil.common.graph.GraphVertexId;
 import org.hydrofoil.common.util.DataUtils;
-import org.hydrofoil.common.util.ParameterUtils;
+import org.hydrofoil.common.util.ArgumentUtils;
 import org.hydrofoil.core.tinkerpop.glue.MultipleCondition;
 import org.hydrofoil.core.tinkerpop.glue.TinkerpopGraphTransit;
 import org.hydrofoil.core.tinkerpop.structure.HydrofoilTinkerpopGraph;
@@ -58,7 +58,7 @@ public final class HydrofoilVertexStep<E extends Element> extends VertexStep<E> 
 
     @SuppressWarnings("unchecked")
     private void expand(){
-        ParameterUtils.mustTrueException(starts.hasNext(),"expand failed", FastNoSuchElementException.instance());
+        ArgumentUtils.mustTrueException(starts.hasNext(),"expand failed", FastNoSuchElementException.instance());
         final Set<HydrofoilVertex> vertexSet = DataUtils.newHashSetWithExpectedSize();
         final List<Traverser.Admin<Vertex>> backStarts = new ArrayList<>();
         starts.forEachRemaining(v -> {

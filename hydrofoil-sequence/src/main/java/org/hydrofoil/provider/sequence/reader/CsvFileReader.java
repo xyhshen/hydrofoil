@@ -5,7 +5,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.hydrofoil.common.schema.TableSchema;
 import org.hydrofoil.common.util.DataUtils;
-import org.hydrofoil.common.util.ParameterUtils;
+import org.hydrofoil.common.util.ArgumentUtils;
 import org.hydrofoil.provider.sequence.FileTable;
 import org.hydrofoil.provider.sequence.IFileReader;
 import org.hydrofoil.provider.sequence.SequenceConfiguration;
@@ -32,12 +32,12 @@ public class CsvFileReader implements IFileReader {
         String delimiter= MapUtils.getString(optionMap,SequenceConfiguration.FILE_CSV_DELIMITER,",");
         CsvReader reader = new CsvReader(is,delimiter.charAt(0), Charset.forName(encode));
 
-        ParameterUtils.notEmpty(tableSchemas);
+        ArgumentUtils.notEmpty(tableSchemas);
 
         //read header
         reader.readRecord();
         String[] columns = reader.getValues();
-        ParameterUtils.mustTrue(ArrayUtils.isNotEmpty(columns));
+        ArgumentUtils.mustTrue(ArrayUtils.isNotEmpty(columns));
         final TableSchema tableSchema = DataUtils.lookup(tableSchemas, 0);
         String tableName = tableSchema.getRealName();
         FileTable fileTable = new FileTable(tableSchema);

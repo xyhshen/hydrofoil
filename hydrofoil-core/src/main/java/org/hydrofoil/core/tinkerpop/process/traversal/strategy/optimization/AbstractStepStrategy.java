@@ -4,7 +4,7 @@ import org.apache.tinkerpop.gremlin.process.traversal.Traversal;
 import org.apache.tinkerpop.gremlin.process.traversal.TraversalStrategy;
 import org.apache.tinkerpop.gremlin.process.traversal.strategy.AbstractTraversalStrategy;
 import org.hydrofoil.common.util.DataUtils;
-import org.hydrofoil.common.util.ParameterUtils;
+import org.hydrofoil.common.util.ArgumentUtils;
 import org.hydrofoil.core.tinkerpop.structure.HydrofoilTinkerpopGraph;
 
 /**
@@ -32,7 +32,7 @@ abstract class AbstractStepStrategy extends AbstractTraversalStrategy<TraversalS
             return;
         }
         //execute apply
-        ParameterUtils.checkStateMessage(
+        ArgumentUtils.checkStateMessage(
                 dispatch(traversal),
                 "apply failed!");
     }

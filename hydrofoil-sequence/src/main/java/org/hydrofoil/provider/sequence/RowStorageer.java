@@ -8,7 +8,7 @@ import org.hydrofoil.common.provider.IDataConnectContext;
 import org.hydrofoil.common.provider.datasource.*;
 import org.hydrofoil.common.schema.TableSchema;
 import org.hydrofoil.common.util.DataUtils;
-import org.hydrofoil.common.util.ParameterUtils;
+import org.hydrofoil.common.util.ArgumentUtils;
 import org.hydrofoil.common.util.bean.KeyValueEntity;
 
 import java.util.*;
@@ -39,7 +39,7 @@ public final class RowStorageer {
     private DataSet getDataSet(String tableName){
         final Map<String, TableSchema> tableSchemaMap = dataSourceContext.getTableSchema(tableName);
         final TableSchema tableSchema = tableSchemaMap.get(tableName);
-        ParameterUtils.notNull(tableSchema);
+        ArgumentUtils.notNull(tableSchema);
         final Map<String, DataSet> dataSetMap = packageDataSetMap.
                 get(tableSchema.getPackage());
         return dataSetMap.get(tableSchema.getRealName());
@@ -49,14 +49,14 @@ public final class RowStorageer {
         final DataSet dataSet = getDataSet(rowQueryScan.getName());
         final List<FileRow> crossRows = dataSet.selectWhere(rowQueryScan.getMatch().stream().map((q) ->
                 Pair.of(q, null)).collect(Collectors.toList()));
+        final RowQueryScanKey scanKey = rowQueryScan.getScanKey();
         List<RowStore> rowStores = crossRows.stream().map(crossRow -> {
-            final Map<String, Collection<FileRow>> joinRowMap = joinOnAll(crossRow, rowQueryScan,true);
+            Map<String, Collection<FileRow>> joinRowMap = joinOnAll(crossRow, rowQueryScan,true);
             if(joinRowMap == null){
                 return null;
             }
-            return combineRowKeyValue(crossRow, joinRowMap, rowQueryScan);
+            return combineRowKeyValue(crossRow, joinRowMap, rowQueryScan,scanKey != null?scanKey.getName():null);
         }).filter(Objects::nonNull).collect(Collectors.toList());
-        final RowQueryScanKey scanKey = rowQueryScan.getScanKey();
         if(scanKey != null){
             rowStores = (List<RowStore>) scanKey.filter(rowStores);
         }
@@ -70,7 +70,7 @@ public final class RowStorageer {
         final List<FileRow> crossRows = dataSet.selectIn(rowKeys);
         final List<RowStore> rowStores = crossRows.stream().map(crossRow -> {
             final Map<String, Collection<FileRow>> joinRowMap = joinOnAll(crossRow, rowQueryGet,false);
-            return combineRowKeyValue(crossRow, joinRowMap, rowQueryGet);
+            return combineRowKeyValue(crossRow, joinRowMap, rowQueryGet,null);
         }).collect(Collectors.toList());
         return rowQueryGet.createResponse(rowStores);
     }
@@ -98,7 +98,7 @@ public final class RowStorageer {
         return baseRowQuery.createCountResponse(count);
     }
 
-    private RowStore combineRowKeyValue(FileRow crossRow,Map<String,Collection<FileRow>> joinRowMap,BaseRowQuery baseRowQuery){
+    private RowStore combineRowKeyValue(FileRow crossRow,Map<String,Collection<FileRow>> joinRowMap,BaseRowQuery baseRowQuery,String keyTableName){
         final RowColumnInformation information = baseRowQuery.getColumnInformation();
         RowStore rowStore = information.createRowStore();
         information.columns(baseRowQuery.getName()).forEach(fieldName->{
@@ -106,6 +106,10 @@ public final class RowStorageer {
         });
         baseRowQuery.getAssociateQuery().forEach(associateRowQuery -> {
             if(associateRowQuery.isOnlyQueries()){
+                return;
+            }
+            if(StringUtils.isNotBlank(keyTableName) &&
+                    !StringUtils.equalsIgnoreCase(keyTableName,associateRowQuery.getName())){
                 return;
             }
             final Collection<FileRow> fileRows = joinRowMap.get(associateRowQuery.getName());

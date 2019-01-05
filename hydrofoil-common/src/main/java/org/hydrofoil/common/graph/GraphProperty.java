@@ -3,7 +3,7 @@ package org.hydrofoil.common.graph;
 import org.apache.commons.lang3.StringUtils;
 import org.hydrofoil.common.util.bean.BinaryArrayBlob;
 import org.hydrofoil.common.util.DataUtils;
-import org.hydrofoil.common.util.ParameterUtils;
+import org.hydrofoil.common.util.ArgumentUtils;
 import org.hydrofoil.common.util.bean.Beans;
 
 import java.net.URL;
@@ -221,7 +221,7 @@ public final class GraphProperty {
         this.name = name;
         this.content = content;
 
-        ParameterUtils.mustTrue(PropertyType.checkValue(content),name + " checkValue");
+        ArgumentUtils.mustTrue(PropertyType.checkValue(content),name + " checkValue");
     }
 
     /**

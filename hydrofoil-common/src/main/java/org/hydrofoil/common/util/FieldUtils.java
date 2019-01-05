@@ -46,8 +46,8 @@ public final class FieldUtils {
                 continue;
             }
 
-            ParameterUtils.notBlank(raw[0]);
-            ParameterUtils.notBlank(raw[1]);
+            ArgumentUtils.notBlank(raw[0]);
+            ArgumentUtils.notBlank(raw[1]);
 
             fieldPairs.add(new FieldPair(raw[0],raw[1]));
         }

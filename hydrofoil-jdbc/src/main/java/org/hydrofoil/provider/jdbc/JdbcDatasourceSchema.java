@@ -4,7 +4,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.hydrofoil.common.util.ParameterUtils;
+import org.hydrofoil.common.util.ArgumentUtils;
 
 import java.util.Map;
 
@@ -102,7 +102,7 @@ public final class JdbcDatasourceSchema {
         public String toString(final Map<String,String> configMap){
             String value = MapUtils.getString(configMap, name);
             if(required){
-                ParameterUtils.notBlank(value,name);
+                ArgumentUtils.notBlank(value,name);
             }
             return StringUtils.defaultString(value,defaultValue);
         }

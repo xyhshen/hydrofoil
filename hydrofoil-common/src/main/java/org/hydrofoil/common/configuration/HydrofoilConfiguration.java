@@ -4,7 +4,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.hydrofoil.common.util.DataUtils;
-import org.hydrofoil.common.util.ParameterUtils;
+import org.hydrofoil.common.util.ArgumentUtils;
 
 import java.io.InputStream;
 import java.util.Map;
@@ -62,7 +62,7 @@ public class HydrofoilConfiguration {
      * @return
      */
     public InputStream getStream(HydrofoilConfigurationItem item){
-        ParameterUtils.mustTrueMessage(item.getType() ==
+        ArgumentUtils.mustTrueMessage(item.getType() ==
                 HydrofoilConfigurationItem.ConfigType.file,"must is file type");
         InputStream is = null;
         StreamType[] values = StreamType.values();

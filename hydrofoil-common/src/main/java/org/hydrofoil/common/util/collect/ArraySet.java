@@ -2,12 +2,12 @@ package org.hydrofoil.common.util.collect;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
-import org.hydrofoil.common.util.ParameterUtils;
+import org.hydrofoil.common.util.ArgumentUtils;
 
 import java.io.Serializable;
 import java.util.*;
 
-import static org.hydrofoil.common.util.ParameterUtils.checkSupport;
+import static org.hydrofoil.common.util.ArgumentUtils.checkSupport;
 
 /**
  * ArraySet
@@ -29,7 +29,7 @@ public class ArraySet<E extends Comparable<? super E>> implements Set<E>, Clonea
     }
 
     private void init(final Collection<? extends E> c){
-        ParameterUtils.mustTrueMessage(CollectionUtils.isNotEmpty(c),"original collect is empty");
+        ArgumentUtils.mustTrueMessage(CollectionUtils.isNotEmpty(c),"original collect is empty");
         keyStorager = c.stream().sorted().toArray(Object[]::new);
     }
 

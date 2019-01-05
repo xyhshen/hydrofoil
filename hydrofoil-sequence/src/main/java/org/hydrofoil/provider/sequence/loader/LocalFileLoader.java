@@ -5,7 +5,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hydrofoil.common.schema.DataSourceSchema;
-import org.hydrofoil.common.util.ParameterUtils;
+import org.hydrofoil.common.util.ArgumentUtils;
 import org.hydrofoil.provider.sequence.IFileLoader;
 import org.hydrofoil.provider.sequence.SequenceConfiguration;
 
@@ -31,7 +31,7 @@ public class LocalFileLoader implements IFileLoader {
     public void create(DataSourceSchema dataSourceSchema) throws Exception {
         directoryPath = MapUtils.getString(dataSourceSchema.getConfigItems(),
                 SequenceConfiguration.DATASOURCE_DIRECTORY_PATH);
-        ParameterUtils.notBlank(directoryPath);
+        ArgumentUtils.notBlank(directoryPath);
     }
 
     @Override

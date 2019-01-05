@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -19,15 +20,18 @@ public final class VariableUtils {
 
     private final static ThreadLocal<Map<String,String>> LOCAL_VARIABLES;
 
-    private final static Pattern SYMBOL_PATTERN;
+    private final static Pattern SYMBOL_FIND_PATTERN;
+
+    private final static Pattern SYMBOL_VALIDATE_PATTERN;
 
     static {
         LOCAL_VARIABLES = ThreadLocal.withInitial(Collections::emptyMap);
-        SYMBOL_PATTERN = Pattern.compile("^\\%\\{[\\S]+\\}$");
+        SYMBOL_VALIDATE_PATTERN = Pattern.compile("^\\%\\{[\\S]+\\}$");
+        SYMBOL_FIND_PATTERN = Pattern.compile("(\\${1}\\{{1})+([^\\{\\}\\s])+(\\}{1})+");
     }
 
     private static boolean isSymbol(final String str){
-        return SYMBOL_PATTERN.matcher(str).matches();
+        return SYMBOL_VALIDATE_PATTERN.matcher(str).matches();
     }
 
     public static void setLocal(final Map<String,String> map){
@@ -69,5 +73,21 @@ public final class VariableUtils {
         return StringUtils.
                 substringBetween(variableSymbol,"${","}");
     }
+
+    public static String parseText(String text){
+        final StringBuilder finalyText = new StringBuilder(text);
+        Matcher matcher = SYMBOL_FIND_PATTERN.matcher(text);
+        while(matcher.find()){
+            int start = matcher.start();
+            int end = matcher.end();
+            String symbol = matcher.group();
+            String value = StringUtils.defaultString(getValue(StringUtils.trimToEmpty(symbol),""),"");
+            finalyText.replace(start,end,value);
+            matcher = SYMBOL_FIND_PATTERN.matcher(finalyText.toString());
+        }
+
+        return finalyText.toString();
+    }
+
 
 }

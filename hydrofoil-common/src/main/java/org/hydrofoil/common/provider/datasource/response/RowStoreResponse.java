@@ -2,7 +2,7 @@ package org.hydrofoil.common.provider.datasource.response;
 
 import org.apache.commons.collections4.IterableUtils;
 import org.hydrofoil.common.provider.datasource.RowStore;
-import org.hydrofoil.common.util.ParameterUtils;
+import org.hydrofoil.common.util.ArgumentUtils;
 
 /**
  * RowStoreResponse
@@ -28,7 +28,7 @@ public class RowStoreResponse extends AbstractRowQueryResponse {
 
     @Override
     public Iterable<RowStore> getRows() {
-        ParameterUtils.notNull(rowIterable);
+        ArgumentUtils.notNull(rowIterable);
         return rowIterable;
     }
 

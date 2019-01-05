@@ -9,7 +9,7 @@ import org.apache.tinkerpop.gremlin.structure.Element;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.hydrofoil.common.graph.GraphElementType;
 import org.hydrofoil.common.util.DataUtils;
-import org.hydrofoil.common.util.ParameterUtils;
+import org.hydrofoil.common.util.ArgumentUtils;
 import org.hydrofoil.core.tinkerpop.glue.MultipleCondition;
 import org.hydrofoil.core.tinkerpop.glue.TinkerpopElementUtils;
 import org.hydrofoil.core.tinkerpop.glue.TinkerpopGraphTransit;
@@ -68,7 +68,7 @@ public final class HydrofoilGraphStep<S, E extends Element> extends GraphStep<S,
 
     @SuppressWarnings("unchecked")
     private Iterator<E> queryGraph(){
-        ParameterUtils.notNull(multipleCondition,"graph query runner");
+        ArgumentUtils.notNull(multipleCondition,"graph query runner");
         HydrofoilTinkerpopGraph graph = (HydrofoilTinkerpopGraph)DataUtils.getOptional(traversal.getGraph());
         final TinkerpopGraphTransit transit = TinkerpopGraphTransit.of(graph);
         if(returnsVertex()){

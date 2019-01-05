@@ -3,7 +3,7 @@ package org.hydrofoil.common.schema;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Element;
 import org.hydrofoil.common.util.DataUtils;
-import org.hydrofoil.common.util.ParameterUtils;
+import org.hydrofoil.common.util.ArgumentUtils;
 import org.hydrofoil.common.util.XmlUtils;
 
 import java.util.Arrays;
@@ -72,7 +72,7 @@ public class TableSchema extends SchemaItem{
         Map<String,String> map = DataUtils.newHashMapWithExpectedSize(elements.size());
         for(Element element:elements){
             String name = element.attributeValue(ATTR_TABLE_OPTION_NAME);
-            ParameterUtils.notBlank(name);
+            ArgumentUtils.notBlank(name);
             map.put(name,element.getStringValue());
         }
         putItem(NODE_TABLE_OPTION,map);

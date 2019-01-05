@@ -3,7 +3,7 @@ package org.hydrofoil.common.schema;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Element;
 import org.hydrofoil.common.util.FieldUtils;
-import org.hydrofoil.common.util.ParameterUtils;
+import org.hydrofoil.common.util.ArgumentUtils;
 import org.hydrofoil.common.util.XmlUtils;
 
 import java.util.Arrays;
@@ -43,7 +43,7 @@ public final class LinkSchema extends SchemaItem{
         loadSchema(node,DEFINES);
 
         String fields = XmlUtils.attributeStringValue(node,ATTR_LINK_JOIN_FIELD);
-        ParameterUtils.notBlank(fields);
+        ArgumentUtils.notBlank(fields);
         putItem(ATTR_LINK_JOIN_FIELD, FieldUtils.toMap(fields));
     }
 

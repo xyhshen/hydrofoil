@@ -6,7 +6,7 @@ import org.hydrofoil.common.graph.EdgeDirection;
 import org.hydrofoil.common.provider.datasource.RowStore;
 import org.hydrofoil.common.schema.EdgeSchema;
 import org.hydrofoil.common.util.DataUtils;
-import org.hydrofoil.common.util.ParameterUtils;
+import org.hydrofoil.common.util.ArgumentUtils;
 import org.hydrofoil.core.engine.EngineEdge;
 import org.hydrofoil.core.engine.EngineElement;
 import org.hydrofoil.core.engine.EngineVertex;
@@ -52,14 +52,14 @@ public class EdgeGraphQueryRunner extends AbstractGraphQueryRunner<EngineEdge,Ed
             /*
             query edge by id style
              */
-            ParameterUtils.mustTrue(edgeMapper.checkElementIds(elementIds),"check edge id");
+            ArgumentUtils.mustTrue(edgeMapper.checkElementIds(elementIds),"check edge id");
             final Map<String,ElementMapping> map = edgeMapper.toGetMappingHasLabel(elementIds);
             elementRequests.addAll(map.values());
         }else{
             Long start = this.offset;
             Long limit = this.length;
             if(CollectionUtils.isNotEmpty(vertexSet)){
-                ParameterUtils.mustTrue(vertexMapper.checkElementIds(vertexSet.stream().map(EngineElement::elementId).collect(Collectors.toSet())),"check vertex id");
+                ArgumentUtils.mustTrue(vertexMapper.checkElementIds(vertexSet.stream().map(EngineElement::elementId).collect(Collectors.toSet())),"check vertex id");
                 elementRequests.addAll(edgeMapper.toEdgeScanMapper(labels,propertyQuerySet,vertexSet,direction));
             }else{
                 /*

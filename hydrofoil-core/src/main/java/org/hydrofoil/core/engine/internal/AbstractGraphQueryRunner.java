@@ -9,7 +9,7 @@ import org.hydrofoil.common.graph.GraphElementId;
 import org.hydrofoil.common.graph.QMatch;
 import org.hydrofoil.common.provider.datasource.RowQueryResponse;
 import org.hydrofoil.common.provider.datasource.RowStore;
-import org.hydrofoil.common.util.ParameterUtils;
+import org.hydrofoil.common.util.ArgumentUtils;
 import org.hydrofoil.core.engine.IGraphQueryRunner;
 import org.hydrofoil.core.engine.management.Management;
 
@@ -160,7 +160,7 @@ public abstract class AbstractGraphQueryRunner <E,T extends IGraphQueryRunner> i
     public Iterator<E> take() {
         final MultiValuedMap<String,ElementMapping> maps = getQueryRequest();
         final ConnectRunner<E> connectRunner = new ConnectRunner(management,(mapping,response)-> handleRowRequest((ElementMapping)mapping,(RowQueryResponse) response));
-        ParameterUtils.mustTrueMessage(connectRunner.select(maps),"take failed");
+        ArgumentUtils.mustTrueMessage(connectRunner.select(maps),"take failed");
         return connectRunner.toIterator();
     }
 
@@ -168,7 +168,7 @@ public abstract class AbstractGraphQueryRunner <E,T extends IGraphQueryRunner> i
     public Long count() {
         MultiValuedMap<String,ElementMapping> maps = getQueryRequest();
         final ConnectRunner<KeyValue<?,Long>> connectRunner = new ConnectRunner(management,"");
-        ParameterUtils.mustTrueMessage(connectRunner.select(maps),"count failed");
+        ArgumentUtils.mustTrueMessage(connectRunner.select(maps),"count failed");
         return connectRunner.toLong();
     }
 

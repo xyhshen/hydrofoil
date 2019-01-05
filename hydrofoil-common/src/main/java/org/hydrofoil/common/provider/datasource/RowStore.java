@@ -2,7 +2,7 @@ package org.hydrofoil.common.provider.datasource;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.hydrofoil.common.util.ParameterUtils;
+import org.hydrofoil.common.util.ArgumentUtils;
 import org.hydrofoil.common.util.bean.FieldPair;
 
 import java.util.ArrayList;
@@ -48,7 +48,7 @@ public final class RowStore {
      * @return this
      */
     public RowStore put(final String fieldname,final Object value){
-        ParameterUtils.notBlank(collectSetName);
+        ArgumentUtils.notBlank(collectSetName);
         Integer fieldIndex =  information.index(collectSetName,fieldname);
         rowFull[fieldIndex] = value;
         return this;
@@ -63,7 +63,7 @@ public final class RowStore {
     public RowStore put(final String name, final FieldPair pair){
         Integer collectIndex = information.index(name);
         Integer fieldIndex =  information.index(name,pair.name());
-        ParameterUtils.mustTrue(ObjectUtils.allNotNull(collectIndex,fieldIndex));
+        ArgumentUtils.mustTrue(ObjectUtils.allNotNull(collectIndex,fieldIndex));
         Object o = rowFull[collectIndex];
         if(o == null || o instanceof Collection){
             rowFull[collectIndex] = new Object[information.size(name)];
@@ -93,7 +93,7 @@ public final class RowStore {
     @SuppressWarnings("unchecked")
     public RowStore createRow(final String name){
         Integer collectIndex = information.index(name);
-        ParameterUtils.notNull(collectIndex);
+        ArgumentUtils.notNull(collectIndex);
         Object o = rowFull[collectIndex];
         if(o == null || !(o instanceof Collection)){
             rowFull[collectIndex] = new ArrayList();
@@ -149,7 +149,7 @@ public final class RowStore {
     @SuppressWarnings("unchecked")
     public Collection<RowStore> rows(final String name){
         Integer collectIndex = information.index(name);
-        ParameterUtils.notNull(collectIndex);
+        ArgumentUtils.notNull(collectIndex);
         Object o = rowFull[collectIndex];
         if(o == null || !(o instanceof Collection)){
             return null;

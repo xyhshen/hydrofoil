@@ -1,7 +1,7 @@
 package org.hydrofoil.common.schema;
 
 import org.dom4j.Element;
-import org.hydrofoil.common.util.ParameterUtils;
+import org.hydrofoil.common.util.ArgumentUtils;
 import org.hydrofoil.common.util.XmlUtils;
 
 import java.util.ArrayList;
@@ -70,14 +70,14 @@ public final class EdgeSchema extends BaseElementSchema {
         Element source = node.element(NODE_EDGE_SOURCE_ELEMENT);
         Element target = node.element(NODE_EDGE_TARGET_ELEMENT);
 
-        ParameterUtils.notNull(source);
-        ParameterUtils.notNull(target);
+        ArgumentUtils.notNull(source);
+        ArgumentUtils.notNull(target);
 
         String sourceLabel = XmlUtils.attributeStringValue(source,ATTR_EDGE_VERTEX_LABEL);
         String targetLabel = XmlUtils.attributeStringValue(target,ATTR_EDGE_VERTEX_LABEL);;
 
-        ParameterUtils.notBlank(sourceLabel);
-        ParameterUtils.notBlank(targetLabel);
+        ArgumentUtils.notBlank(sourceLabel);
+        ArgumentUtils.notBlank(targetLabel);
 
         putItem("source-" + ATTR_EDGE_VERTEX_LABEL,sourceLabel);
         sourceConnections = loadConnection(source);
@@ -89,8 +89,8 @@ public final class EdgeSchema extends BaseElementSchema {
         final List<Element> elements = XmlUtils.listElement(node, NODE_EDGE_CONNECTION_ELEMENT);
         Collection<EdgeConnection> connections = new ArrayList<>(elements.size());
         for(Element element:elements){
-            String vertexPropertyLabel = ParameterUtils.notBlank(XmlUtils.attributeStringValue(element,ATTR_EDGE_CONNECTION_VERTEX));
-            String edgePropertyLabel = ParameterUtils.notBlank(XmlUtils.attributeStringValue(element,ATTR_EDGE_CONNECTION_EDGE));
+            String vertexPropertyLabel = ArgumentUtils.notBlank(XmlUtils.attributeStringValue(element,ATTR_EDGE_CONNECTION_VERTEX));
+            String edgePropertyLabel = ArgumentUtils.notBlank(XmlUtils.attributeStringValue(element,ATTR_EDGE_CONNECTION_EDGE));
             connections.add(new EdgeConnection(vertexPropertyLabel,edgePropertyLabel));
         }
         return connections;

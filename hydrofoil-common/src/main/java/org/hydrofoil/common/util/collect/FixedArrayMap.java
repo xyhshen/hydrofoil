@@ -3,7 +3,7 @@ package org.hydrofoil.common.util.collect;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.hydrofoil.common.util.DataUtils;
-import org.hydrofoil.common.util.ParameterUtils;
+import org.hydrofoil.common.util.ArgumentUtils;
 
 import java.io.Serializable;
 import java.util.*;
@@ -96,13 +96,13 @@ public class FixedArrayMap<K,V> implements Map<K,V>, Cloneable, Serializable {
     }
 
     public FixedArrayMap(final Map<K,Integer> keyMap){
-        ParameterUtils.mustTrue(MapUtils.isNotEmpty(keyMap));
+        ArgumentUtils.mustTrue(MapUtils.isNotEmpty(keyMap));
         this.keyMap = keyMap;
         values = new FixedArrayMapValue[keyMap.size()];
     }
 
     public static <K> Map<K,Integer> keyMapOf(final Collection<K> keys){
-        ParameterUtils.mustTrue(CollectionUtils.isNotEmpty(keys));
+        ArgumentUtils.mustTrue(CollectionUtils.isNotEmpty(keys));
         final Map<K,Integer> keyMap = DataUtils.newHashMapWithExpectedSize(keys.size());
         for(K key:keys){
             Integer i = keyMap.size();

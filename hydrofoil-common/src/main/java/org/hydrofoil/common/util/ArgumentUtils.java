@@ -13,7 +13,7 @@ import java.util.Collection;
  * @author xie_yh
  * @date 2018/6/30 11:07
  */
-public final class ParameterUtils {
+public final class ArgumentUtils {
 
 
     /**
@@ -42,8 +42,8 @@ public final class ParameterUtils {
      * collection not empty
      * @param c collection
      */
-    public static void notEmpty(final Collection c){
-        notEmpty(c,"parameter");
+    public static Collection notEmpty(final Collection c){
+        return notEmpty(c,"parameter");
     }
 
     /**
@@ -51,10 +51,11 @@ public final class ParameterUtils {
      * @param c collection
      * @param name name
      */
-    public static void notEmpty(final Collection c,final String name){
+    public static Collection notEmpty(final Collection c,final String name){
         if(CollectionUtils.isEmpty(c)){
             throw new IllegalArgumentException(name + " is empty!");
         }
+        return c;
     }
 
     /**
@@ -82,18 +83,19 @@ public final class ParameterUtils {
      * @param o
      * @param message
      */
-    public static void nullMessage(final Object o,final String message){
+    public static Object notNullMessage(final Object o,final String message){
         if(o == null){
             throw new IllegalArgumentException(message);
         }
+        return o;
     }
 
     /**
      * must is true
      * @param b value
      */
-    public static void mustTrue(final boolean b){
-        mustTrue(b,"parameter");
+    public static boolean mustTrue(final boolean b){
+        return mustTrue(b,"parameter");
     }
 
     /**
@@ -101,16 +103,24 @@ public final class ParameterUtils {
      * @param b value
      * @param name name
      */
-    public static void mustTrue(final boolean b,final String name){
+    public static boolean mustTrue(final boolean b,final String name){
         if(!b){
             throw new IllegalArgumentException(name + " is false!");
         }
+        return true;
     }
 
-    public static void mustTrueMessage(final boolean b,final String message){
-        if(!b){
+    /**
+     *
+     * @param b
+     * @param message
+     * @return
+     */
+    public static boolean mustTrueMessage(final boolean b,final String message){
+        if(!b) {
             throw new IllegalArgumentException(message);
         }
+        return true;
     }
 
     /**
@@ -119,10 +129,11 @@ public final class ParameterUtils {
      * @param message
      * @param t
      */
-    public static void mustTrueException(final boolean b,final String message,Throwable t){
+    public static boolean mustTrueException(final boolean b,final String message,Throwable t){
         if(!b){
             throw new RuntimeException(message,t);
         }
+        return true;
     }
 
     public static void checkStateMessage(final boolean b,final String message){

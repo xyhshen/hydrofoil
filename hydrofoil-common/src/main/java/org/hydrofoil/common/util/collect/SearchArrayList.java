@@ -5,7 +5,7 @@ import org.apache.commons.collections4.MultiMapUtils;
 import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hydrofoil.common.util.Algorithms;
-import org.hydrofoil.common.util.ParameterUtils;
+import org.hydrofoil.common.util.ArgumentUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,7 +50,7 @@ public class SearchArrayList<K extends Comparable<? super K>,V> {
 
     @SuppressWarnings("unchecked")
     public Collection<V> getRange(final K start, final K end){
-        ParameterUtils.mustTrue(start != null);
+        ArgumentUtils.mustTrue(start != null);
         if(!isSorted()){
             sorting();
         }

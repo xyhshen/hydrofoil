@@ -2,7 +2,7 @@ package org.hydrofoil.core.engine;
 
 import org.hydrofoil.common.graph.GraphProperty;
 import org.hydrofoil.common.util.DataUtils;
-import org.hydrofoil.common.util.ParameterUtils;
+import org.hydrofoil.common.util.ArgumentUtils;
 
 import java.util.Map;
 
@@ -52,18 +52,18 @@ public final class EngineProperty {
     }
 
     public GraphProperty property(){
-        ParameterUtils.mustTrueMessage(!complex,"property not is simple");
+        ArgumentUtils.mustTrueMessage(!complex,"property not is simple");
         return (GraphProperty) entity;
     }
 
     @SuppressWarnings("unchecked")
     public Map<String,GraphProperty> properties(){
-        ParameterUtils.mustTrueMessage(complex,"property not is simple map");
+        ArgumentUtils.mustTrueMessage(complex,"property not is simple map");
         return (Map<String, GraphProperty>) entity;
     }
 
     public Map<String,Object> asValueMap(){
-        ParameterUtils.mustTrueMessage(complex,"must is complex");
+        ArgumentUtils.mustTrueMessage(complex,"must is complex");
         Map<String,Object> map = DataUtils.newMapWithMaxSize(0);
         properties().forEach((k,v)->{
             map.put(k,v.content());

@@ -13,7 +13,7 @@ import org.hydrofoil.common.schema.BaseElementSchema;
 import org.hydrofoil.common.schema.LinkSchema;
 import org.hydrofoil.common.schema.PropertySchema;
 import org.hydrofoil.common.util.DataUtils;
-import org.hydrofoil.common.util.ParameterUtils;
+import org.hydrofoil.common.util.ArgumentUtils;
 import org.hydrofoil.common.util.bean.KeyValueEntity;
 import org.hydrofoil.common.util.collect.ArrayMap;
 import org.hydrofoil.core.engine.EngineElement;
@@ -59,6 +59,14 @@ public abstract class AbstractElementMapper<E extends EngineElement> implements 
      */
     protected abstract boolean checkElementIdType(GraphElementId elementId);
 
+    /**
+     *
+     * @param scanMapping
+     * @param scanResponse
+     * @return
+     */
+    protected abstract ElementMapping scanToGetHandle(final ElementMapping scanMapping,final RowQueryResponse scanResponse);
+
     public boolean checkElementIds(final Collection<GraphElementId> elementIds){
         if(CollectionUtils.isEmpty(elementIds)){
             return false;
@@ -84,7 +92,7 @@ public abstract class AbstractElementMapper<E extends EngineElement> implements 
     private ElementMapping createGetMappings(BaseElementSchema elementSchema, Collection<GraphElementId> ids){
         RowQueryGet rowQueryGet = new RowQueryGet();
         rowQueryGet.setName(elementSchema.getTable());
-        final KeyValueEntity.KeyValueEntityFactory keyFactory = KeyValueEntity.createFactory(elementSchema.getPrimaryKeys());
+        final KeyValueEntity.KeyValueEntityFactory keyFactory = elementSchema.getPrimaryKeyFieldsFactory();
         ids.forEach(id->{
             final KeyValueEntity keyValue = keyFactory.create();
             elementSchema.getProperties().forEach((k,v)->{
@@ -131,16 +139,24 @@ public abstract class AbstractElementMapper<E extends EngineElement> implements 
         //set associate query cond
         associateQueryCondition.keySet().forEach(linkTableName->{
             final RowQueryScan.AssociateRowQuery associateRowQuery = associateRowQueryMap.get(linkTableName);
-            ParameterUtils.notNull(associateRowQuery);
+            ArgumentUtils.notNull(associateRowQuery);
             associateRowQuery.getMatch().addAll(associateQueryCondition.get(linkTableName));
         });
+
+        if(associateQueryCondition.size() > 0 && !minimum){
+            rowQueryRequest.setSimpleScan(true);
+        }
 
         rowQueryRequest.setOffset(start);
         rowQueryRequest.setLimit(limit);
         if(start == null && limit != null){
             rowQueryRequest.setOffset(0L);
         }
-        return createMappingElement(rowQueryRequest, elementSchema);
+        final ElementMapping mapping = createMappingElement(rowQueryRequest, elementSchema);
+        if(rowQueryRequest.isSimpleScan()){
+            mapping.setToGetMappingFunction(this::scanToGetHandle);
+        }
+        return mapping;
     }
 
     @SuppressWarnings("unchecked")

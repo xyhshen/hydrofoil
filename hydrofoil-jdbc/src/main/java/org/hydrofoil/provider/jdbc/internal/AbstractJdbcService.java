@@ -12,7 +12,7 @@ import org.hydrofoil.common.provider.datasource.*;
 import org.hydrofoil.common.schema.ColumnSchema;
 import org.hydrofoil.common.schema.TableSchema;
 import org.hydrofoil.common.util.LogUtils;
-import org.hydrofoil.common.util.ParameterUtils;
+import org.hydrofoil.common.util.ArgumentUtils;
 import org.hydrofoil.common.util.bean.KeyValueEntity;
 import org.hydrofoil.provider.jdbc.IJdbcService;
 import org.slf4j.Logger;
@@ -39,6 +39,8 @@ public abstract class AbstractJdbcService implements IJdbcService {
     private DataSource dataSource;
 
     protected SqlFeature sqlFeature;
+
+    protected static final String KEY_NAME = "keys";
 
     protected AbstractJdbcService(
             DataSource dataSource,
@@ -94,8 +96,15 @@ public abstract class AbstractJdbcService implements IJdbcService {
      * @param context
      * @return
      */
-    protected abstract SqlStatement createBasicGetSql(RowQueryGet rowQuery, QueryContext context);
+    protected abstract SqlStatement createBasicGetSqlTemplate(RowQueryGet rowQuery, QueryContext context);
 
+    /**
+     * make get sql
+     * @param tableName
+     * @param basicSql
+     * @param context
+     * @param keyValueEntities
+     */
     protected abstract void makeGetKeySql(final String tableName,SqlStatement basicSql,final QueryContext context,final Collection<KeyValueEntity> keyValueEntities);
 
     /**
@@ -110,8 +119,9 @@ public abstract class AbstractJdbcService implements IJdbcService {
         List<RowStore> rowStores = new ArrayList<>();
         try{
             final QueryContext context = createContext(rowQueryGet);
-            ParameterUtils.notEmpty(rowQueryGet.getRowKeys(),"row key");
-            final SqlStatement sqlStatement = createBasicGetSql(rowQueryGet, context);
+            ArgumentUtils.notEmpty(rowQueryGet.getRowKeys(),"row key");
+            //create basic query
+            final SqlStatement sqlStatement = createBasicGetSqlTemplate(rowQueryGet, context);
             final List<List<KeyValueEntity>> pages = ListUtils.partition(new ArrayList<>(rowQueryGet.getRowKeys()),
                     sqlFeature.getMaxPerPage());
             for(List<KeyValueEntity> page:pages){
@@ -127,9 +137,44 @@ public abstract class AbstractJdbcService implements IJdbcService {
         return rowQueryGet.createResponse(rowStores);
     }
 
+    protected abstract SqlStatement createBasicScanSql(final RowQueryScan rowQueryScan,final QueryContext context);
+
+    protected abstract SqlStatement createQueryScanSql(final RowQueryScan rowQueryScan,final QueryContext context);
+
+    protected abstract void makeScanKeySql(SqlStatement basicSql,final QueryContext context,final Collection<KeyValueEntity> keyValueEntities);
+
     @Override
     public RowQueryResponse scanRows(RowQueryScan rowQueryScan) {
-        return null;
+        List<RowStore> rowStores = new ArrayList<>();
+        try{
+            final SqlStatement sqlStatement;
+            final QueryContext context = createContext(rowQueryScan);
+            if(rowQueryScan.isSimpleScan()){
+                sqlStatement = createQueryScanSql(rowQueryScan,context);
+            }else{
+                //create basic query
+                sqlStatement = createBasicScanSql(rowQueryScan, context);
+            }
+
+            final RowQueryScanKey scanKey = rowQueryScan.getScanKey();
+            if(scanKey != null){
+                final List<List<KeyValueEntity>> pages = ListUtils.partition(new ArrayList<>(scanKey.getKeyValueEntities()),
+                        sqlFeature.getMaxPerPage());
+                for(List<KeyValueEntity> page:pages){
+                    //make get key sql
+                    makeScanKeySql(sqlStatement,context,page);
+                    //execute sql
+                    final List<Map<String, Object>> results = executeSqlStatement(sqlStatement);
+                    rowStores.addAll(processResult(rowQueryScan,context,results));
+                }
+            }else{
+                final List<Map<String, Object>> results = executeSqlStatement(sqlStatement);
+                rowStores.addAll(processResult(rowQueryScan,context,results));
+            }
+        }catch (SQLException e){
+            return RowQueryResponse.createFailedResponse(rowQueryScan.getId(),e);
+        }
+        return rowQueryScan.createResponse(rowStores);
     }
 
     @Override

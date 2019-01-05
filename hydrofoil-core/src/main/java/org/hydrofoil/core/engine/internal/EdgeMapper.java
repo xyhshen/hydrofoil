@@ -16,7 +16,7 @@ import org.hydrofoil.common.schema.EdgeSchema;
 import org.hydrofoil.common.schema.PropertySchema;
 import org.hydrofoil.common.schema.VertexSchema;
 import org.hydrofoil.common.util.DataUtils;
-import org.hydrofoil.common.util.ParameterUtils;
+import org.hydrofoil.common.util.ArgumentUtils;
 import org.hydrofoil.common.util.bean.KeyValueEntity;
 import org.hydrofoil.core.engine.EngineEdge;
 import org.hydrofoil.core.engine.EngineProperty;
@@ -56,7 +56,7 @@ public class EdgeMapper extends AbstractElementMapper {
 
     private boolean useOtherContactEdgeProperty(final EdgeSchema edgeSchema,final boolean sourceVertex){
         final EdgeVertexConnectionInformation edgeVertexConnectionInformation =
-                (EdgeVertexConnectionInformation) ParameterUtils.notNull(
+                (EdgeVertexConnectionInformation) ArgumentUtils.notNull(
                 schemaManager.getEdgeVertexPropertySet(edgeSchema.getLabel(), sourceVertex));
         return !edgeVertexConnectionInformation.isVertexPrimaryKey();
     }
@@ -120,7 +120,7 @@ public class EdgeMapper extends AbstractElementMapper {
         //to vertex mapping
         final ElementMapping elementMapping = vertexMapper.toMinimumMapping(vertexSchema.getLabel(), new RowQueryScanKey(vertexPropertylinkTable,
                 keyFactory, keyValueEntities), null, null);
-        ParameterUtils.notNull(vertexContext);
+        ArgumentUtils.notNull(vertexContext);
         elementMapping.setContext(vertexContext);
         vertexContext.tableName = vertexPropertylinkTable;
         vertexContext.label = vertexLabel;
@@ -227,6 +227,16 @@ public class EdgeMapper extends AbstractElementMapper {
         }
 
         return mapping;
+    }
+
+    @Override
+    protected ElementMapping scanToGetHandle(ElementMapping scanMapping, RowQueryResponse scanResponse) {
+        EdgeSchema edgeSchema = (EdgeSchema) scanMapping.getSchemaItem();
+        Set<GraphElementId> ids = DataUtils.newHashSetWithExpectedSize();
+        for(RowStore rowStore:scanResponse.getRows()){
+            ids.add(rowElementToId(edgeSchema,rowStore,GraphVertexId.class));
+        }
+        return toGetMapping(edgeSchema.getLabel(),ids);
     }
 
 
@@ -343,7 +353,7 @@ public class EdgeMapper extends AbstractElementMapper {
         final EdgeContext context = (EdgeContext) mapping.getContext();
         GraphElementId.GraphElementBuilder fromBuilder = GraphElementId.builder(edgeSchema.getSourceLabel());
         EdgeVertexConnectionInformation sourceConnection = schemaManager.getEdgeVertexPropertySet(edgeSchema.getLabel(),true);
-        ParameterUtils.notNull(sourceConnection);
+        ArgumentUtils.notNull(sourceConnection);
         if(context != null && context.sourceVertexIds != null){
             final KeyValueEntity e = getEdgeProperties(sourceConnection.getEdgeTableName(), sourceConnection.getEdgeFieldProperty(), sourceConnection.getEdgePropertyFactory(),rowStore);
             vertexIds[0] = context.sourceVertexIds.get(e);
@@ -356,7 +366,7 @@ public class EdgeMapper extends AbstractElementMapper {
         }
 
         EdgeVertexConnectionInformation targetConnection = schemaManager.getEdgeVertexPropertySet(edgeSchema.getLabel(),false);
-        ParameterUtils.notNull(targetConnection);
+        ArgumentUtils.notNull(targetConnection);
         if(context != null && context.targetVertexIds != null){
             final KeyValueEntity e = getEdgeProperties(targetConnection.getEdgeTableName(), targetConnection.getEdgeFieldProperty(), targetConnection.getEdgePropertyFactory(),rowStore);
             vertexIds[1] = context.targetVertexIds.get(e);

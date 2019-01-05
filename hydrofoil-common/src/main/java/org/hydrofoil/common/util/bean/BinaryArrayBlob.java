@@ -2,7 +2,7 @@ package org.hydrofoil.common.util.bean;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
-import org.hydrofoil.common.util.ParameterUtils;
+import org.hydrofoil.common.util.ArgumentUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -56,31 +56,31 @@ public class BinaryArrayBlob implements Blob {
 
     @Override
     public long position(byte[] pattern, long start) throws SQLException {
-        ParameterUtils.checkSupport(false,"");
+        ArgumentUtils.checkSupport(false,"");
         return 0;
     }
 
     @Override
     public long position(Blob pattern, long start) throws SQLException {
-        ParameterUtils.checkSupport(false,"");
+        ArgumentUtils.checkSupport(false,"");
         return 0;
     }
 
     @Override
     public int setBytes(long pos, byte[] bytes) throws SQLException {
-        ParameterUtils.checkSupport(false,"");
+        ArgumentUtils.checkSupport(false,"");
         return 0;
     }
 
     @Override
     public int setBytes(long pos, byte[] bytes, int offset, int len) throws SQLException {
-        ParameterUtils.checkSupport(false,"");
+        ArgumentUtils.checkSupport(false,"");
         return 0;
     }
 
     @Override
     public OutputStream setBinaryStream(long pos) throws SQLException {
-        ParameterUtils.checkSupport(false,"");
+        ArgumentUtils.checkSupport(false,"");
         return null;
     }
 

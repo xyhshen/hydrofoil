@@ -7,6 +7,7 @@ import org.hydrofoil.common.graph.QMatch;
 import org.hydrofoil.common.provider.IDataConnectContext;
 import org.hydrofoil.common.provider.datasource.BaseRowQuery;
 import org.hydrofoil.common.provider.datasource.RowQueryGet;
+import org.hydrofoil.common.provider.datasource.RowQueryScan;
 import org.hydrofoil.common.schema.ColumnSchema;
 import org.hydrofoil.common.util.DataUtils;
 import org.hydrofoil.common.util.SqlUtils;
@@ -72,7 +73,7 @@ public final class MysqlJdbcService extends AbstractJdbcService{
      * @return sql
      */
     @SuppressWarnings("unchecked")
-    private String toWhereSection(QueryContext context,String tableName,QMatch.Q q, String joinField, List<String> params){
+    private String toWhereSection(QueryContext context,String tableName,QMatch.Q q, String joinField, List<Object> params){
         StringBuilder sql = new StringBuilder();
         if(q.type() == QMatch.QType.eq){
             sql.append(context.getColumnAlias(tableName,q.pair().name()))
@@ -145,7 +146,7 @@ public final class MysqlJdbcService extends AbstractJdbcService{
      * @param params params
      * @return sql
      */
-    private String createAssociateGetSql(BaseRowQuery rowQuery,QueryContext context, List<String> params){
+    private String createAssociateGetSql(BaseRowQuery rowQuery,QueryContext context, List<Object> params){
         StringBuilder sql = new StringBuilder();
         rowQuery.getAssociateQuery().forEach((associateQuery)->{
             if(associateQuery.isOnlyQueries() || associateQuery.isOneToMany()){
@@ -168,16 +169,15 @@ public final class MysqlJdbcService extends AbstractJdbcService{
     }
 
     @Override
-    protected SqlStatement createBasicGetSql(RowQueryGet rowQuery, QueryContext context) {
+    protected SqlStatement createBasicGetSqlTemplate(RowQueryGet rowQuery, QueryContext context) {
         SqlStatement sqlStatement = new SqlStatement();
-        sqlStatement.append("select ");
-        sqlStatement.append(getColumnList(context));
-        sqlStatement.append(" from (").
-                location("keys").
-                append(")").
-                blank().
-                append(context.getTableAlias().get(toRealName(rowQuery.getName())));
-        sqlStatement.blank().append(createAssociateGetSql(rowQuery,context,null));
+        sqlStatement.stage("select");
+        sqlStatement.stage(getColumnList(context));
+        sqlStatement.sentence(" from (").
+                stage(KEY_NAME,null,null).
+                sentence(")").
+                stage(context.getTableAlias().get(toRealName(rowQuery.getName())));
+        sqlStatement.blank().stage(createAssociateGetSql(rowQuery,context,null));
 
         /*if(!rowQuery.getMatch().isEmpty()){
             sql.append(" where ");
@@ -239,12 +239,58 @@ public final class MysqlJdbcService extends AbstractJdbcService{
         }
         sql.deleteCharAt(sql.length() - 1);
         sql.append(")");
-        basicSql.set("keys",sql.toString(),params);
+        basicSql.stage(KEY_NAME,sql.toString(),params);
     }
 
     @Override
     protected String crateCountSql(List<String> params) {
         return null;
+    }
+
+    private void createSqlScanWhere(SqlStatement sqlStatement,RowQueryScan rowQueryScan, QueryContext context){
+        List<Object> params = new ArrayList<>();
+        StringBuilder sql = new StringBuilder();
+        for(QMatch.Q q:rowQueryScan.getMatch()){
+            sql.append(" (");
+            sql.append(toWhereSection(context,rowQueryScan.getName(),q,null,params));
+            sql.append(") and ");
+        }
+        if(sql.length() > 0){
+            sql = new StringBuilder(StringUtils.removeEnd(sql.toString()," and "));
+            sqlStatement.stage(sql.toString(),params);
+        }
+        if(rowQueryScan.getScanKey() != null){
+            if(!rowQueryScan.getMatch().isEmpty()){
+                sqlStatement.sentence(" and");
+            }
+            sqlStatement.sentence(" (");
+            sqlStatement.stage(KEY_NAME,null,null);
+            sqlStatement.sentence(")");
+        }
+    }
+
+    @Override
+    protected SqlStatement createBasicScanSql(RowQueryScan rowQueryScan, QueryContext context) {
+        SqlStatement sqlStatement = new SqlStatement();
+        sqlStatement.stage("select").
+                stage(getColumnList(context)).
+                stage("from").
+                stage(rowQueryScan.getName());
+        if(rowQueryScan.getScanKey() != null || !rowQueryScan.getMatch().isEmpty()){
+            sqlStatement.stage("where");
+            createSqlScanWhere(sqlStatement,rowQueryScan,context);
+        }
+        return sqlStatement;
+    }
+
+    @Override
+    protected SqlStatement createQueryScanSql(RowQueryScan rowQueryScan, QueryContext context) {
+        return null;
+    }
+
+    @Override
+    protected void makeScanKeySql(SqlStatement basicSql, QueryContext context, Collection<KeyValueEntity> keyValueEntities) {
+
     }
 
     @Override

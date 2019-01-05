@@ -3,7 +3,7 @@ package org.hydrofoil.core.engine.query;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hydrofoil.common.provider.datasource.RowStore;
 import org.hydrofoil.common.schema.VertexSchema;
-import org.hydrofoil.common.util.ParameterUtils;
+import org.hydrofoil.common.util.ArgumentUtils;
 import org.hydrofoil.core.engine.EngineVertex;
 import org.hydrofoil.core.engine.internal.AbstractGraphQueryRunner;
 import org.hydrofoil.core.engine.internal.ElementMapping;
@@ -34,7 +34,7 @@ public final class VertexGraphQueryRunner extends AbstractGraphQueryRunner<Engin
             /*
             query vertex by id style
              */
-            ParameterUtils.mustTrue(vertexMapper.checkElementIds(elementIds),"check vertex id");
+            ArgumentUtils.mustTrue(vertexMapper.checkElementIds(elementIds),"check vertex id");
             final Map<String,ElementMapping> map = vertexMapper.toGetMappingHasLabel(elementIds);
             elementRequests.addAll(map.values());
         }else{

@@ -2,8 +2,9 @@ package org.hydrofoil.common.schema;
 
 import org.dom4j.Element;
 import org.hydrofoil.common.util.DataUtils;
-import org.hydrofoil.common.util.ParameterUtils;
+import org.hydrofoil.common.util.ArgumentUtils;
 import org.hydrofoil.common.util.XmlUtils;
+import org.hydrofoil.common.util.bean.KeyValueEntity;
 
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -31,11 +32,11 @@ public abstract class BaseElementSchema extends SchemaItem {
             SchemaItems.nodeDefine(NODE_ELEMENT_LINKS,NODE_ELEMENT_LINK,LinkSchema.class)
     );
 
-    private List<String> primaryKeys;
+    private KeyValueEntity.KeyValueEntityFactory primaryKeysFactory;
 
-    BaseElementSchema(){
-        primaryKeys = new ArrayList<>(1);
-    }
+    private KeyValueEntity.KeyValueEntityFactory primaryKeyFieldsFactory;
+
+    BaseElementSchema(){}
 
     @Override
     void parse(final Element node){
@@ -48,24 +49,29 @@ public abstract class BaseElementSchema extends SchemaItem {
 
     private void loadProperties(final Element node){
         List<Element> elements = XmlUtils.listElement(node, NODE_ELEMENT_PROPERTY);
-        ParameterUtils.notEmpty(elements);
+        ArgumentUtils.notEmpty(elements);
 
         Map<String,PropertySchema> properties = DataUtils.newHashMapWithExpectedSize(elements.size());
         //parse property schema
+        List<String> primaryKeys = new ArrayList<>();
+        List<String> primaryKeyFields = new ArrayList<>();
         for(Element element:elements){
             PropertySchema propertySchema = new PropertySchema();
             propertySchema.read(element);
             properties.put(propertySchema.getLabel(),propertySchema);
             if(propertySchema.isPrimary()){
                 primaryKeys.add(propertySchema.getLabel());
+                primaryKeyFields.add(propertySchema.getField());
             }
         }
-        ParameterUtils.notEmpty(primaryKeys);
+        ArgumentUtils.notEmpty(primaryKeys);
         putSchemaItem(NODE_ELEMENT_PROPERTIES,properties);
+        primaryKeysFactory = KeyValueEntity.createFactory(primaryKeys);
+        primaryKeyFieldsFactory = KeyValueEntity.createFactory(primaryKeyFields);
     }
 
     public Collection<String> getPrimaryKeys(){
-        return primaryKeys;
+        return primaryKeysFactory.keys();
     }
 
     public String getLabel(){
@@ -82,6 +88,22 @@ public abstract class BaseElementSchema extends SchemaItem {
 
     public Map<String,LinkSchema> getLinks(){
         return getSchemaMap(NODE_ELEMENT_LINK);
+    }
+
+    /**
+     * @return KeyValueEntityFactory
+     * @see BaseElementSchema#primaryKeyFieldsFactory
+     **/
+    public KeyValueEntity.KeyValueEntityFactory getPrimaryKeyFieldsFactory() {
+        return primaryKeyFieldsFactory;
+    }
+
+    /**
+     * @return KeyValueEntityFactory
+     * @see BaseElementSchema#primaryKeysFactory
+     **/
+    public KeyValueEntity.KeyValueEntityFactory getPrimaryKeysFactory() {
+        return primaryKeysFactory;
     }
 
     @Override

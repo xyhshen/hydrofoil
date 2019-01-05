@@ -11,7 +11,7 @@ import org.hydrofoil.common.graph.GraphProperty;
 import org.hydrofoil.common.graph.GraphVertexId;
 import org.hydrofoil.common.graph.QMatch;
 import org.hydrofoil.common.util.DataUtils;
-import org.hydrofoil.common.util.ParameterUtils;
+import org.hydrofoil.common.util.ArgumentUtils;
 import org.hydrofoil.core.engine.*;
 import org.hydrofoil.core.engine.query.EdgeGraphQueryRunner;
 import org.hydrofoil.core.engine.query.VertexGraphQueryRunner;
@@ -51,7 +51,7 @@ public final class TinkerpopGraphTransit {
             @Override
             public Vertex next() {
                 final EngineVertex next = vertexIterator.next();
-                ParameterUtils.nullMessage(next,"vertex is null");
+                ArgumentUtils.notNullMessage(next,"vertex is null");
                 return new HydrofoilVertex(graph,next);
             }
         };
@@ -85,7 +85,7 @@ public final class TinkerpopGraphTransit {
             @Override
             public Edge next() {
                 final EngineEdge next = edgeIterator.next();
-                ParameterUtils.nullMessage(next,"edge is null");
+                ArgumentUtils.notNullMessage(next,"edge is null");
                 return new HydrofoilEdge(graph,next);
             }
         };

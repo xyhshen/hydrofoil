@@ -3,14 +3,14 @@ package org.hydrofoil.common.util.collect;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
-import org.hydrofoil.common.util.ParameterUtils;
+import org.hydrofoil.common.util.ArgumentUtils;
 
 import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.hydrofoil.common.util.ParameterUtils.checkSupport;
+import static org.hydrofoil.common.util.ArgumentUtils.checkSupport;
 
 /**
  * ArrayMap
@@ -96,7 +96,7 @@ public class ArrayMap<K extends Comparable<? super K>,V> implements Map<K,V>, Cl
 
     @SuppressWarnings("unchecked")
     private void init(final Map<? extends K,? extends V> original){
-        ParameterUtils.mustTrueMessage(MapUtils.isNotEmpty(original),"original is empty");
+        ArgumentUtils.mustTrueMessage(MapUtils.isNotEmpty(original),"original is empty");
         storager = original.entrySet().stream().map((entry)->
                 new ArrayMapEntry<>(entry.getKey(),entry.getValue())).sorted().
                 toArray(ArrayMapEntry[]::new);

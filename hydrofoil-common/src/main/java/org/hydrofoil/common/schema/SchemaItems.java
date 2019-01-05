@@ -4,7 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Element;
 import org.hydrofoil.common.util.DataUtils;
 import org.hydrofoil.common.util.LangUtils;
-import org.hydrofoil.common.util.ParameterUtils;
+import org.hydrofoil.common.util.ArgumentUtils;
 import org.hydrofoil.common.util.XmlUtils;
 
 import java.util.List;
@@ -117,10 +117,10 @@ class AttributeDefine implements BiConsumer<Element,SchemaItem> {
     @SuppressWarnings("unchecked")
     private void checkValue(final String value){
         if(required){
-            ParameterUtils.notBlank(value,name);
+            ArgumentUtils.notBlank(value,name);
         }
         if(checkPredicate != null && StringUtils.isNotBlank(value)){
-            ParameterUtils.mustTrueMessage(checkPredicate.test(value),"check value failed:" + name);
+            ArgumentUtils.mustTrueMessage(checkPredicate.test(value),"check value failed:" + name);
         }
     }
 
@@ -225,7 +225,7 @@ class NodeDefine implements BiConsumer<Element,SchemaItem>{
         Map<String,SchemaItem> schemaMap = DataUtils.newHashMapWithExpectedSize(elements.size());
         for(Element element:elements){
             SchemaItem schema = LangUtils.newInstance(getNodeClass());
-            ParameterUtils.notNull(schema);
+            ArgumentUtils.notNull(schema);
             schema.read(element);
             schemaMap.put(schema.getId(),schema);
         }

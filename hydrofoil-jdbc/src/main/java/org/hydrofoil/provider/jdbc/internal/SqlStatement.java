@@ -1,8 +1,6 @@
 package org.hydrofoil.provider.jdbc.internal;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.MutableTriple;
-import org.apache.commons.lang3.tuple.Triple;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -21,18 +19,55 @@ public final class SqlStatement {
 
     private final List<Object> sections;
 
+    private class Section{
+        /**
+         * label
+         */
+        private String label;
+        /**
+         * sql
+         */
+        private String sql;
+        /**
+         * params
+         */
+        private List<Object> params;
+
+        private Section(String label,String sql,List<Object> params){
+            this.label = label;
+            this.params = params;
+        }
+    }
+
     public SqlStatement(){
         sections = new LinkedList<>();
     }
 
-    public SqlStatement append(final String section){
-        sections.add(section);
+    public SqlStatement stage(final String sql){
+        sections.add(new Section("",sql,null));
         return this;
     }
 
     @SuppressWarnings("unchecked")
-    public SqlStatement append(final String section, List<Object> params){
-        sections.add(new MutableTriple("",section,params));
+    public SqlStatement stage(final String sql, final List<Object> params){
+        sections.add(new Section("",sql,params));
+        return this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public SqlStatement stage(final String label, final String sql,final List<Object> params){
+        final Section section = getLocation(label);
+        if(section != null){
+            section.sql = sql;
+            section.params = params;
+        }else{
+            sections.add(new Section(label,sql,params));
+        }
+        return this;
+    }
+
+    public SqlStatement sentence(final String sentence){
+        sections.add(sentence);
         return this;
     }
 
@@ -41,53 +76,52 @@ public final class SqlStatement {
         return this;
     }
 
-    @SuppressWarnings("unchecked")
-    public SqlStatement location(final String name){
-        sections.add(new MutableTriple(name,null,new ArrayList<>()));
-        return this;
-    }
-
-    private MutableTriple getLocation(String name){
+    private Section getLocation(String name){
         for(Object sc:sections){
-            if(sc instanceof Triple){
-                MutableTriple triple = (MutableTriple) sc;
-                if(StringUtils.equalsIgnoreCase(triple.getLeft().toString(),name)){
-                    return triple;
+            if(sc instanceof Section){
+                Section section = (Section) sc;
+                if(StringUtils.equalsIgnoreCase(section.label,name)){
+                    return section;
                 }
             }
         }
         return null;
     }
 
-    @SuppressWarnings("unchecked")
-    public SqlStatement set(final String name, String section,List<Object> params){
-        final MutableTriple triple = getLocation(name);
-        if(triple != null){
-            triple.setMiddle(section);
-            triple.setRight(params);
-        }
-        return this;
-    }
+
 
     public String toSql(){
         StringBuilder sql = new StringBuilder();
+        boolean lastBlank = true;
         for(Object sc:sections){
-            if(sc instanceof Triple){
-                MutableTriple triple = (MutableTriple) sc;
-                sql.append(Objects.toString(triple.getMiddle()));
+            String s = null;
+            if(sc instanceof Section){
+                Section section = (Section) sc;
+                s = StringUtils.wrapIfMissing(section.sql," ");
+                if(lastBlank){
+                    s = StringUtils.removeFirst(s," ");
+                }
+                sql.append(s);
             }else{
-                sql.append(Objects.toString(sc));
+                s = Objects.toString(sc);
+                sql.append(s);
             }
+            lastBlank = StringUtils.endsWithIgnoreCase(s," ");
         }
         return sql.toString();
+    }
+
+    @Override
+    public String toString() {
+        return toSql();
     }
 
     public List<Object> getParams(){
         List<Object> l = new ArrayList<>();
         for(Object sc:sections){
-            if(sc instanceof Triple){
-                MutableTriple triple = (MutableTriple) sc;
-                List<Object> c = (List<Object>) triple.getRight();
+            if(sc instanceof Section){
+                Section section = (Section) sc;
+                List<Object> c = section.params;
                 if(c == null){
                     continue;
                 }
