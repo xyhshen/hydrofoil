@@ -1,6 +1,7 @@
 package org.hydrofoil.common.graph;
 
-import java.util.Map;
+import org.apache.commons.lang3.ObjectUtils;
+import org.hydrofoil.common.util.bean.KeyValueEntity;
 
 /**
  * GraphEdgeId
@@ -12,7 +13,7 @@ import java.util.Map;
  */
 public final class GraphEdgeId extends GraphElementId {
 
-    GraphEdgeId(final String label,final Map<String,Object> unique) {
+    GraphEdgeId(final String label,final KeyValueEntity unique) {
         super(label,unique);
     }
 
@@ -27,7 +28,7 @@ public final class GraphEdgeId extends GraphElementId {
         try {
             graphEdgeId = (GraphEdgeId) super.clone();
             graphEdgeId.label = label;
-            graphEdgeId.unique.putAll(super.unique);
+            graphEdgeId.unique = ObjectUtils.clone(super.unique);
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();
         }

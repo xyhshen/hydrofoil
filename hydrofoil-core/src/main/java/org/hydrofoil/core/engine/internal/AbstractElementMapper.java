@@ -73,11 +73,11 @@ public abstract class AbstractElementMapper<E extends EngineElement> implements 
         }
 
         for(final GraphElementId elementId:elementIds){
-            if(!checkElementIdType(elementId) || MapUtils.isEmpty(elementId.unique())){
+            if(!checkElementIdType(elementId) || MapUtils.isEmpty(elementId.unique().asMap())){
                 return false;
             }
             Collection<String> primaryKeys = getElementSchema(elementId.label()).getPrimaryKeys();
-            if(!SetUtils.isEqualSet(elementId.unique().keySet(),primaryKeys)){
+            if(!SetUtils.isEqualSet(elementId.unique().keys(),primaryKeys)){
                 return false;
             }
         }
@@ -97,7 +97,7 @@ public abstract class AbstractElementMapper<E extends EngineElement> implements 
             final KeyValueEntity keyValue = keyFactory.create();
             elementSchema.getProperties().forEach((k,v)->{
                 if(v.isPrimary()){
-                    Object value = MapUtils.getObject(id.unique(),v.getLabel());
+                    Object value = MapUtils.getObject(id.unique().asMap(),v.getLabel());
                     keyValue.put(v.getField(),value);
                 }
             });
@@ -161,7 +161,7 @@ public abstract class AbstractElementMapper<E extends EngineElement> implements 
 
     @SuppressWarnings("unchecked")
     <EID extends GraphElementId> EID rowElementToId(BaseElementSchema elementSchema, RowStore rowStore, Class<EID> clz){
-        GraphElementId.GraphElementBuilder builder = GraphElementId.builder(elementSchema.getLabel());
+        GraphElementId.GraphElementBuilder builder = GraphElementId.builder(elementSchema);
         String tableName = elementSchema.getTable();
 
         elementSchema.getProperties().values().forEach((propertySchema) -> {

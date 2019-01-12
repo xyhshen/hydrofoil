@@ -1,10 +1,10 @@
 package org.hydrofoil.common.graph;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hydrofoil.common.util.collect.ArrayMap;
+import org.hydrofoil.common.schema.BaseElementSchema;
+import org.hydrofoil.common.util.bean.KeyValueEntity;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
@@ -15,7 +15,7 @@ import java.util.Objects;
  * @author xie_yh
  * @date 2018/7/2 15:48
  */
-public class GraphElementId implements Cloneable{
+public class GraphElementId implements Cloneable,Serializable {
 
     /**
      * element label
@@ -25,25 +25,25 @@ public class GraphElementId implements Cloneable{
     /**
      * unique field
      */
-    protected Map<String,Object> unique;
+    protected KeyValueEntity unique;
 
     /**
      * element builder
      */
     public static final class GraphElementBuilder{
 
-        private final Map<String,Object> unique;
-
         private final String label;
 
-        GraphElementBuilder(final String label){
+        private final KeyValueEntity keyValue;
+
+        GraphElementBuilder(final String label,final KeyValueEntity keyValue){
             this.label = label;
-            unique = new HashMap<>();
+            this.keyValue = keyValue;
         }
 
-        GraphElementBuilder(final String label,final String name,final Object value){
-            this(label);
-            unique.put(name,value);
+        GraphElementBuilder(final String label,final KeyValueEntity keyValue,final String name,final Object value){
+            this(label,keyValue);
+            keyValue.put(name,value);
         }
 
         /**
@@ -52,7 +52,7 @@ public class GraphElementId implements Cloneable{
          * @see GraphElementId#unique
          **/
         public GraphElementBuilder unique(final String name,final Object value) {
-            unique.put(name,value);
+            keyValue.put(name,value);
             return this;
         }
 
@@ -61,7 +61,7 @@ public class GraphElementId implements Cloneable{
          * @return vertex id
          */
         public GraphVertexId buildVertexId(){
-            return new GraphVertexId(label,unique);
+            return new GraphVertexId(label,keyValue);
         }
 
         /**
@@ -69,13 +69,13 @@ public class GraphElementId implements Cloneable{
          * @return edge id
          */
         public GraphEdgeId buildEdgeId(){
-            return new GraphEdgeId(label,unique);
+            return new GraphEdgeId(label,keyValue);
         }
     }
 
-    GraphElementId(final String label,final Map<String,Object> unique){
+    GraphElementId(final String label,final KeyValueEntity unique){
         this.label = label;
-        this.unique = new ArrayMap<>(unique);
+        this.unique = unique;
     }
 
     /**
@@ -91,7 +91,7 @@ public class GraphElementId implements Cloneable{
      * @return k,v->(label,value)
      * @see GraphElementId#unique
      **/
-    public Map<String, Object> unique() {
+    public KeyValueEntity unique() {
         return unique;
     }
 
@@ -119,8 +119,8 @@ public class GraphElementId implements Cloneable{
      * @param value value
      * @return id
      */
-    public static GraphVertexId VertexId(final String label,final String name,final Object value){
-        return new GraphElementBuilder(label,name,value).buildVertexId();
+    public static GraphVertexId vertexId(final String label, final KeyValueEntity keyValue, final String name, final Object value){
+        return new GraphElementBuilder(label,keyValue,name,value).buildVertexId();
     }
 
     /**
@@ -130,8 +130,8 @@ public class GraphElementId implements Cloneable{
      * @param value value
      * @return id
      */
-    public static GraphEdgeId EdgeId(final String label,final String name,final Object value){
-        return new GraphElementBuilder(label,name,value).buildEdgeId();
+    public static GraphEdgeId edgeId(final String label, final KeyValueEntity keyValue, final String name, final Object value){
+        return new GraphElementBuilder(label,keyValue,name,value).buildEdgeId();
     }
 
     /**
@@ -139,7 +139,16 @@ public class GraphElementId implements Cloneable{
      * @param label element label
      * @return id builder
      */
-    public static GraphElementBuilder builder(final String label){
-        return new GraphElementBuilder(label);
+    public static GraphElementBuilder builder(final String label,final KeyValueEntity keyValue){
+        return new GraphElementBuilder(label,keyValue);
+    }
+
+    /**
+     * create builder
+     * @param elementSchema element schema
+     * @return id builder
+     */
+    public static GraphElementBuilder builder(BaseElementSchema elementSchema){
+        return new GraphElementBuilder(elementSchema.getLabel(),elementSchema.getPrimaryKeysFactory().create());
     }
 }

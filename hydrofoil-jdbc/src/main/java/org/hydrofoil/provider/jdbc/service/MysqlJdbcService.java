@@ -225,12 +225,12 @@ public final class MysqlJdbcService extends AbstractJdbcService{
         for(KeyValueEntity keyValue:keyValueEntities){
             if(singleKey){
                 sql.append("?");
-                params.add(keyValue.getKeyValueMap().get(keyName));
+                params.add(keyValue.asMap().get(keyName));
             }else{
                 sql.append("(");
                 for(String key:factory.keys()){
                     sql.append("?").append(",");
-                    params.add(keyValue.getKeyValueMap().get(key));
+                    params.add(keyValue.asMap().get(key));
                 }
                 sql.deleteCharAt(sql.length() - 1);
                 sql.append(")");

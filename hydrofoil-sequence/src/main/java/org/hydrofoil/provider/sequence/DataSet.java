@@ -178,7 +178,7 @@ final class DataSet {
 
     List<FileRow> selectIn(final Collection<KeyValueEntity> primaryKeys){
         return primaryKeys.stream().map(primaryKey->{
-            String rowKey = makeRowKey(primaryKey.getKeyValueMap());
+            String rowKey = makeRowKey(primaryKey.asMap());
             Integer i = MapUtils.getInteger(rowKeyMap,rowKey);
             return fileTable.getRow(i);
         }).collect(Collectors.toList());

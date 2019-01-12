@@ -53,15 +53,15 @@ public final class IdManage {
         }
         //format:type,order,
         StringBuilder idstring = new StringBuilder();
-        if(elementId.unique().size() == 1){
+        if(elementId.unique().keys().size() == 1){
             idstring.append(elementId.label()).append(ID_FIELD_SPLIT);
-            idstring.append(EncodeUtils.wrapString(Objects.toString(DataUtils.collectFirst(elementId.unique().values()),null),
+            idstring.append(EncodeUtils.wrapString(Objects.toString(DataUtils.collectFirst(elementId.unique().asMap().values()),null),
                     ID_FIELD_WRAP,SPECIAL_CHARACTER));
         }else{
             //by json
             JSONObject fulljson = new JSONObject();
             JSONObject keyjson = new JSONObject();
-            elementId.unique().forEach((k,v)-> keyjson.put(k,Objects.toString(v,null)));
+            elementId.unique().asMap().forEach((k,v)-> keyjson.put(k,Objects.toString(v,null)));
             fulljson.put(elementId.label(),keyjson);
             idstring.append(fulljson.toString());
         }
@@ -113,7 +113,9 @@ public final class IdManage {
             final String key = DataUtils.collectFirst(elementSchema.getPrimaryKeys());
             uniqueMap = Collections.singletonMap(key,uniqueKey);
         }
-        final GraphElementId.GraphElementBuilder builder = GraphVertexId.builder(label);
+        BaseElementSchema schema = type == GraphElementType.vertex?schemaManager.getVertexSchema(label):
+                schemaManager.getEdgeSchema(label);
+        final GraphElementId.GraphElementBuilder builder = GraphElementId.builder(schema);
         for(String key:elementSchema.getPrimaryKeys()){
             builder.unique(key, MapUtils.getObject(uniqueMap,key));
         }

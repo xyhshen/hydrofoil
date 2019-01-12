@@ -277,7 +277,7 @@ public class EdgeMapper extends AbstractElementMapper {
                     if (useOtherProperty) {
                         value = vertex.property(connection.getVertexPropertyLabel()).property().content();
                     } else {
-                        value = MapUtils.getObject(vertex.elementId().unique(),connection.getVertexPropertyLabel());
+                        value = MapUtils.getObject(vertex.elementId().unique().asMap(),connection.getVertexPropertyLabel());
                     }
                     if(null == value){
                         return;
@@ -351,7 +351,7 @@ public class EdgeMapper extends AbstractElementMapper {
     private GraphVertexId[] getEdgeVertexId(ElementMapping mapping, EdgeSchema edgeSchema, RowStore rowStore){
         GraphVertexId[] vertexIds = new GraphVertexId[2];
         final EdgeContext context = (EdgeContext) mapping.getContext();
-        GraphElementId.GraphElementBuilder fromBuilder = GraphElementId.builder(edgeSchema.getSourceLabel());
+        GraphElementId.GraphElementBuilder fromBuilder = GraphElementId.builder(schemaManager.getVertexSchema(edgeSchema.getSourceLabel()));
         EdgeVertexConnectionInformation sourceConnection = schemaManager.getEdgeVertexPropertySet(edgeSchema.getLabel(),true);
         ArgumentUtils.notNull(sourceConnection);
         if(context != null && context.sourceVertexIds != null){
@@ -371,7 +371,7 @@ public class EdgeMapper extends AbstractElementMapper {
             final KeyValueEntity e = getEdgeProperties(targetConnection.getEdgeTableName(), targetConnection.getEdgeFieldProperty(), targetConnection.getEdgePropertyFactory(),rowStore);
             vertexIds[1] = context.targetVertexIds.get(e);
         }else{
-            GraphElementId.GraphElementBuilder toBuilder = GraphElementId.builder(edgeSchema.getTargetLabel());
+            GraphElementId.GraphElementBuilder toBuilder = GraphElementId.builder(schemaManager.getVertexSchema(edgeSchema.getTargetLabel()));
             edgeSchema.getTargetConnections().forEach((connection)->{
                 final PropertySchema propertySchema = edgeSchema.getProperties().get(connection.getEdgePropertyLabel());
                 toBuilder.unique(connection.getVertexPropertyLabel(),rowStore.value(targetConnection.getEdgeTableName(),propertySchema.getField()));

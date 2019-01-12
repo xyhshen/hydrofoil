@@ -3,8 +3,10 @@ package org.hydrofoil.common.util.bean;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hydrofoil.common.util.collect.FixedArrayMap;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * RowKey
@@ -14,7 +16,7 @@ import java.util.Map;
  * @author xie_yh
  * @date 2018/11/3 15:29
  */
-public final class KeyValueEntity {
+public final class KeyValueEntity implements Cloneable {
 
     private final Map<String,Object> keyValueMap;
 
@@ -54,12 +56,24 @@ public final class KeyValueEntity {
         return new KeyValueEntityFactory(keys);
     }
 
+    public static KeyValueEntityFactory createFactory(final String ...keys){
+        return new KeyValueEntityFactory(Arrays.asList(keys));
+    }
+
     /**
      * @return String>
      * @see KeyValueEntity#KeyValueEntity
      **/
-    public Map<String, Object> getKeyValueMap() {
+    public Map<String, Object> asMap() {
         return keyValueMap;
+    }
+
+    /**
+     * key's
+     * @return key's
+     */
+    public Collection<String> keys(){
+        return factory.keys();
     }
 
     /**
@@ -78,8 +92,16 @@ public final class KeyValueEntity {
         if(!(o instanceof KeyValueEntity)){
             return false;
         }
-        return CollectionUtils.isEqualCollection(((KeyValueEntity)o).keyValueMap.keySet(),keyValueMap.keySet())
-                && CollectionUtils.isEqualCollection(((KeyValueEntity)o).keyValueMap.values(),keyValueMap.values());
+        KeyValueEntity right = (KeyValueEntity) o;
+        if(!CollectionUtils.isEqualCollection(right.keyValueMap.keySet(),keyValueMap.keySet())){
+            return false;
+        }
+        for(Map.Entry<String,Object> entry:keyValueMap.entrySet()){
+            if(!Objects.equals(right.keyValueMap.get(entry.getKey()),entry.getValue())){
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
@@ -90,5 +112,12 @@ public final class KeyValueEntity {
             hashCode = 31 * hashCode + (entry.getValue() == null ? 0 : entry.getValue().hashCode());
         }
         return hashCode;
+    }
+
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        FixedArrayMap<String,Object> map = new FixedArrayMap<>(factory.keyMap);
+        map.putAll(keyValueMap);
+        return new KeyValueEntity(factory,map);
     }
 }
